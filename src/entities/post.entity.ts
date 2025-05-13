@@ -1,0 +1,39 @@
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+} from 'typeorm';
+import { v4 as uuid } from 'uuid';
+import { User } from './user.entity';
+import { Vehicle } from './vehicle.entity';
+import { Question } from './question.entity';
+
+export type PostStatus = 'Active' | 'Inactive' | 'Rejected';
+
+@Entity('posts')
+export class Post {
+  @PrimaryGeneratedColumn('uuid')
+  id: string = uuid();
+
+  @ManyToOne(() => User, (user) => user.posts)
+  user: User;
+
+  @ManyToOne(() => Vehicle)
+  vehicle: Vehicle;
+
+  @CreateDateColumn()
+  postDate: Date;
+
+  @Column({
+    type: 'enum',
+    enum: ['Active', 'Inactive', 'Rejected'],
+    default: 'Active',
+  })
+  status: PostStatus;
+
+  @OneToMany(() => Question, (question) => question.post)
+  questions: Question[];
+}
