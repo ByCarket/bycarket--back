@@ -29,4 +29,3 @@ export class Vehicle {
   @Column({ type: 'simple-json', nullable: true })
   photos: string[]; // Array de URLs (JSON)
 }
-
