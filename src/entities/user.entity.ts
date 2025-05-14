@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { v4 as uuid } from 'uuid';
-import { Roles } from '../enums/roles.enum';
+import { Role } from '../enums/roles.enum';
 import { Post } from './post.entity';
 import { Question } from './question.entity';
 
@@ -35,8 +35,8 @@ export class User {
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
-  @Column({ type: 'enum', enum: Roles, default: Roles.USER })
-  role: Roles;
+  @Column({ type: 'enum', enum: Role, default: Role.USER })
+  role: Role;
 
   @OneToMany(() => Post, (post) => post.user)
   posts: Post[];
