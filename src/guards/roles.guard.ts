@@ -1,12 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Role } from '../enums/roles.enum';
 
@@ -19,14 +14,13 @@ export class RolesGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
+    if (!rolesRequired) return true;
 
     const request = context.switchToHttp().getRequest();
     const { user } = request;
 
     if (!user || !rolesRequired.includes(user.role)) {
-      throw new ForbiddenException(
-        'You do not have permission to access this route',
-      );
+      throw new ForbiddenException('You do not have permission to access this route');
     }
 
     return true;
