@@ -1,19 +1,29 @@
+// @ts-check
 import eslintPluginPrettier from 'eslint-plugin-prettier';
-import eslintConfigPrettier from 'eslint-config-prettier';
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
+import eslintConfigPrettier from 'eslint-config-prettier';
 
-/** @type {import("eslint").Linter.FlatConfig} */
+/** @type {import("eslint").Linter.Config[]} */
 export default [
   {
     files: ['**/*.ts', '**/*.js', '**/*.tsx', '**/*.jsx'],
     languageOptions: {
-      parser: await import('@typescript-eslint/parser'),
+      parser: require('@typescript-eslint/parser'),
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      ecmaFeatures: {
+        jsx: true,
+      },
+      globals: {
+        ...globals.node,
+        ...globals.jest,
+      },
       parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-        ecmaFeatures: {
-          jsx: true,
-        },
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
       },
     },
     plugins: {
@@ -33,8 +43,14 @@ export default [
       'no-console': 'warn',
       eqeqeq: ['error', 'always'],
       curly: 'error',
+
+      // Reglas específicas para TypeScript
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-floating-promises': 'warn',
+      '@typescript-eslint/no-unsafe-argument': 'warn',
     },
   },
   // Desactiva reglas de ESLint que chocan con Prettier
   eslintConfigPrettier,
+  eslintPluginPrettierRecommended,
 ];
