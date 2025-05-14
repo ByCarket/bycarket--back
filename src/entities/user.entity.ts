@@ -14,7 +14,7 @@ export class User {
   @Column({ type: 'varchar', length: 50, nullable: false })
   name: string;
 
-  @Column({ type: 'varchar', length: 50, nullable: false })
+  @Column({ type: 'varchar', length: 50, nullable: false, unique: true })
   email: string;
 
   @Column({ type: 'varchar', length: 80, nullable: false })
@@ -38,9 +38,9 @@ export class User {
   @Column({ type: 'enum', enum: Role, default: Role.USER })
   role: Role;
 
-  @OneToMany(() => Post, (post) => post.user)
+  @OneToMany(() => Post, post => post.user)
   posts: Post[];
 
-  @OneToMany(() => Question, (question) => question.user)
+  @OneToMany(() => Question, question => question.user)
   questions: Question[];
 }
