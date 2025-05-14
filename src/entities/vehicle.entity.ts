@@ -1,5 +1,4 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { v4 as uuid } from 'uuid';
 import { Brand } from './brand.entity';
 import { Model } from './model.entity';
 import { YearOption } from './year.entity';
@@ -7,15 +6,15 @@ import { YearOption } from './year.entity';
 @Entity('vehicles')
 export class Vehicle {
   @PrimaryGeneratedColumn('uuid')
-  id: string = uuid();
+  id: string;
 
-  @ManyToOne(() => Brand)
+  @ManyToOne(() => Brand, { onDelete: 'SET NULL', nullable: true })
   brand: Brand;
 
-  @ManyToOne(() => Model)
+  @ManyToOne(() => Model, { onDelete: 'SET NULL', nullable: true })
   model: Model;
 
-  @ManyToOne(() => YearOption)
+  @ManyToOne(() => YearOption, { onDelete: 'SET NULL', nullable: true })
   yearOption: YearOption;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
@@ -28,5 +27,5 @@ export class Vehicle {
   description: string;
 
   @Column({ type: 'simple-json', nullable: true })
-  photos: string[]; // Almacenará un array de URLs como JSON
+  photos: string[]; // Array de URLs (JSON)
 }
