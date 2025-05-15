@@ -41,8 +41,8 @@ export class UsersController {
 
   @Get('me')
   @HttpCode(200)
-  async getMe(@UserAuthenticated('sub') id: string): Promise<ResponsePrivateUserDto> {
-    return await this.usersService.getMe(id);
+  async getMyUser(@UserAuthenticated('sub') id: string): Promise<ResponsePrivateUserDto> {
+    return await this.usersService.getMyUser(id);
   }
 
   @Get(':id')
@@ -57,12 +57,25 @@ export class UsersController {
     @UserAuthenticated('sub') id: string,
     @Body() newUser: ModifyUserDto,
   ): Promise<ResponseIdDto> {
-    return await this.usersService.updateUser(id, newUser);
+    return await this.usersService.updateMyUser(id, newUser);
   }
 
+  @Patch(':id/role')
+  @HttpCode(200)
   @Roles(Role.ADMIN)
+  async upgradeToAdmin(@Param('id', ParseUUIDPipe) id: string): Promise<ResponseIdDto> {
+    return await this.usersService.upgradeToAdmin(id);
+  }
+
+  @Delete('me')
+  @HttpCode(200)
+  async deleteMyUser(@UserAuthenticated('sub') id: string): Promise<ResponseIdDto> {
+    return await this.usersService.deleteUser(id);
+  }
+
   @Delete(':id')
   @HttpCode(200)
+  @Roles(Role.ADMIN)
   async deleteUser(@Param('id', ParseUUIDPipe) id: string): Promise<ResponseIdDto> {
     return await this.usersService.deleteUser(id);
   }
