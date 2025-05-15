@@ -13,7 +13,7 @@ dotenv.config({ path: '.env.development' });
 
 @Injectable()
 export class DualAuthGuard implements CanActivate {
-  private auth0Checker;
+  private auth0Checker
 
   constructor(private jwtService: JwtService) {
     // Configurar el middleware de verificación de Auth0

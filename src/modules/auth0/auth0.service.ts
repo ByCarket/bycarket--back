@@ -33,7 +33,7 @@ export class Auth0Service {
         password: Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2),
         auth0Id: sub,
         // Otros campos requeridos en tu modelo User
-        phone: '',
+        phone: undefined,
         country: '',
         city: '',
         address: '',
