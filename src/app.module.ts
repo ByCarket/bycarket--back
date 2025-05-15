@@ -8,6 +8,8 @@ import { PostsModule } from './modules/posts/posts.module';
 import { VehiclesModule } from './modules/vehicles/vehicles.module';
 import { JwtModule } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
+import { PassportModule } from '@nestjs/passport';
+import { Auth0Module } from './modules/auth0/auth0.module';
 
 dotenv.config({ path: '.env.development' });
 
@@ -29,7 +31,9 @@ dotenv.config({ path: '.env.development' });
     signOptions: { expiresIn: "1d" },
     secret: process.env.JWT_SECRET,
   }),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     AuthModule,
+    Auth0Module,
     UsersModule,
     PostsModule,
     VehiclesModule,

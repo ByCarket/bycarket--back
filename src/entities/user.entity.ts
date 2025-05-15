@@ -38,6 +38,9 @@ export class User {
   @Column({ type: 'enum', enum: Role, default: Role.USER })
   role: Role;
 
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  auth0Id: string;
+
   @OneToMany(() => Post, post => post.user)
   posts: Post[];
 
