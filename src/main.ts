@@ -22,7 +22,10 @@ async function bootstrap() {
         const order = ['Vehicles'];
         return order.indexOf(a) - order.indexOf(b);
       },
-      operationsSorter: 'method',
+      operationsSorter: (a: any, b: any) => {
+        const order = ['get', 'post', 'put', 'patch', 'delete'];
+        return order.indexOf(a.get('method')) - order.indexOf(b.get('method'));
+      },
     },
   });
   app.use(LoggerGlobal);

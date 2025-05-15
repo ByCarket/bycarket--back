@@ -5,7 +5,13 @@ import { User } from 'src/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsOrder } from 'typeorm';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { ResponseIdDto, ResponsePagUsersDto, ResponseUserDto } from 'src/dto/responses-user.dto';
+import {
+  ResponseIdDto,
+  ResponsePagUsersDto,
+  ResponsePrivateUserDto,
+  ResponsePublicUserDto,
+} from 'src/dto/responses-user.dto';
+import { Role } from 'src/enums/roles.enum';
 
 @Injectable()
 export class UsersService {
@@ -41,7 +47,7 @@ export class UsersService {
     // Eliminar el campo password de los resultados (en caso que no esté filtrado por select)
     const secureUsers = users.map(
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      ({ password, role, ...userToReturn }) => userToReturn,
+      ({ password, ...userToReturn }) => userToReturn,
     );
 
     // Devolver objeto con datos paginados
@@ -54,13 +60,35 @@ export class UsersService {
     };
   }
 
-  async getUserById(id: string): Promise<ResponseUserDto> {
-    const user = await this.usersRepository.findOne({ where: { id } });
+  async getMyUser(id: string): Promise<ResponsePrivateUserDto> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: {
+        posts: true,
+        questions: true,
+      },
+    });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found.`);
     }
 
-    const { password, role, ...data } = user;
+    const { password, ...data } = user;
+    return {
+      data,
+      message: 'User found successfully.',
+    };
+  }
+
+  async getUserById(id: string): Promise<ResponsePublicUserDto> {
+    const data = await this.usersRepository.findOne({
+      where: { id },
+      select: ['id', 'name', 'email', 'address', 'city', 'country', 'isActive', 'phone'],
+      relations: { posts: true },
+    });
+    if (!data) {
+      throw new NotFoundException(`User with ID ${id} not found.`);
+    }
+
     return {
       data,
       message: 'User found successfully.',
@@ -76,7 +104,7 @@ export class UsersService {
     return await this.usersRepository.save(newUser);
   }
 
-  async updateUser(id: string, user: ModifyUserDto): Promise<ResponseIdDto> {
+  async updateMyUser(id: string, user: ModifyUserDto): Promise<ResponseIdDto> {
     const result = await this.usersRepository.update(id, user);
     if (result.affected === 0) {
       throw new NotFoundException(`User with ID ${id} not found.`);
@@ -85,6 +113,18 @@ export class UsersService {
     return {
       data: id,
       message: 'User updated successfully.',
+    };
+  }
+
+  async upgradeToAdmin(id: string): Promise<ResponseIdDto> {
+    const result = await this.usersRepository.update(id, { role: Role.ADMIN });
+    if (result.affected === 0) {
+      throw new NotFoundException(`User with ID ${id} not found.`);
+    }
+
+    return {
+      data: id,
+      message: 'User upgraded to admin successfully.',
     };
   }
 

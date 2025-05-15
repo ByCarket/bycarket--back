@@ -8,7 +8,6 @@ import {
   Delete,
   UseGuards,
   ParseUUIDPipe,
-  Request,
   Patch,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -17,10 +16,15 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/enums/roles.enum';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { UsersService } from './users.service';
-import { User } from '../../entities/user.entity';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { ModifyUserDto } from 'src/dto/modify-user.dto';
-import { ResponseIdDto, ResponsePagUsersDto, ResponseUserDto } from 'src/dto/responses-user.dto';
+import {
+  ResponseIdDto,
+  ResponsePagUsersDto,
+  ResponsePrivateUserDto,
+  ResponsePublicUserDto,
+} from 'src/dto/responses-user.dto';
+import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
 
 @ApiBearerAuth()
 @Controller('users')
@@ -35,21 +39,43 @@ export class UsersController {
     return await this.usersService.getUsers(paginationDto);
   }
 
+  @Get('me')
+  @HttpCode(200)
+  async getMyUser(@UserAuthenticated('sub') id: string): Promise<ResponsePrivateUserDto> {
+    return await this.usersService.getMyUser(id);
+  }
+
   @Get(':id')
   @HttpCode(200)
-  async getUserById(@Param('id', ParseUUIDPipe) id: string): Promise<ResponseUserDto> {
+  async getUserById(@Param('id', ParseUUIDPipe) id: string): Promise<ResponsePublicUserDto> {
     return await this.usersService.getUserById(id);
   }
 
   @Patch('me')
   @HttpCode(200)
-  async updateUser(@Request() { user }, @Body() newUser: ModifyUserDto): Promise<ResponseIdDto> {
-    return await this.usersService.updateUser(user.sub, newUser);
+  async updateUser(
+    @UserAuthenticated('sub') id: string,
+    @Body() newUser: ModifyUserDto,
+  ): Promise<ResponseIdDto> {
+    return await this.usersService.updateMyUser(id, newUser);
   }
 
+  @Patch(':id/role')
+  @HttpCode(200)
   @Roles(Role.ADMIN)
+  async upgradeToAdmin(@Param('id', ParseUUIDPipe) id: string): Promise<ResponseIdDto> {
+    return await this.usersService.upgradeToAdmin(id);
+  }
+
+  @Delete('me')
+  @HttpCode(200)
+  async deleteMyUser(@UserAuthenticated('sub') id: string): Promise<ResponseIdDto> {
+    return await this.usersService.deleteUser(id);
+  }
+
   @Delete(':id')
   @HttpCode(200)
+  @Roles(Role.ADMIN)
   async deleteUser(@Param('id', ParseUUIDPipe) id: string): Promise<ResponseIdDto> {
     return await this.usersService.deleteUser(id);
   }
