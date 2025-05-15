@@ -7,6 +7,8 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors();
+
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Bycarket API')
     .setDescription('API documentation for Bycarket')
