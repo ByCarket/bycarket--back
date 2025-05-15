@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  BadRequestException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from 'src/dto/create-user.dto';
@@ -12,6 +8,7 @@ import { User } from 'src/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { JwtSign } from 'src/interfaces/jwtPayload.interface';
 
 @Injectable()
 export class AuthService {
@@ -47,7 +44,7 @@ export class AuthService {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    const jwtPayload = {
+    const jwtPayload: JwtSign = {
       sub: user.id,
       email: user.email,
     };
