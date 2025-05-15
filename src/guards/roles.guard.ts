@@ -5,14 +5,13 @@ import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@
 import { Reflector } from '@nestjs/core';
 import { Role } from '../enums/roles.enum';
 import { JwtPayload } from 'src/interfaces/jwtPayload.interface';
-import { Repository } from 'typeorm';
-import { User } from 'src/entities/user.entity';
+import { UsersService } from 'src/modules/users/users.service';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    private readonly usersRepository: Repository<User>,
+    private readonly usersService: UsersService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -25,9 +24,9 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const { sub } = request.user as JwtPayload;
 
-    const user = await this.usersRepository.findOneBy({ id: sub });
-    const hasRole = () => rolesRequired.some(role => user?.role?.includes(role));
-    const isValid = user && user.role && hasRole();
+    const { data } = await this.usersService.getMe(sub);
+    const hasRole = () => rolesRequired.some(role => data.role?.includes(role));
+    const isValid = data && data.role && hasRole();
 
     if (!isValid)
       throw new ForbiddenException(
