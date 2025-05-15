@@ -8,7 +8,6 @@ import {
   Delete,
   UseGuards,
   ParseUUIDPipe,
-  Request,
   Patch,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -17,10 +16,15 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/enums/roles.enum';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { UsersService } from './users.service';
-import { User } from '../../entities/user.entity';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { ModifyUserDto } from 'src/dto/modify-user.dto';
-import { ResponseIdDto, ResponsePagUsersDto, ResponseUserDto } from 'src/dto/responses-user.dto';
+import {
+  ResponseIdDto,
+  ResponsePagUsersDto,
+  ResponsePrivateUserDto,
+  ResponsePublicUserDto,
+} from 'src/dto/responses-user.dto';
+import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
 
 @ApiBearerAuth()
 @Controller('users')
@@ -35,16 +39,25 @@ export class UsersController {
     return await this.usersService.getUsers(paginationDto);
   }
 
+  @Get('me')
+  @HttpCode(200)
+  async getMe(@UserAuthenticated('sub') id: string): Promise<ResponsePrivateUserDto> {
+    return await this.usersService.getMe(id);
+  }
+
   @Get(':id')
   @HttpCode(200)
-  async getUserById(@Param('id', ParseUUIDPipe) id: string): Promise<ResponseUserDto> {
+  async getUserById(@Param('id', ParseUUIDPipe) id: string): Promise<ResponsePublicUserDto> {
     return await this.usersService.getUserById(id);
   }
 
   @Patch('me')
   @HttpCode(200)
-  async updateUser(@Request() { user }, @Body() newUser: ModifyUserDto): Promise<ResponseIdDto> {
-    return await this.usersService.updateUser(user.sub, newUser);
+  async updateUser(
+    @UserAuthenticated('sub') id: string,
+    @Body() newUser: ModifyUserDto,
+  ): Promise<ResponseIdDto> {
+    return await this.usersService.updateUser(id, newUser);
   }
 
   @Roles(Role.ADMIN)
