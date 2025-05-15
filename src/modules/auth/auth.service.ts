@@ -22,14 +22,14 @@ export class AuthService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  async signup(user: Omit<CreateUserDto, 'confirmPassword'>) {
+  async register(user: Omit<CreateUserDto, 'confirmPassword'>) {
     const { email, password } = user;
     const userExist = await this.usersRepository.findOne({
       where: { email },
     });
 
     if (userExist) {
-      throw new BadRequestException('Email ya registrado');
+      throw new BadRequestException('Email already registered');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -42,10 +42,10 @@ export class AuthService {
     return userWithoutPassword;
   }
 
-  async signin({ email, password }: LoginUserDto) {
+  async login({ email, password }: LoginUserDto) {
     const user = await this.usersService.getUserByEmail(email);
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      throw new UnauthorizedException('Credenciales inválidas');
+      throw new UnauthorizedException('Invalid credentials');
     }
     const jwtPayload = {
       userId: user.id,
@@ -64,7 +64,7 @@ export class AuthService {
     });
 
     if (userExist) {
-      throw new BadRequestException('Email ya registrado');
+      throw new BadRequestException('Email already registered');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

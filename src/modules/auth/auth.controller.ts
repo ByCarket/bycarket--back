@@ -15,18 +15,37 @@ export class AuthController {
     description: 'User created successfully',
   })
   @ApiOperation({
-    summary:
-      'User Creation (email, password, name, phone, country, city, address)',
+    summary: 'User Creation (email, password, name, phone, country, city, address)',
   })
   async register(@Body() createUserDto: CreateUserDto) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { confirmPassword, ...userWithoutConfirmPassword } = createUserDto;
-    return await this.authService.signup(userWithoutConfirmPassword);
+    return await this.authService.register(userWithoutConfirmPassword);
   }
 
   @Post('login')
+  @HttpCode(200)
+  @ApiResponse({
+    status: 200,
+    description: 'User logged in successfully',
+  })
   @ApiOperation({ summary: 'User Login (email and  password)' })
   login(@Body() loginUserDto: LoginUserDto) {
-    return this.authService.signin(loginUserDto);
+    return this.authService.login(loginUserDto);
+  }
+
+  @Post('create-admin')
+  @HttpCode(201)
+  @ApiResponse({
+    status: 201,
+    description: 'Admin created successfully',
+  })
+  @ApiOperation({
+    summary: 'Admin creation (email, password, name, phone, country, city, address)',
+  })
+  async createAdmin(@Body() createUserDto: CreateUserDto) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { confirmPassword, ...userWithoutConfirmPassword } = createUserDto;
+    return await this.authService.createAdmin(userWithoutConfirmPassword);
   }
 }

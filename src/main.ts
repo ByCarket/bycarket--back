@@ -12,6 +12,7 @@ async function bootstrap() {
     .setDescription('API documentation for Bycarket')
     .setVersion('1.0')
     .addTag('bycarket')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
