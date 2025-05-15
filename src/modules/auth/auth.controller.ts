@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('signup')
+  @Post('register')
   @HttpCode(201)
   @ApiResponse({
     status: 201,
@@ -18,15 +18,15 @@ export class AuthController {
     summary:
       'User Creation (email, password, name, phone, country, city, address)',
   })
-  async signup(@Body() createUserDto: CreateUserDto) {
+  async register(@Body() createUserDto: CreateUserDto) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { confirmPassword, ...userWithoutConfirmPassword } = createUserDto;
     return await this.authService.signup(userWithoutConfirmPassword);
   }
 
-  @Post('signin')
+  @Post('login')
   @ApiOperation({ summary: 'User Login (email and  password)' })
-  signin(@Body() loginUserDto: LoginUserDto) {
+  login(@Body() loginUserDto: LoginUserDto) {
     return this.authService.signin(loginUserDto);
   }
 }
