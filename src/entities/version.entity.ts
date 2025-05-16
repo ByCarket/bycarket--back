@@ -23,3 +23,4 @@ export class Version {
   @OneToMany(() => YearOption, (yearOption) => yearOption.version)
   yearOptions: YearOption[];
 }
+
