@@ -6,6 +6,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { VehiclesModule } from './modules/vehicles/vehicles.module';
+import { JwtModule } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
 import { SeederModule } from './modules/seeder/seeder.module';
 import { YearOptionsModule } from './modules/year-option/year-options.module';
@@ -30,6 +31,11 @@ dotenv.config({ path: '.env.development' });
         return config as TypeOrmModuleOptions;
       },
     }),
+    JwtModule.register({
+    global: true,
+    signOptions: { expiresIn: "1d" },
+    secret: process.env.JWT_SECRET,
+  }),
     AuthModule,
     UsersModule,
     PostsModule,

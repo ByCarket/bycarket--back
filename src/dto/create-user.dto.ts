@@ -15,6 +15,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreateUserDto {
   @IsEmail()
   @IsNotEmpty()
+  @MaxLength(50)
   @ApiProperty({
     description: 'User email address',
     example: 'john.smith@example.com',
@@ -25,7 +26,7 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(3)
-  @MaxLength(80)
+  @MaxLength(50)
   @ApiProperty({
     description: 'User full name',
     example: 'John Smith',
@@ -39,9 +40,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   @MinLength(8)
   @MaxLength(15)
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/,
-  )
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&]{6,15}$/)
   @ApiProperty({
     description:
       'User password (must contain at least one uppercase letter, one lowercase letter, one number and one special character)',
@@ -64,7 +63,7 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(3)
-  @MaxLength(80)
+  @MaxLength(50)
   @ApiProperty({
     description: 'User shipping address',
     example: '123 Main Street, Apt 4B',
@@ -87,7 +86,7 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(5)
-  @MaxLength(20)
+  @MaxLength(50)
   @ApiProperty({
     description: 'User country of residence',
     example: 'United States',
@@ -100,7 +99,7 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(5)
-  @MaxLength(20)
+  @MaxLength(50)
   @ApiProperty({
     description: 'User city of residence',
     example: 'New York',
