@@ -3,6 +3,7 @@ import { v4 as uuid } from 'uuid';
 import { Role } from '../enums/roles.enum';
 import { Post } from './post.entity';
 import { Question } from './question.entity';
+import { Vehicle } from './vehicle.entity';
 
 @Entity({
   name: 'users',
@@ -49,4 +50,7 @@ export class User {
 
   @OneToMany(() => Question, question => question.user)
   questions: Question[];
+
+  @OneToMany(() => Vehicle, vehicle => vehicle.user)
+  vehicles: Vehicle[];
 }
