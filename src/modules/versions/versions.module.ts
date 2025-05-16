@@ -5,10 +5,14 @@ import { Model } from 'src/entities/model.entity';
 import { VersionsService } from './versions.service';
 import { VersionsController } from './versions.controller';
 import { AuthModule } from '../auth/auth.module';
+import { UsersService } from '../users/users.service';
+import { User } from 'src/entities/user.entity';
+import { Post } from 'src/entities/post.entity';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Version, Model]),AuthModule],
-    providers: [VersionsService],
-    controllers: [VersionsController],
+  imports: [TypeOrmModule.forFeature([Version, Model, User, Post]), AuthModule, UsersModule],
+  providers: [VersionsService],
+  controllers: [VersionsController],
 })
 export class VersionsModule {}

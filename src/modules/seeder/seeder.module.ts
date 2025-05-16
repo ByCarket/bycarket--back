@@ -6,13 +6,13 @@ import { Brand } from '../../entities/brand.entity';
 import { Model } from '../../entities/model.entity';
 import { Version } from '../../entities/version.entity';
 import { AuthModule } from '../auth/auth.module';
-
+import { UsersService } from '../users/users.service';
+import { User } from 'src/entities/user.entity';
+import { Post } from 'src/entities/post.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Brand, Model, Version]),AuthModule],
+  imports: [TypeOrmModule.forFeature([Brand, Model, Version, User, Post]), AuthModule],
   controllers: [SeederController],
-  providers: [SeederService],
+  providers: [SeederService, UsersService],
 })
 export class SeederModule {}
-
-
