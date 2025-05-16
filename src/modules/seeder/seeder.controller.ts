@@ -6,16 +6,13 @@ import { Role } from 'src/enums/roles.enum';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { AuthGuard } from 'src/guards/auth.guard';
 
-
 @ApiTags('Seeder')
 @Controller('seeder')
 @ApiBearerAuth()
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
-@UseGuards(RolesGuard)
 export class SeederController {
   constructor(private readonly seederService: SeederService) {}
-
 
   @Post('brands')
   @ApiOperation({ summary: 'Seed de marcas únicas desde archivo JSON' })
@@ -24,14 +21,12 @@ export class SeederController {
     return this.seederService.seedBrands();
   }
 
-
   @Post('models')
   @ApiOperation({ summary: 'Seed de modelos asociados a marcas existentes' })
   @ApiResponse({ status: 201, description: 'Modelos cargados exitosamente' })
   async seedModels() {
     return this.seederService.seedModels();
   }
-
 
   @Post('versions')
   @ApiOperation({ summary: 'Seed de versiones asociadas a modelos' })
@@ -40,5 +35,3 @@ export class SeederController {
     return this.seederService.seedVersions();
   }
 }
-
-
