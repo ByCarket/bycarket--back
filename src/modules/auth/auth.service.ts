@@ -54,25 +54,6 @@ export class AuthService {
     return { success: 'Login successfully', token };
   }
 
-  async changeEmail(id: string, newEmail: string): Promise<ResponseIdDto> {
-    const user = await this.usersRepository.findOneBy({ id });
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
-    const emailExist = await this.usersRepository.findOneBy({ email: newEmail });
-    if (emailExist) {
-      throw new BadRequestException('Email already registered');
-    }
-
-    user.email = newEmail;
-    await this.usersRepository.save(user);
-
-    return {
-      data: id,
-      message: 'Email changed successfully',
-    };
-  }
-
   async createAdmin(user: Omit<CreateUserDto, 'confirmPassword'>) {
     const { email, password } = user;
     const userExist = await this.usersRepository.findOne({
@@ -92,5 +73,24 @@ export class AuthService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: newUserPassword, ...userWithoutPassword } = newUser;
     return userWithoutPassword;
+  }
+
+  async changeEmail(id: string, newEmail: string): Promise<ResponseIdDto> {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    const emailExist = await this.usersRepository.findOneBy({ email: newEmail });
+    if (emailExist) {
+      throw new BadRequestException('Email already registered');
+    }
+
+    user.email = newEmail;
+    await this.usersRepository.save(user);
+
+    return {
+      data: id,
+      message: 'Email changed successfully',
+    };
   }
 }
