@@ -9,7 +9,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module';
 import { JwtModule } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
 import { PassportModule } from '@nestjs/passport';
-import { GoogleAuthModule } from './modules/auth0/google-auth.module';
+import { GoogleAuthModule } from './modules/googleAuth/google-auth.module';
 
 dotenv.config({ path: '.env.development' });
 
@@ -36,7 +36,7 @@ dotenv.config({ path: '.env.development' });
     UsersModule,
     PostsModule,
     VehiclesModule,
-	GoogleAuthModule,
+    GoogleAuthModule,
   ],
   controllers: [],
   providers: [],

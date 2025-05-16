@@ -9,10 +9,10 @@ export class GoogleAuthController {
   constructor(private readonly googleAuthService: GoogleAuthService) {}
 
   @Post('process-login')
-  @ApiOperation({ summary: 'Procesar datos de usuario de Google después del login con NextAuth' })
+  @ApiOperation({ summary: 'Process Google user data after login with NextAuth' })
   @ApiResponse({
     status: 200,
-    description: 'Usuario de Google procesado correctamente',
+    description: 'User processed successfully',
   })
   async processGoogleLogin(@Body() googleProfile: any) {
     const user = await this.googleAuthService.processGoogleUser(googleProfile);
@@ -24,21 +24,21 @@ export class GoogleAuthController {
         role: user.role,
         profileComplete: user.profileComplete,
       },
-      message: 'Usuario de Google procesado correctamente',
+      message: 'User processed successfully',
     };
   }
 
   @Post('complete-profile')
-  @ApiOperation({ summary: 'Completa el perfil del usuario de Google' })
+  @ApiOperation({ summary: 'Complete profile of user' })
   @ApiResponse({
     status: 200,
-    description: 'Perfil del usuario completado correctamente',
+    description: 'User profile completed successfully',
   })
   async completeProfile(@Body() profileData: CompleteProfileDto & { email: string }) {
     const user = await this.googleAuthService.findUserByEmail(profileData.email);
 
     if (!user) {
-        throw new Error('El user no se encontró en la base de datos');
+        throw new Error('User not found');
     }
 
     const updatedUser = await this.googleAuthService.completeUserProfile(user.id, profileData);
@@ -51,7 +51,7 @@ export class GoogleAuthController {
         role: updatedUser.role,
         profileComplete: updatedUser.profileComplete,
       },
-      message: 'Perfil completado correctamente',
+      message: 'User profile completed successfully',
     };
   }
 }
