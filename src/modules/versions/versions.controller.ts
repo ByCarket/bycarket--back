@@ -1,14 +1,22 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, ParseUUIDPipe } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Post, Put, Delete, Param, Body, ParseUUIDPipe, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { VersionsService } from './versions.service';
 import { CreateVersionDto } from '../../dto/create-version.dto';
 import { UpdateVersionDto } from '../../dto/update-version.dto';
 import { Version } from 'src/entities/version.entity';
+import { AuthGuard } from 'src/guards/auth.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { Roles } from 'src/decorators/roles.decorator';
+import { Role } from 'src/enums/roles.enum';
 
 @ApiTags('Versions')
+@ApiBearerAuth()
 @Controller('versions')
+@UseGuards(AuthGuard)
+@Roles(Role.ADMIN)
+@UseGuards(RolesGuard)
 export class VersionsController {
-    constructor(private readonly service: VersionsService) {}
+    constructor(private readonly service: VersionsService) { }
 
     @Get()
     findAll(): Promise<Version[]> {
