@@ -13,7 +13,8 @@ import { YearOptionsModule } from './modules/year-option/year-options.module';
 import { BrandsModule } from './modules/brands/brands.module';
 import { ModelsModule } from './modules/models/models.module';
 import { VersionsModule } from './modules/versions/versions.module';
-
+import { PassportModule } from '@nestjs/passport';
+import { GoogleAuthModule } from './modules/googleAuth/google-auth.module';
 
 dotenv.config({ path: '.env.development' });
 
@@ -36,6 +37,7 @@ dotenv.config({ path: '.env.development' });
     signOptions: { expiresIn: "1d" },
     secret: process.env.JWT_SECRET,
   }),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     AuthModule,
     UsersModule,
     PostsModule,
@@ -45,6 +47,7 @@ dotenv.config({ path: '.env.development' });
     ModelsModule,
     VersionsModule,
     YearOptionsModule,
+    GoogleAuthModule
   ],
   controllers: [],
   providers: [],
