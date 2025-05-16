@@ -41,6 +41,12 @@ export class User {
   @Column({ type: 'varchar', length: 100, nullable: true })
   auth0Id: string;
 
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  googleId: string;
+
+  @Column({ type: 'boolean', default: false })
+  profileComplete: boolean;
+
   @OneToMany(() => Post, post => post.user)
   posts: Post[];
 
