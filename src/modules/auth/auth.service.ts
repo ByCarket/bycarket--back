@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtSign } from 'src/interfaces/jwtPayload.interface';
+import { ResponseIdDto } from 'src/dto/responses-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -51,6 +52,25 @@ export class AuthService {
 
     const token = this.jwtService.sign(jwtPayload);
     return { success: 'Login successfully', token };
+  }
+
+  async changeEmail(id: string, newEmail: string): Promise<ResponseIdDto> {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    const emailExist = await this.usersRepository.findOneBy({ email: newEmail });
+    if (emailExist) {
+      throw new BadRequestException('Email already registered');
+    }
+
+    user.email = newEmail;
+    await this.usersRepository.save(user);
+
+    return {
+      data: id,
+      message: 'Email changed successfully',
+    };
   }
 
   async createAdmin(user: Omit<CreateUserDto, 'confirmPassword'>) {
