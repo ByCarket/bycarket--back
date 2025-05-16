@@ -9,6 +9,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtSign } from 'src/interfaces/jwtPayload.interface';
+import { ChangePasswordDto } from 'src/dto/change-password.dto';
+import { ResponseIdDto } from 'src/dto/responses-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -72,5 +74,26 @@ export class AuthService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: newUserPassword, ...userWithoutPassword } = newUser;
     return userWithoutPassword;
+  }
+
+  async changePassword(
+    id: string,
+    { oldPassword, password }: ChangePasswordDto,
+  ): Promise<ResponseIdDto> {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (!(await bcrypt.compare(oldPassword, user.password))) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await this.usersRepository.update(id, { password: hashedPassword });
+    return {
+      data: id,
+      message: 'Password changed successfully',
+    };
   }
 }
