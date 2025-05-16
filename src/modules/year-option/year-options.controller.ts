@@ -25,16 +25,13 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/enums/roles.enum';
 import { RolesGuard } from 'src/guards/roles.guard';
 
-
 @ApiTags('YearOptions')
 @Controller('year-options')
 @ApiBearerAuth()
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
-@UseGuards(RolesGuard)
 export class YearOptionsController {
   constructor(private readonly service: YearOptionsService) {}
-
 
   @Get()
   @ApiOperation({ summary: 'Obtener todos los registros de YearOption' })
@@ -42,7 +39,6 @@ export class YearOptionsController {
   findAll(): Promise<YearOption[]> {
     return this.service.findAll();
   }
-
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener un YearOption por ID' })
@@ -52,7 +48,6 @@ export class YearOptionsController {
     return this.service.findOne(id);
   }
 
-
   @Get('version/:versionId')
   @ApiOperation({ summary: 'Obtener años disponibles por versión' })
   @ApiResponse({
@@ -60,12 +55,9 @@ export class YearOptionsController {
     description: 'Lista de YearOptions encontrados para esa versión',
   })
   @ApiNotFoundResponse({ description: 'Versión no encontrada' })
-  findByVersion(
-    @Param('versionId', ParseUUIDPipe) versionId: string,
-  ): Promise<YearOption[]> {
+  findByVersion(@Param('versionId', ParseUUIDPipe) versionId: string): Promise<YearOption[]> {
     return this.service.findByVersion(versionId);
   }
-
 
   @Post()
   @ApiOperation({ summary: 'Crear un nuevo YearOption' })
@@ -73,7 +65,6 @@ export class YearOptionsController {
   create(@Body() dto: CreateYearOptionDto): Promise<YearOption> {
     return this.service.create(dto);
   }
-
 
   @Put(':id')
   @ApiOperation({ summary: 'Actualizar un YearOption existente' })
@@ -86,7 +77,6 @@ export class YearOptionsController {
     return this.service.update(id, dto);
   }
 
-
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar un YearOption' })
   @ApiResponse({ status: 200, description: 'YearOption eliminado' })
@@ -95,5 +85,3 @@ export class YearOptionsController {
     return this.service.delete(id);
   }
 }
-
-

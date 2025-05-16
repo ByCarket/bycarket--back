@@ -21,12 +21,11 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/enums/roles.enum';
 import { RolesGuard } from 'src/guards/roles.guard';
 
-@ApiTags('Vehicles') 
+@ApiTags('Vehicles')
 @Controller('vehicles')
 @ApiBearerAuth()
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
-@UseGuards(RolesGuard)
 export class VehiclesController {
   constructor(private readonly vehiclesService: VehiclesService) {}
 
