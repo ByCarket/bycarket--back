@@ -14,7 +14,8 @@ import { ResponseIdDto } from 'src/dto/responses-user.dto';
 import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from 'src/guards/auth.guard';
-import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiUserProfileDocs } from './decorators/apiUploadUserProfileDocs.decorator';
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard)
@@ -22,7 +23,7 @@ import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
-  @ApiConsumes('multipart/form-data')
+  @ApiUserProfileDocs()
   @UseInterceptors(FileInterceptor('image'))
   @Patch('user-profile')
   @HttpCode(200)

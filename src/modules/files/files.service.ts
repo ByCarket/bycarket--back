@@ -13,7 +13,7 @@ export class FilesService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  async uploadImgRepository(file: Express.Multer.File): Promise<UploadApiResponse> {
+  async uploadImgCloudinary(file: Express.Multer.File): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
       const upload = cloudinary.uploader.upload_stream(
         { resource_type: 'auto' },
@@ -37,7 +37,7 @@ export class FilesService {
       throw new NotFoundException(`User with ID ${id} not found.`);
     }
 
-    const uploadedImg = await this.uploadImgRepository(file);
+    const uploadedImg = await this.uploadImgCloudinary(file);
     await this.usersRepository.update(id, { image: uploadedImg.secure_url });
 
     return {
