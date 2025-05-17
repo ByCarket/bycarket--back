@@ -11,8 +11,8 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ModelsService } from './models.service';
-import { CreateModelDto } from '../../dto/create-model.dto';
-import { UpdateModelDto } from '../../dto/update-model.dto';
+import { CreateModelDto } from 'src/dto/vehicleDto/create-model.dto';
+import { UpdateModelDto } from 'src/dto/vehicleDto/update-model.dto';
 import { Model } from 'src/entities/model.entity';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { Role } from 'src/enums/roles.enum';

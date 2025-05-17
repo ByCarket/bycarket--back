@@ -4,7 +4,7 @@ import { Role } from 'src/enums/roles.enum';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CompleteProfileDto } from '../../dto/complete-profile.dto';
+import { CompleteProfileDto } from '../../dto/usersDto/complete-profile.dto';
 
 @Injectable()
 export class GoogleAuthService {

@@ -1,8 +1,8 @@
 import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { CreateUserDto } from 'src/dto/create-user.dto';
-import { LoginUserDto } from 'src/dto/login-user.dto';
+import { CreateUserDto } from 'src/dto/usersDto/create-user.dto';
+import { LoginUserDto } from 'src/dto/usersDto/login-user.dto';
 import { Role } from 'src/enums/roles.enum';
 import { User } from 'src/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
