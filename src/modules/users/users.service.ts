@@ -1,6 +1,6 @@
 import { ForbiddenException, GoneException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from 'src/dto/create-user.dto';
-import { ModifyUserDto } from 'src/dto/modify-user.dto';
+import { CreateUserDto } from 'src/dto/usersDto/create-user.dto';
+import { ModifyUserDto } from 'src/dto/usersDto/modify-user.dto';
 import { User } from 'src/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsOrder } from 'typeorm';
@@ -10,7 +10,7 @@ import {
   ResponsePagUsersDto,
   ResponsePrivateUserDto,
   ResponsePublicUserDto,
-} from 'src/dto/responses-user.dto';
+} from 'src/dto/usersDto/responses-user.dto';
 import { Role } from 'src/enums/roles.enum';
 import { Post } from 'src/entities/post.entity';
 

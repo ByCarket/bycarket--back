@@ -1,14 +1,17 @@
 import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { CreateUserDto } from 'src/dto/create-user.dto';
-import { LoginUserDto } from 'src/dto/login-user.dto';
+import { CreateUserDto } from 'src/dto/usersDto/create-user.dto';
+import { LoginUserDto } from 'src/dto/usersDto/login-user.dto';
 import { Role } from 'src/enums/roles.enum';
 import { User } from 'src/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtSign } from 'src/interfaces/jwtPayload.interface';
+import { ResponseIdDto } from 'src/dto/usersDto/responses-user.dto';
+import { ChangePasswordDto } from 'src/dto/usersDto/change-password.dto';
+import { GoogleProfileDto } from 'src/dto/usersDto/google-profile.dto';
 
 @Injectable()
 export class AuthService {
@@ -53,6 +56,36 @@ export class AuthService {
     return { success: 'Login successfully', token };
   }
 
+  async processGoogleUser(googleProfile: GoogleProfileDto) {
+    const { email, name, sub } = googleProfile;
+
+    let user = await this.usersService.getUserByEmail(email);
+
+    if (!user) {
+      const newUser = {
+        email,
+        name: name || email.split('@')[0],
+        password: Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2),
+        googleId: sub,
+        phone: undefined,
+        country: '',
+        city: '',
+        address: '',
+      };
+
+      user = await this.usersRepository.create(newUser);
+      await this.usersRepository.save(user);
+    } else if (!user.googleId) {
+      user.googleId = sub;
+      await this.usersRepository.save(user);
+    }
+
+    const jwtPayload = { sub: user.id, email: user.email };
+    const token = this.jwtService.sign(jwtPayload);
+
+    return { success: 'Login successfully', token };
+  }
+
   async createAdmin(user: Omit<CreateUserDto, 'confirmPassword'>) {
     const { email, password } = user;
     const userExist = await this.usersRepository.findOne({
@@ -72,5 +105,45 @@ export class AuthService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: newUserPassword, ...userWithoutPassword } = newUser;
     return userWithoutPassword;
+  }
+
+  async changeEmail(id: string, newEmail: string): Promise<ResponseIdDto> {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    const emailExist = await this.usersRepository.findOneBy({ email: newEmail });
+    if (emailExist) {
+      throw new BadRequestException('Email already registered');
+    }
+
+    user.email = newEmail;
+    await this.usersRepository.save(user);
+
+    return {
+      data: id,
+      message: 'Email changed successfully',
+    };
+  }
+
+  async changePassword(
+    id: string,
+    { oldPassword, password }: ChangePasswordDto,
+  ): Promise<ResponseIdDto> {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (!(await bcrypt.compare(oldPassword, user.password))) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await this.usersRepository.update(id, { password: hashedPassword });
+    return {
+      data: id,
+      message: 'Password changed successfully',
+    };
   }
 }

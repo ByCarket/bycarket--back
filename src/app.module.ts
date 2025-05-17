@@ -14,11 +14,9 @@ import { BrandsModule } from './modules/brands/brands.module';
 import { ModelsModule } from './modules/models/models.module';
 import { VersionsModule } from './modules/versions/versions.module';
 import { PassportModule } from '@nestjs/passport';
-import { GoogleAuthModule } from './modules/googleAuth/google-auth.module';
 import { FilesModule } from './modules/files/files.module';
 
 dotenv.config({ path: '.env.development' });
-
 
 @Module({
   imports: [
@@ -34,10 +32,10 @@ dotenv.config({ path: '.env.development' });
       },
     }),
     JwtModule.register({
-    global: true,
-    signOptions: { expiresIn: "1d" },
-    secret: process.env.JWT_SECRET,
-  }),
+      global: true,
+      signOptions: { expiresIn: '1d' },
+      secret: process.env.JWT_SECRET,
+    }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     AuthModule,
     UsersModule,
@@ -48,12 +46,9 @@ dotenv.config({ path: '.env.development' });
     ModelsModule,
     VersionsModule,
     YearOptionsModule,
-    GoogleAuthModule,
-    FilesModule
+    FilesModule,
   ],
   controllers: [],
   providers: [],
 })
 export class AppModule {}
-
-

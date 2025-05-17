@@ -17,13 +17,13 @@ import { Role } from 'src/enums/roles.enum';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { UsersService } from './users.service';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { ModifyUserDto } from 'src/dto/modify-user.dto';
+import { ModifyUserDto } from 'src/dto/usersDto/modify-user.dto';
 import {
   ResponseIdDto,
   ResponsePagUsersDto,
   ResponsePrivateUserDto,
   ResponsePublicUserDto,
-} from 'src/dto/responses-user.dto';
+} from 'src/dto/usersDto/responses-user.dto';
 import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
 import { apiGetUsersDocs } from './decorators/apiGetUsersDocs.decorator';
 import { ApiGetMyUserDocs } from './decorators/apiGetMyUserDocs.decorator';

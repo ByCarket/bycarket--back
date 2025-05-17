@@ -12,8 +12,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { CreateVehicleDto } from 'src/dto/create-vehicle.dto';
-import { UpdateVehicleDto } from 'src/dto/update-vehicle.dto';
+import { CreateVehicleDto } from 'src/dto/vehicleDto/create-vehicle.dto';
+import { UpdateVehicleDto } from 'src/dto/vehicleDto/update-vehicle.dto';
 import { Vehicle } from 'src/entities/vehicle.entity';
 import { VehiclesService } from './vehicles.service';
 import { AuthGuard } from 'src/guards/auth.guard';
