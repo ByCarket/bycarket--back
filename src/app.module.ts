@@ -8,8 +8,16 @@ import { PostsModule } from './modules/posts/posts.module';
 import { VehiclesModule } from './modules/vehicles/vehicles.module';
 import { JwtModule } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
+import { SeederModule } from './modules/seeder/seeder.module';
+import { YearOptionsModule } from './modules/year-option/year-options.module';
+import { BrandsModule } from './modules/brands/brands.module';
+import { ModelsModule } from './modules/models/models.module';
+import { VersionsModule } from './modules/versions/versions.module';
+import { PassportModule } from '@nestjs/passport';
+import { GoogleAuthModule } from './modules/googleAuth/google-auth.module';
 
 dotenv.config({ path: '.env.development' });
+
 
 @Module({
   imports: [
@@ -29,12 +37,21 @@ dotenv.config({ path: '.env.development' });
     signOptions: { expiresIn: "1d" },
     secret: process.env.JWT_SECRET,
   }),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     AuthModule,
     UsersModule,
     PostsModule,
     VehiclesModule,
+    SeederModule,
+    BrandsModule,
+    ModelsModule,
+    VersionsModule,
+    YearOptionsModule,
+    GoogleAuthModule
   ],
   controllers: [],
   providers: [],
 })
 export class AppModule {}
+
+

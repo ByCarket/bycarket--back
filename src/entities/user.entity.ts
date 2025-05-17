@@ -3,6 +3,7 @@ import { v4 as uuid } from 'uuid';
 import { Role } from '../enums/roles.enum';
 import { Post } from './post.entity';
 import { Question } from './question.entity';
+import { Vehicle } from './vehicle.entity';
 
 @Entity({
   name: 'users',
@@ -38,9 +39,18 @@ export class User {
   @Column({ type: 'enum', enum: Role, default: Role.USER })
   role: Role;
 
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  googleId: string;
+
+  @Column({ type: 'boolean', default: false })
+  profileComplete: boolean;
+
   @OneToMany(() => Post, post => post.user)
   posts: Post[];
 
   @OneToMany(() => Question, question => question.user)
   questions: Question[];
+
+  @OneToMany(() => Vehicle, vehicle => vehicle.user)
+  vehicles: Vehicle[];
 }

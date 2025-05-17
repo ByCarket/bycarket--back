@@ -1,4 +1,3 @@
-// src/modules/vehicles/vehicles.controller.ts
 import {
   Body,
   Controller,
@@ -10,15 +9,23 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateVehicleDto } from 'src/dto/create-vehicle.dto';
 import { UpdateVehicleDto } from 'src/dto/update-vehicle.dto';
 import { Vehicle } from 'src/entities/vehicle.entity';
 import { VehiclesService } from './vehicles.service';
+import { AuthGuard } from 'src/guards/auth.guard';
+import { Roles } from 'src/decorators/roles.decorator';
+import { Role } from 'src/enums/roles.enum';
+import { RolesGuard } from 'src/guards/roles.guard';
 
-@ApiTags('Vehicles') // 👉 Este es el tag que se verá en Swagger UI
+@ApiTags('Vehicles')
 @Controller('vehicles')
+@ApiBearerAuth()
+@UseGuards(AuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
 export class VehiclesController {
   constructor(private readonly vehiclesService: VehiclesService) {}
 
@@ -42,17 +49,19 @@ export class VehiclesController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Crear un nuevo vehículo' })
+  @ApiOperation({ summary: 'Crear nuevo vehículo con marca, modelo, versión y año' })
   @ApiResponse({ status: 201, description: 'Vehículo creado exitosamente' })
-  async createVehicle(@Body() createVehicleDto: CreateVehicleDto): Promise<Vehicle> {
+  @ApiResponse({ status: 404, description: 'Marca, modelo o versión no encontrada' })
+  create(@Body() createVehicleDto: CreateVehicleDto): Promise<Vehicle> {
     return this.vehiclesService.createVehicle(createVehicleDto);
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Actualizar un vehículo existente' })
+  @ApiOperation({ summary: 'Actualizar vehículo existente (incluye año y versión)' })
   @ApiParam({ name: 'id', description: 'UUID del vehículo a actualizar' })
-  @ApiResponse({ status: 200, description: 'Vehículo actualizado exitosamente' })
-  async updateVehicle(
+  @ApiResponse({ status: 200, description: 'Vehículo actualizado' })
+  @ApiResponse({ status: 404, description: 'Vehículo o entidad relacionada no encontrada' })
+  update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateVehicleDto: UpdateVehicleDto,
   ): Promise<Vehicle> {

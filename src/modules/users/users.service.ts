@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, GoneException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from 'src/dto/create-user.dto';
 import { ModifyUserDto } from 'src/dto/modify-user.dto';
 import { User } from 'src/entities/user.entity';
@@ -12,12 +12,15 @@ import {
   ResponsePublicUserDto,
 } from 'src/dto/responses-user.dto';
 import { Role } from 'src/enums/roles.enum';
+import { Post } from 'src/entities/post.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Post)
+    private readonly postsRepository: Repository<Post>,
   ) {}
 
   async getUsers(paginationDto: PaginationDto): Promise<ResponsePagUsersDto> {
@@ -36,6 +39,7 @@ export class UsersService {
         'country',
         'city',
         'address',
+        'isActive',
         'role',
       ] as (keyof User)[],
       order: { name: 'ASC' } as FindOptionsOrder<User>,
@@ -64,15 +68,16 @@ export class UsersService {
     const user = await this.usersRepository.findOne({
       where: { id },
       relations: {
-        posts: true,
-        questions: true,
+        posts: {
+          questions: true,
+        },
       },
     });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found.`);
     }
 
-    const { password, ...data } = user;
+    const { password, isActive, ...data } = user;
     return {
       data,
       message: 'User found successfully.',
@@ -82,7 +87,7 @@ export class UsersService {
   async getUserById(id: string): Promise<ResponsePublicUserDto> {
     const data = await this.usersRepository.findOne({
       where: { id },
-      select: ['id', 'name', 'email', 'address', 'city', 'country', 'isActive', 'phone'],
+      select: ['id', 'name', 'email', 'address', 'city', 'country', 'phone'],
       relations: { posts: true },
     });
     if (!data) {
@@ -129,10 +134,19 @@ export class UsersService {
   }
 
   async deleteUser(id: string): Promise<ResponseIdDto> {
-    const result = await this.usersRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`User with ID ${id} not found.`);
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) throw new NotFoundException(`User with ID ${id} not found.`);
+    if (user.role === Role.ADMIN) throw new ForbiddenException('Cannot delete an admin user.');
+    if (user.isActive === false) throw new GoneException('User has already been deleted.');
+
+    if (user.posts?.length) {
+      user.posts.forEach(async post => {
+        await this.postsRepository.update(post.id, { status: 'Inactive' });
+      });
     }
+
+    await this.usersRepository.update(id, { isActive: false });
+
     return {
       data: id,
       message: 'User deleted successfully.',

@@ -2,11 +2,15 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Brand } from './brand.entity';
 import { Model } from './model.entity';
 import { YearOption } from './year.entity';
+import { User } from './user.entity';
 
 @Entity('vehicles')
 export class Vehicle {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => User, { onDelete: 'SET NULL', nullable: true })
+  user: User;
 
   @ManyToOne(() => Brand, { onDelete: 'SET NULL', nullable: true })
   brand: Brand;
