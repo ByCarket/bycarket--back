@@ -11,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtSign } from 'src/interfaces/jwtPayload.interface';
 import { ResponseIdDto } from 'src/dto/usersDto/responses-user.dto';
 import { ChangePasswordDto } from 'src/dto/usersDto/change-password.dto';
+import { GoogleProfileDto } from 'src/dto/usersDto/google-profile.dto';
 
 @Injectable()
 export class AuthService {
@@ -52,6 +53,36 @@ export class AuthService {
     };
 
     const token = this.jwtService.sign(jwtPayload);
+    return { success: 'Login successfully', token };
+  }
+
+  async processGoogleUser(googleProfile: GoogleProfileDto) {
+    const { email, name, sub } = googleProfile;
+
+    let user = await this.usersService.getUserByEmail(email);
+
+    if (!user) {
+      const newUser = {
+        email,
+        name: name || email.split('@')[0],
+        password: Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2),
+        googleId: sub,
+        phone: undefined,
+        country: '',
+        city: '',
+        address: '',
+      };
+
+      user = await this.usersRepository.create(newUser);
+      await this.usersRepository.save(user);
+    } else if (!user.googleId) {
+      user.googleId = sub;
+      await this.usersRepository.save(user);
+    }
+
+    const jwtPayload = { sub: user.id, email: user.email };
+    const token = this.jwtService.sign(jwtPayload);
+
     return { success: 'Login successfully', token };
   }
 
