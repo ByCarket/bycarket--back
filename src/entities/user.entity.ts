@@ -36,6 +36,9 @@ export class User {
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  image: string;
+
   @Column({ type: 'enum', enum: Role, default: Role.USER })
   role: Role;
 

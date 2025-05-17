@@ -14,6 +14,7 @@ import { BrandsModule } from './modules/brands/brands.module';
 import { ModelsModule } from './modules/models/models.module';
 import { VersionsModule } from './modules/versions/versions.module';
 import { PassportModule } from '@nestjs/passport';
+import { FilesModule } from './modules/files/files.module';
 
 dotenv.config({ path: '.env.development' });
 
@@ -45,6 +46,7 @@ dotenv.config({ path: '.env.development' });
     ModelsModule,
     VersionsModule,
     YearOptionsModule,
+    FilesModule,
   ],
   controllers: [],
   providers: [],
