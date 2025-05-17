@@ -1,7 +1,7 @@
 import { Controller, Post, Req, Body } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GoogleAuthService } from './google-auth.service';
-import { CompleteProfileDto } from '../../dto/complete-profile.dto';
+import { CompleteProfileDto } from '../../dto/usersDto/complete-profile.dto';
 
 @ApiTags('google-auth')
 @Controller('google-auth')

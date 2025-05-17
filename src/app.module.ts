@@ -47,7 +47,7 @@ dotenv.config({ path: '.env.development' });
     ModelsModule,
     VersionsModule,
     YearOptionsModule,
-    GoogleAuthModule
+    GoogleAuthModule,
   ],
   controllers: [],
   providers: [],

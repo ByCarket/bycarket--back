@@ -1,7 +1,7 @@
+import { CreateUserDto } from 'src/dto/usersDto/create-user.dto';
+import { LoginUserDto } from 'src/dto/usersDto/login-user.dto';
 import { Controller, Post, Body, HttpCode, UseGuards, Patch } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { CreateUserDto } from 'src/dto/create-user.dto';
-import { LoginUserDto } from 'src/dto/login-user.dto';
 import { AuthService } from './auth.service';
 import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
 import { ChangeEmailDto } from 'src/dto/change-email.dto';
