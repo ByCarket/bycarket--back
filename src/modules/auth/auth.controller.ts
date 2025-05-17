@@ -4,10 +4,10 @@ import { Controller, Post, Body, HttpCode, UseGuards, Patch } from '@nestjs/comm
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
-import { ChangeEmailDto } from 'src/dto/change-email.dto';
-import { ResponseIdDto } from 'src/dto/responses-user.dto';
+import { ChangeEmailDto } from 'src/dto/usersDto/change-email.dto';
+import { ResponseIdDto } from 'src/dto/usersDto/responses-user.dto';
 import { AuthGuard } from 'src/guards/auth.guard';
-import { ChangePasswordDto } from 'src/dto/change-password.dto';
+import { ChangePasswordDto } from 'src/dto/usersDto/change-password.dto';
 
 @Controller('auth')
 export class AuthController {

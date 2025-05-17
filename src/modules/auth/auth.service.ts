@@ -9,8 +9,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtSign } from 'src/interfaces/jwtPayload.interface';
-import { ResponseIdDto } from 'src/dto/responses-user.dto';
-import { ChangePasswordDto } from 'src/dto/change-password.dto';
+import { ResponseIdDto } from 'src/dto/usersDto/responses-user.dto';
+import { ChangePasswordDto } from 'src/dto/usersDto/change-password.dto';
 
 @Injectable()
 export class AuthService {
