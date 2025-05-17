@@ -8,6 +8,7 @@ import { ChangeEmailDto } from 'src/dto/usersDto/change-email.dto';
 import { ResponseIdDto } from 'src/dto/usersDto/responses-user.dto';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { ChangePasswordDto } from 'src/dto/usersDto/change-password.dto';
+import { GoogleProfileDto } from 'src/dto/usersDto/google-profile.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -37,6 +38,17 @@ export class AuthController {
   @ApiOperation({ summary: 'User Login (email and  password)' })
   login(@Body() loginUserDto: LoginUserDto) {
     return this.authService.login(loginUserDto);
+  }
+
+  @Post('process-google')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Process Google user data after login with NextAuth' })
+  @ApiResponse({
+    status: 200,
+    description: 'User processed successfully',
+  })
+  async processGoogleLogin(@Body() googleProfile: GoogleProfileDto) {
+    return await this.authService.processGoogleUser(googleProfile);
   }
 
   @Post('create-admin')
