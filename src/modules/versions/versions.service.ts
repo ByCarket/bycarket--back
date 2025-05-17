@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Version } from 'src/entities/version.entity';
 import { Model } from 'src/entities/model.entity';
-import { CreateVersionDto } from '../../dto/create-version.dto';
-import { UpdateVersionDto } from '../../dto/update-version.dto';
+import { CreateVersionDto } from 'src/dto/vehicleDto/create-version.dto';
+import { UpdateVersionDto } from 'src/dto/vehicleDto/update-version.dto';
 
 @Injectable()
 export class VersionsService {

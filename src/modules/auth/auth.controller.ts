@@ -1,8 +1,13 @@
-import { Controller, Post, Body, HttpCode } from '@nestjs/common';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { CreateUserDto } from 'src/dto/create-user.dto';
-import { LoginUserDto } from 'src/dto/login-user.dto';
+import { CreateUserDto } from 'src/dto/usersDto/create-user.dto';
+import { LoginUserDto } from 'src/dto/usersDto/login-user.dto';
+import { Controller, Post, Body, HttpCode, UseGuards, Patch } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
+import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
+import { ChangeEmailDto } from 'src/dto/usersDto/change-email.dto';
+import { ResponseIdDto } from 'src/dto/usersDto/responses-user.dto';
+import { AuthGuard } from 'src/guards/auth.guard';
+import { ChangePasswordDto } from 'src/dto/usersDto/change-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -47,5 +52,27 @@ export class AuthController {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { confirmPassword, ...userWithoutConfirmPassword } = createUserDto;
     return await this.authService.createAdmin(userWithoutConfirmPassword);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @Patch('change-email')
+  @HttpCode(200)
+  async changeEmail(
+    @UserAuthenticated('sub') id: string,
+    @Body() { email }: ChangeEmailDto,
+  ): Promise<ResponseIdDto> {
+    return await this.authService.changeEmail(id, email);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @Patch('change-password')
+  @HttpCode(200)
+  async changePassword(
+    @UserAuthenticated('sub') id: string,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ): Promise<ResponseIdDto> {
+    return await this.authService.changePassword(id, changePasswordDto);
   }
 }

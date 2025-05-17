@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ResponsePrivateUserDto } from 'src/dto/responses-user.dto';
+import { ResponsePrivateUserDto } from 'src/dto/usersDto/responses-user.dto';
 import { unauthorizedResponse } from '../swagger/unauthorizedResponse.swagger';
 
 export const ApiGetMyUserDocs = () => {

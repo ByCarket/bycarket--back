@@ -17,8 +17,8 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { YearOptionsService } from './year-options.service';
-import { CreateYearOptionDto } from '../../dto/create-year-option.dto';
-import { UpdateYearOptionDto } from '../../dto/update-year-option.dto';
+import { CreateYearOptionDto } from 'src/dto/vehicleDto/create-year-option.dto';
+import { UpdateYearOptionDto } from 'src/dto/vehicleDto/update-year-option.dto';
 import { YearOption } from 'src/entities/year.entity';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { Roles } from 'src/decorators/roles.decorator';

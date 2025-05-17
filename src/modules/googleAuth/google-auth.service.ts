@@ -5,6 +5,8 @@ import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
+import { CompleteProfileDto } from '../../dto/usersDto/complete-profile.dto';
+
 
 @Injectable()
 export class GoogleAuthService {
