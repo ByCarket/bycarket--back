@@ -112,22 +112,4 @@ export class BaseUserDto {
     maxLength: 20,
   })
   city: string;
-  
-  /**
-   * Método auxiliar para verificaciones de contraseña y cambios
-   */
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(8)
-  @MaxLength(15)
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&]{6,15}$/)
-  @ApiProperty({
-    description:
-      'Previous password for validation',
-    example: 'OldPass@word123',
-    type: String,
-    minLength: 8,
-    maxLength: 15,
-  })
-  oldPassword?: string;
 }
