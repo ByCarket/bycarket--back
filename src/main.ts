@@ -10,7 +10,6 @@ async function bootstrap() {
   app.enableCors();
 
   const swaggerConfig = new DocumentBuilder()
-    .setBasePath('/src')
     .setTitle('Bycarket API')
     .setDescription('API documentation for Bycarket')
     .setVersion('1.0')

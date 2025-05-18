@@ -4,7 +4,7 @@ import * as toStream from 'buffer-to-stream';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
-import { ResponseIdDto } from 'src/dto/postsDto/responses-post.dto';
+import { ResponseIdDto } from 'src/DTOs/usersDto/responses-user.dto';
 import { Vehicle } from 'src/entities/vehicle.entity';
 
 
