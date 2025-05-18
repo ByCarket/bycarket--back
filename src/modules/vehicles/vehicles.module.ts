@@ -6,7 +6,8 @@ import { Vehicle } from 'src/entities/vehicle.entity';
 import { Brand } from 'src/entities/brand.entity';
 import { Model } from 'src/entities/model.entity';
 import { AuthModule } from '../auth/auth.module';
-import { UsersService } from '../users/users.service';
+import { UsersModule } from '../users/users.module'; 
+
 import { User } from 'src/entities/user.entity';
 import { Post } from 'src/entities/post.entity';
 import { Version } from 'src/entities/version.entity';
@@ -14,7 +15,6 @@ import { Version } from 'src/entities/version.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([Vehicle, Brand, Model, User, Post, Version]), AuthModule],
   controllers: [VehiclesController],
-  providers: [VehiclesService, UsersService],
-  exports: [UsersService],
+  providers: [VehiclesService], 
 })
 export class VehiclesModule {}

@@ -86,8 +86,9 @@ export class VehiclesService {
       user,
     });
 
-    return this.vehicleRepository.save(vehicle);
-  }
+  return this.vehicleRepository.save(vehicle);
+}
+
 
   // ✅ UPDATE vehicle
   async updateVehicle(id: string, userId: string, updateVehicleInfo: UpdateVehicleDto) {
