@@ -20,6 +20,7 @@ import { AuthGuard } from 'src/guards/auth.guard';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/enums/roles.enum';
 import { RolesGuard } from 'src/guards/roles.guard';
+import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
 
 @ApiTags('Vehicles')
 @Controller('vehicles')
@@ -27,7 +28,7 @@ import { RolesGuard } from 'src/guards/roles.guard';
 @UseGuards(AuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
 export class VehiclesController {
-  constructor(private readonly vehiclesService: VehiclesService) {}
+  constructor(private readonly vehiclesService: VehiclesService) { }
 
   @Get()
   @HttpCode(200)
@@ -48,13 +49,20 @@ export class VehiclesController {
     return this.vehiclesService.getVehicleById(id);
   }
 
+  @UseGuards(AuthGuard) // solo requiere que el usuario esté logueado
   @Post()
-  @ApiOperation({ summary: 'Crear nuevo vehículo con marca, modelo, versión y año' })
-  @ApiResponse({ status: 201, description: 'Vehículo creado exitosamente' })
+  @HttpCode(201)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Crear un nuevo vehículo asignado al usuario autenticado' })
+  @ApiResponse({ status: 201, description: 'Vehículo creado correctamente' })
   @ApiResponse({ status: 404, description: 'Marca, modelo o versión no encontrada' })
-  create(@Body() createVehicleDto: CreateVehicleDto): Promise<Vehicle> {
-    return this.vehiclesService.createVehicle(createVehicleDto);
+  async createVehicle(
+    @Body() createVehicleDto: CreateVehicleDto,
+    @UserAuthenticated('sub') userId: string,
+  ): Promise<Vehicle> {
+    return this.vehiclesService.createVehicle(createVehicleDto, userId);
   }
+
 
   @Put(':id')
   @ApiOperation({ summary: 'Actualizar vehículo existente (incluye año y versión)' })

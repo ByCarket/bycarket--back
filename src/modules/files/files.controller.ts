@@ -3,19 +3,23 @@ import {
   FileTypeValidator,
   HttpCode,
   MaxFileSizeValidator,
+  Param,
   ParseFilePipe,
+  ParseUUIDPipe,
   Patch,
   UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesService } from './files.service';
-import { ResponseIdDto } from 'src/dto/responses-user.dto';
+import { ResponseIdDto } from 'src/dto/postsDto/responses-post.dto';
 import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { ApiUserProfileDocs } from './decorators/apiUploadUserProfileDocs.decorator';
+import { ApiUploadVehicleImagesDocs } from './decorators/apiUploadVehicleImagesDocs.decorator';
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard)
@@ -46,4 +50,25 @@ export class FilesController {
   ): Promise<ResponseIdDto> {
     return this.filesService.updateImgUser(id, file);
   }
+
+  @Patch('vehicle-images/:vehicleId')
+@UseInterceptors(FilesInterceptor('images'))
+@ApiUploadVehicleImagesDocs()
+@HttpCode(200)
+@ApiBearerAuth()
+async uploadVehicleImages(
+  @UserAuthenticated('sub') userId: string,
+  @Param('vehicleId', ParseUUIDPipe) vehicleId: string,
+  @UploadedFiles(
+    new ParseFilePipe({
+      validators: [
+        new MaxFileSizeValidator({ maxSize: 1000000 }), // 1 MB por imagen
+        new FileTypeValidator({ fileType: /(jpg|jpeg|png|webp)/ }),
+      ],
+    }),
+  ) files: Express.Multer.File[],
+): Promise<ResponseIdDto> {
+  return this.filesService.uploadVehicleImages(userId, files, vehicleId);
+}
+
 }
