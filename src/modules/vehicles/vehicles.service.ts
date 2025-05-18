@@ -7,6 +7,7 @@ import { UpdateVehicleDto } from '../../dto/vehicleDto/update-vehicle.dto';
 import { Brand } from 'src/entities/brand.entity';
 import { Model } from 'src/entities/model.entity';
 import { YearOption } from 'src/entities/year.entity';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class VehiclesService {
@@ -49,43 +50,47 @@ export class VehiclesService {
   }
 
   // ✅ CREATE vehicle
-  async createVehicle(createVehicleDto: CreateVehicleDto): Promise<Vehicle> {
-    const { brandId, modelId, versionId, year, price, mileage, description } = createVehicleDto;
+  async createVehicle(
+  createVehicleDto: CreateVehicleDto,
+  userId: string,
+): Promise<Vehicle> {
+  const { brandId, modelId, versionId, year, price, mileage, description } = createVehicleDto;
 
-    const brand = await this.brandRepository.findOneBy({ id: brandId });
-    const model = await this.modelRepository.findOneBy({ id: modelId });
+  const brand = await this.brandRepository.findOneBy({ id: brandId });
+  const model = await this.modelRepository.findOneBy({ id: modelId });
 
-    if (!brand) throw new NotFoundException(`Brand with ID ${brandId} not found`);
-    if (!model) throw new NotFoundException(`Model with ID ${modelId} not found`);
+  if (!brand) throw new NotFoundException(`Brand with ID ${brandId} not found`);
+  if (!model) throw new NotFoundException(`Model with ID ${modelId} not found`);
 
-    // Buscar o crear YearOption
-    let yearOption = await this.yearOptionRepository.findOne({
-      where: {
-        year,
-        version: { id: versionId },
-      },
-      relations: ['version'],
+  let yearOption = await this.yearOptionRepository.findOne({
+    where: {
+      year,
+      version: { id: versionId },
+    },
+    relations: ['version'],
+  });
+
+  if (!yearOption) {
+    yearOption = this.yearOptionRepository.create({
+      year,
+      version: { id: versionId },
     });
-
-    if (!yearOption) {
-      yearOption = this.yearOptionRepository.create({
-        year,
-        version: { id: versionId },
-      });
-      await this.yearOptionRepository.save(yearOption);
-    }
-
-    const vehicle = this.vehicleRepository.create({
-      brand,
-      model,
-      yearOption,
-      price,
-      mileage,
-      description,
-    });
-
-    return this.vehicleRepository.save(vehicle);
+    await this.yearOptionRepository.save(yearOption);
   }
+
+  const vehicle = this.vehicleRepository.create({
+    user: { id: userId } as User, // ← asignación obligatoria
+    brand,
+    model,
+    yearOption,
+    price,
+    mileage,
+    description,
+  });
+
+  return this.vehicleRepository.save(vehicle);
+}
+
 
   // ✅ UPDATE vehicle
   async updateVehicle(id: string, updateVehicleDto: UpdateVehicleDto): Promise<Vehicle> {
