@@ -11,8 +11,8 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { VersionsService } from './versions.service';
-import { CreateVersionDto } from 'src/dto/vehicleDto/create-version.dto';
-import { UpdateVersionDto } from 'src/dto/vehicleDto/update-version.dto';
+import { CreateVersionDto } from 'src/DTOs/vehicleDto/seederDto/create-version.dto';
+import { UpdateVersionDto } from 'src/DTOs/vehicleDto/seederDto/update-version.dto';
 import { Version } from 'src/entities/version.entity';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { RolesGuard } from 'src/guards/roles.guard';

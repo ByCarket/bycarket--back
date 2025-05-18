@@ -11,8 +11,8 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { BrandsService } from './brands.service';
-import { CreateBrandDto } from 'src/dto/vehicleDto/create-brand.dto';
-import { UpdateBrandDto } from 'src/dto/vehicleDto/update-brand.dto';
+import { CreateBrandDto } from 'src/DTOs/vehicleDto/seederDto/create-brand.dto';
+import { UpdateBrandDto } from 'src/DTOs/vehicleDto/seederDto/update-brand.dto';
 import { Brand } from 'src/entities/brand.entity';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { Role } from 'src/enums/roles.enum';

@@ -1,4 +1,4 @@
-import { ResponseIdDto } from 'src/dto/postsDto/responses-post.dto';
+import { ResponseIdDto } from 'src/DTOs/usersDto/responses-user.dto';
 
 export const idResponse = (action: string) => {
   return {

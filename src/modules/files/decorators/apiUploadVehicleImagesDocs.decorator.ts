@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ResponseIdDto } from 'src/dto/postsDto/responses-post.dto';
+import { ResponseIdDto } from 'src/DTOs/usersDto/responses-user.dto';
 
 export function ApiUploadVehicleImagesDocs() {
   return applyDecorators(

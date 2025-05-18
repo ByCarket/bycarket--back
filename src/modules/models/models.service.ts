@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Model } from 'src/entities/model.entity';
 import { Brand } from 'src/entities/brand.entity';
-import { CreateModelDto } from 'src/dto/vehicleDto/create-model.dto';
-import { UpdateModelDto } from 'src/dto/vehicleDto/update-model.dto';
+import { CreateModelDto } from 'src/DTOs/vehicleDto/seederDto/create-model.dto';
+import { UpdateModelDto } from 'src/DTOs/vehicleDto/seederDto/update-model.dto';
 
 @Injectable()
 export class ModelsService {

@@ -1,16 +1,16 @@
 import { ForbiddenException, GoneException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from 'src/dto/usersDto/create-user.dto';
-import { ModifyUserDto } from 'src/dto/usersDto/modify-user.dto';
+import { CreateUserDto } from 'src/DTOs/usersDto/createUser.dto';
+import { UpdateUserInfoDto } from 'src/DTOs/usersDto/updateUserInfo.dto';
 import { User } from 'src/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsOrder } from 'typeorm';
-import { PaginationDto } from 'src/dto/pagination.dto';
-import {
-  ResponseIdDto,
-  ResponsePagUsersDto,
-  ResponsePrivateUserDto,
-  ResponsePublicUserDto,
-} from 'src/dto/usersDto/responses-user.dto';
+import { ResponsePaginatedUsersDto } from 'src/DTOs/usersDto/responsePaginatedUsers.dto';
+// import {
+//   ResponseIdDto,
+//   ResponsePagUsersDto,
+//   ResponsePrivateUserDto,
+//   ResponsePublicUserDto,
+// } from 'src/dto/usersDto/responses-user.dto';
 import { Role } from 'src/enums/roles.enum';
 import { Post } from 'src/entities/post.entity';
 
@@ -23,7 +23,7 @@ export class UsersService {
     private readonly postsRepository: Repository<Post>,
   ) {}
 
-  async getUsers(paginationDto: PaginationDto): Promise<ResponsePagUsersDto> {
+  async getUsers(paginationDto: ResponsePaginatedUsersDto): Promise<ResponsePaginatedUsersDto> {
     const { page = 1, limit = 10 } = paginationDto;
     const skip = (page - 1) * limit;
 
@@ -64,7 +64,7 @@ export class UsersService {
     };
   }
 
-  async getMyUser(id: string): Promise<ResponsePrivateUserDto> {
+  async getMyUser(id: string) {
     const user = await this.usersRepository.findOne({
       where: { id },
       relations: {
@@ -84,7 +84,7 @@ export class UsersService {
     };
   }
 
-  async getUserById(id: string): Promise<ResponsePublicUserDto> {
+  async getUserById(id: string) {
     const data = await this.usersRepository.findOne({
       where: { id },
       select: ['id', 'name', 'email', 'address', 'city', 'country', 'phone'],
@@ -104,12 +104,12 @@ export class UsersService {
     return await this.usersRepository.findOne({ where: { email } });
   }
 
-  async createUser(user: CreateUserDto): Promise<User> {
+  async createUser(user: CreateUserDto): Promise<CreateUserDto> {
     const newUser = this.usersRepository.create(user);
     return await this.usersRepository.save(newUser);
   }
 
-  async updateMyUser(id: string, user: ModifyUserDto): Promise<ResponseIdDto> {
+  async updateMyUser(id: string, user: UpdateUserInfoDto) {
     const result = await this.usersRepository.update(id, user);
     if (result.affected === 0) {
       throw new NotFoundException(`User with ID ${id} not found.`);
@@ -121,7 +121,7 @@ export class UsersService {
     };
   }
 
-  async upgradeToAdmin(id: string): Promise<ResponseIdDto> {
+  async upgradeToAdmin(id: string) {
     const result = await this.usersRepository.update(id, { role: Role.ADMIN });
     if (result.affected === 0) {
       throw new NotFoundException(`User with ID ${id} not found.`);
@@ -133,7 +133,7 @@ export class UsersService {
     };
   }
 
-  async deleteUser(id: string): Promise<ResponseIdDto> {
+  async deleteUser(id: string) {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) throw new NotFoundException(`User with ID ${id} not found.`);
     if (user.role === Role.ADMIN) throw new ForbiddenException('Cannot delete an admin user.');

@@ -13,7 +13,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesService } from './files.service';
-import { ResponseIdDto } from 'src/dto/postsDto/responses-post.dto';
+import { ResponseIdDto } from 'src/DTOs/usersDto/responses-user.dto';
 import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from 'src/guards/auth.guard';

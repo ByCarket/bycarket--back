@@ -11,7 +11,7 @@ import { User } from './user.entity';
 import { Vehicle } from './vehicle.entity';
 import { Question } from './question.entity';
 
-export type PostStatus = 'Active' | 'Inactive' | 'Rejected';
+export type PostStatus = 'Active' | 'Inactive' | 'Rejected' | 'Pending' | 'Sold';
 
 @Entity('posts')
 export class Post {
@@ -29,8 +29,8 @@ export class Post {
 
   @Column({
     type: 'enum',
-    enum: ['Active', 'Inactive', 'Rejected'],
-    default: 'Active',
+    enum: ['Active', 'Inactive', 'Rejected', 'Pending', 'Sold'],
+    default: 'Pending',
   })
   status: PostStatus;
 

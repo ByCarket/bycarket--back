@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { ResponsePublicUserDto } from 'src/dto/usersDto/responses-user.dto';
+import { ResponsePublicUserDto } from 'src/DTOs/usersDto/responses-user.dto';
 import { userNotFound } from '../swagger/userNotFound.swagger';
 import { paramId } from '../swagger/paramId.swagger';
 

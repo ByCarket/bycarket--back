@@ -1,8 +1,11 @@
-import { IsString, IsUUID, IsOptional, IsEnum } from 'class-validator';
+import { IsUUID, IsOptional, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { PostStatus } from 'src/entities/post.entity';
 
-export class CreatePostDto {
+/**
+ * Base DTO for post-related operations
+ */
+export class BasePostDto {
   @ApiProperty({
     description: 'ID del usuario que crea el post',
     example: '123e4567-e89b-12d3-a456-426614174000',
@@ -19,11 +22,11 @@ export class CreatePostDto {
 
   @ApiProperty({
     description: 'Estado del post',
-    example: 'Active',
-    enum: ['Active', 'Inactive', 'Rejected'],
-    default: 'Active',
+    example: 'Pending',
+    enum: ['Active', 'Inactive', 'Rejected', 'Pending', 'Sold'],
+    default: 'Pending',
   })
   @IsOptional()
-  @IsEnum(['Active', 'Inactive', 'Rejected'])
-  status?: PostStatus;
+  @IsEnum(['Active', 'Inactive', 'Rejected', 'Pending', 'Sold'])
+  status: PostStatus;
 }

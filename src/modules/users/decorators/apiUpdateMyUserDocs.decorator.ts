@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, getSchemaPath } from '@nestjs/swagger';
-import { ModifyUserDto } from 'src/dto/usersDto/modify-user.dto';
+import { UpdateUserInfoDto } from 'src/DTOs/usersDto/updateUserInfo.dto';
 import { unauthorizedResponse } from '../swagger/unauthorizedResponse.swagger';
 import { userNotFound } from '../swagger/userNotFound.swagger';
 import { idResponse } from '../swagger/idResponse.swagger';
@@ -15,7 +15,7 @@ export const ApiUpdateMyUserDocs = () => {
       description: 'User data to update',
       required: true,
       schema: {
-        oneOf: [{ $ref: getSchemaPath(ModifyUserDto) }],
+        oneOf: [{ $ref: getSchemaPath(UpdateUserInfoDto) }],
       },
       examples: {
         'Update name': {
