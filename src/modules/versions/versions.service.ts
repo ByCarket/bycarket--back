@@ -16,7 +16,7 @@ export class VersionsService {
   ) {}
 
   async findAll(): Promise<Version[]> {
-    return await this.versionRepository.find({ relations: ['model', 'yearOptions'] });
+    return await this.versionRepository.find({ relations: ['model'] });
   }
 
   async findOne(id: string): Promise<Version> {
