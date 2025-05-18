@@ -1,8 +1,8 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Brand } from './brand.entity';
 import { Model } from './model.entity';
-import { YearOption } from './year.entity';
 import { User } from './user.entity';
+import { Version } from './version.entity';
 
 @Entity('vehicles')
 export class Vehicle {
@@ -18,8 +18,11 @@ export class Vehicle {
   @ManyToOne(() => Model, { onDelete: 'SET NULL', nullable: true })
   model: Model;
 
-  @ManyToOne(() => YearOption, { onDelete: 'SET NULL', nullable: true })
-  yearOption: YearOption;
+  @ManyToOne(() => Version, { onDelete: 'SET NULL', nullable: true })
+  version: Version;
+
+  @Column({ type: 'int', nullable: true })
+  year: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;

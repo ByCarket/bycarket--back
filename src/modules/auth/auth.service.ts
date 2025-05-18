@@ -1,17 +1,16 @@
 import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { CreateUserDto } from 'src/dto/usersDto/create-user.dto';
-import { LoginUserDto } from 'src/dto/usersDto/login-user.dto';
+import { CreateUserDto } from 'src/DTOs/usersDto/createUser.dto';
+import { LoginUserDto } from 'src/DTOs/usersDto/loginUser.dto';
 import { Role } from 'src/enums/roles.enum';
 import { User } from 'src/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtSign } from 'src/interfaces/jwtPayload.interface';
-import { ResponseIdDto } from 'src/dto/usersDto/responses-user.dto';
-import { ChangePasswordDto } from 'src/dto/usersDto/change-password.dto';
-import { GoogleProfileDto } from 'src/dto/usersDto/google-profile.dto';
+import { ChangePasswordDto } from 'src/DTOs/usersDto/changePassword.dto';
+import { GoogleProfileDto } from 'src/DTOs/usersDto/google-profile.dto';
 
 @Injectable()
 export class AuthService {
@@ -107,7 +106,7 @@ export class AuthService {
     return userWithoutPassword;
   }
 
-  async changeEmail(id: string, newEmail: string): Promise<ResponseIdDto> {
+  async changeEmail(id: string, newEmail: string) {
     const user = await this.usersRepository.findOneBy({ id });
     if (!user) {
       throw new BadRequestException('User not found');
@@ -129,7 +128,7 @@ export class AuthService {
   async changePassword(
     id: string,
     { oldPassword, password }: ChangePasswordDto,
-  ): Promise<ResponseIdDto> {
+  ) {
     const user = await this.usersRepository.findOneBy({ id });
     if (!user) {
       throw new BadRequestException('User not found');

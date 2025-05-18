@@ -10,6 +10,7 @@ async function bootstrap() {
   app.enableCors();
 
   const swaggerConfig = new DocumentBuilder()
+    .setBasePath('/src')
     .setTitle('Bycarket API')
     .setDescription('API documentation for Bycarket')
     .setVersion('1.0')
@@ -20,6 +21,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, document, {
     swaggerOptions: {
+      
       tagsSorter: (a: string, b: string) => {
         const order = ['Vehicles'];
         return order.indexOf(a) - order.indexOf(b);

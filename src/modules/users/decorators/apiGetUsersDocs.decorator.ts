@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { ResponsePagUsersDto } from 'src/dto/usersDto/responses-user.dto';
+import { ResponsePagUsersDto } from 'src/DTOs/usersDto/responses-user.dto';
 import { unauthorizedResponse } from '../swagger/unauthorizedResponse.swagger';
 import { forbiddenResponse } from '../swagger/forbiddenResponse.swagger';
 

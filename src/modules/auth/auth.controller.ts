@@ -1,14 +1,13 @@
-import { CreateUserDto } from 'src/dto/usersDto/create-user.dto';
-import { LoginUserDto } from 'src/dto/usersDto/login-user.dto';
+import { CreateUserDto } from 'src/DTOs/usersDto/createUser.dto';
+import { LoginUserDto } from 'src/DTOs/usersDto/loginUser.dto';
 import { Controller, Post, Body, HttpCode, UseGuards, Patch } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
-import { ChangeEmailDto } from 'src/dto/usersDto/change-email.dto';
-import { ResponseIdDto } from 'src/dto/usersDto/responses-user.dto';
+import { ChangeEmailDto } from 'src/DTOs/usersDto/changeEmail.dto';
 import { AuthGuard } from 'src/guards/auth.guard';
-import { ChangePasswordDto } from 'src/dto/usersDto/change-password.dto';
-import { GoogleProfileDto } from 'src/dto/usersDto/google-profile.dto';
+import { ChangePasswordDto } from 'src/DTOs/usersDto/changePassword.dto';
+import { GoogleProfileDto } from 'src/DTOs/usersDto/google-profile.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -70,10 +69,7 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Patch('change-email')
   @HttpCode(200)
-  async changeEmail(
-    @UserAuthenticated('sub') id: string,
-    @Body() { email }: ChangeEmailDto,
-  ): Promise<ResponseIdDto> {
+  async changeEmail(@UserAuthenticated('sub') id: string, @Body() { email }: ChangeEmailDto) {
     return await this.authService.changeEmail(id, email);
   }
 
@@ -84,7 +80,7 @@ export class AuthController {
   async changePassword(
     @UserAuthenticated('sub') id: string,
     @Body() changePasswordDto: ChangePasswordDto,
-  ): Promise<ResponseIdDto> {
+  ) {
     return await this.authService.changePassword(id, changePasswordDto);
   }
 }

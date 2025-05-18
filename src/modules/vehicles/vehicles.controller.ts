@@ -6,20 +6,22 @@ import {
   HttpCode,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { CreateVehicleDto } from 'src/dto/vehicleDto/create-vehicle.dto';
-import { UpdateVehicleDto } from 'src/dto/vehicleDto/update-vehicle.dto';
+import { CreateVehicleDto } from 'src/DTOs/vehicleDto/createVehicle.dto';
+import { UpdateVehicleDto } from 'src/DTOs/vehicleDto/updateVehicle.dto';
 import { Vehicle } from 'src/entities/vehicle.entity';
 import { VehiclesService } from './vehicles.service';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/enums/roles.enum';
 import { RolesGuard } from 'src/guards/roles.guard';
+import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
 
 @ApiTags('Vehicles')
 @Controller('vehicles')
@@ -44,35 +46,48 @@ export class VehiclesController {
   @ApiOperation({ summary: 'Obtener vehículo por ID' })
   @ApiParam({ name: 'id', description: 'UUID del vehículo' })
   @ApiResponse({ status: 200, description: 'Vehículo encontrado' })
-  async getVehicleById(@Param('id', ParseUUIDPipe) id: string): Promise<Vehicle> {
-    return this.vehiclesService.getVehicleById(id);
+  async getVehicleById(@UserAuthenticated('sub') userId: string,@Param('id', ParseUUIDPipe) id: string): Promise<Vehicle | void> {
+    return this.vehiclesService.getVehicleById(id, userId);
   }
 
   @Post()
   @ApiOperation({ summary: 'Crear nuevo vehículo con marca, modelo, versión y año' })
   @ApiResponse({ status: 201, description: 'Vehículo creado exitosamente' })
   @ApiResponse({ status: 404, description: 'Marca, modelo o versión no encontrada' })
-  create(@Body() createVehicleDto: CreateVehicleDto): Promise<Vehicle> {
-    return this.vehiclesService.createVehicle(createVehicleDto);
+  async createVehicle(@UserAuthenticated('sub') userId: string,
+    @Body() createVehicleDto: CreateVehicleDto): Promise<Vehicle> {
+    return this.vehiclesService.createVehicle(createVehicleDto, userId);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @ApiOperation({ summary: 'Actualizar vehículo existente (incluye año y versión)' })
   @ApiParam({ name: 'id', description: 'UUID del vehículo a actualizar' })
   @ApiResponse({ status: 200, description: 'Vehículo actualizado' })
   @ApiResponse({ status: 404, description: 'Vehículo o entidad relacionada no encontrada' })
-  update(
+  async updateVehicle(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateVehicleDto: UpdateVehicleDto,
+    @UserAuthenticated('sub') userId: string,
+    @Body() updateVehicleInfo: UpdateVehicleDto,
   ): Promise<Vehicle> {
-    return this.vehiclesService.updateVehicle(id, updateVehicleDto);
+    return this.vehiclesService.updateVehicle(id, userId, updateVehicleInfo);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar un vehículo por ID' })
   @ApiParam({ name: 'id', description: 'UUID del vehículo a eliminar' })
   @ApiResponse({ status: 200, description: 'Vehículo eliminado exitosamente' })
-  async deleteVehicle(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+  async deleteVehicle(@UserAuthenticated('sub') userId: string,@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    return this.vehiclesService.deleteVehicle(id, userId);
+  }
+
+  @Delete('admin/:id')
+  @ApiOperation({ summary: 'Eliminar un vehículo por ID (solo admin)' })
+  @ApiParam({ name: 'id', description: 'UUID del vehículo a eliminar' })
+  @ApiResponse({ status: 200, description: 'Vehículo eliminado exitosamente' })
+  @Roles(Role.ADMIN)
+  async adminDeleteVehicle(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<void> {
     return this.vehiclesService.deleteVehicle(id);
   }
 }

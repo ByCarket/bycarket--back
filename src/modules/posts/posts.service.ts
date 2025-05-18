@@ -4,10 +4,10 @@ import { Repository, FindOptionsOrder } from 'typeorm';
 import { Post, PostStatus } from 'src/entities/post.entity';
 import { Vehicle } from 'src/entities/vehicle.entity';
 import { User } from 'src/entities/user.entity';
-import { CreatePostDto } from 'src/dto/postsDto/create-post.dto';
-import { UpdatePostDto } from 'src/dto/postsDto/update-post.dto';
-import { PaginationDto } from 'src/dto/pagination.dto';
-import { ResponseIdDto, ResponsePagPostsDto, ResponsePostDto } from '../../dto/postsDto/responses-post.dto';
+import { ResponsePaginatedPostsDto } from 'src/DTOs/postsDto/responsePaginatedPosts.dto';
+import { PostDetail } from 'src/DTOs/postsDto/postDetail.dto';
+import { CreatePostDto } from 'src/DTOs/postsDto/createPost.dto';
+import { UpdatePostDto } from 'src/DTOs/postsDto/updatePost.dto';
 
 @Injectable()
 export class PostsService {
@@ -20,7 +20,7 @@ export class PostsService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  async getPosts(paginationDto: PaginationDto): Promise<ResponsePagPostsDto> {
+  async getPosts(paginationDto: ResponsePaginatedPostsDto): Promise<ResponsePaginatedPostsDto> {
     const { page = 1, limit = 10 } = paginationDto;
     const skip = (page - 1) * limit;
 
@@ -34,7 +34,7 @@ export class PostsService {
         vehicle: {
           brand: true,
           model: true,
-          yearOption: true,
+          version: true,
         },
       },
       order: { postDate: 'DESC' } as FindOptionsOrder<Post>,
@@ -62,17 +62,10 @@ export class PostsService {
     };
   }
 
-  async getPostById(id: string): Promise<ResponsePostDto> {
+  async getPostById(id: string): Promise<PostDetail> {
     const post = await this.postsRepository.findOne({
       where: { id },
-      relations: {
-        user: true,
-        vehicle: {
-          brand: true,
-          model: true,
-          yearOption: true,
-        },
-      },
+      relations: { user: true , vehicle: true },
     });
 
     if (!post) {
@@ -81,17 +74,17 @@ export class PostsService {
 
     // Filtrar datos del usuario para mostrar solo lo necesario
     if (post.user) {
-      const { id: userId, name, phone } = post.user;
-      post.user = { id: userId, name, phone } as User;
+      const { name, phone } = post.user;
+      post.user = { name, phone } as User;
     }
 
-    return {
-      data: post,
-      message: 'Post found successfully.',
-    };
+    return post;
   }
 
-  async getUserPosts(userId: string, paginationDto: PaginationDto): Promise<ResponsePagPostsDto> {
+  async getUserPosts(
+    userId: string,
+    paginationDto: ResponsePaginatedPostsDto,
+  ): Promise<ResponsePaginatedPostsDto> {
     const { page = 1, limit = 10 } = paginationDto;
     const skip = (page - 1) * limit;
 
@@ -111,7 +104,7 @@ export class PostsService {
         vehicle: {
           brand: true,
           model: true,
-          yearOption: true,
+          version: true,
         },
       },
       order: { postDate: 'DESC' } as FindOptionsOrder<Post>,
@@ -139,7 +132,7 @@ export class PostsService {
     };
   }
 
-  async createPost(createPostDto: CreatePostDto): Promise<ResponseIdDto> {
+  async createPost(createPostDto: CreatePostDto) {
     const { userId, vehicleId, status = 'Active' } = createPostDto;
 
     // Verificar que el usuario existe
@@ -188,7 +181,7 @@ export class PostsService {
     id: string,
     userId: string,
     updatePostDto: UpdatePostDto,
-  ): Promise<ResponseIdDto> {
+  ){
     // Verificar que el post existe y pertenece al usuario
     const post = await this.postsRepository.findOne({
       where: { id },
@@ -212,7 +205,7 @@ export class PostsService {
     };
   }
 
-  async adminUpdatePost(id: string, updatePostDto: UpdatePostDto): Promise<ResponseIdDto> {
+  async adminUpdatePost(id: string, updatePostDto: UpdatePostDto) {
     // Verificar que el post existe
     const post = await this.postsRepository.findOne({ where: { id } });
     if (!post) {
@@ -228,7 +221,7 @@ export class PostsService {
     };
   }
 
-  async deletePost(id: string, userId: string): Promise<ResponseIdDto> {
+  async deletePost(id: string, userId: string) {
     // Verificar que el post existe y pertenece al usuario
     const post = await this.postsRepository.findOne({
       where: { id },
@@ -252,7 +245,7 @@ export class PostsService {
     };
   }
 
-  async adminDeletePost(id: string): Promise<ResponseIdDto> {
+  async adminDeletePost(id: string) {
     // Verificar que el post existe
     const post = await this.postsRepository.findOne({ where: { id } });
     if (!post) {
