@@ -37,8 +37,8 @@ export class FilesController {
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({
-            maxSize: 200000,
-            message: 'The file must not exceed 200kb.',
+            maxSize: 1000000,
+            message: 'The file must not exceed 1Mb.',
           }),
           new FileTypeValidator({
             fileType: /(jpg|jpeg|png|webp)/,
