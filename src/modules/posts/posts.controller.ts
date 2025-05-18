@@ -38,7 +38,7 @@ export class PostsController {
     return await this.postsService.getPosts(paginationDto);
   }
 
-  @Get('posts/:userId')
+  @Get(':userId')
   @Public()
   @HttpCode(200)
   async getUserPosts(
