@@ -16,22 +16,17 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/enums/roles.enum';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { UsersService } from './users.service';
-import { ResponsePaginatedUsersDto } from 'src/DTOs/usersDto/responsePaginatedUsers.dto';
 import { UpdateUserInfoDto } from 'src/DTOs/usersDto/updateUserInfo.dto';
-// import {
-//   ResponseIdDto,
-//   ResponsePagUsersDto,
-//   ResponsePrivateUserDto,
-//   ResponsePublicUserDto,
-// } from 'src/dto/usersDto/responses-user.dto';
 import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
-// import { apiGetUsersDocs } from './decorators/apiGetUsersDocs.decorator';
-// import { ApiGetMyUserDocs } from './decorators/apiGetMyUserDocs.decorator';
-// import { ApiGetUserByIdDocs } from './decorators/apiGetUserByIdDocs.decorator';
-// import { ApiUpdateMyUserDocs } from './decorators/apiUpdateMyUserDocs.decorator';
-// import { ApiUpgradeAdminDocs } from './decorators/apiUpgradeAdminDocs.decorator';
-// import { ApiDeleteMyUserDocs } from './decorators/apiDeleteMyUserDocs.decorator';
-// import { ApiDeleteUserDocs } from './decorators/apiDeleteUserDocs.decorator';
+import { ResponsePagUsersDto } from 'src/DTOs/usersDto/responses-user.dto';
+import { QueryPagUsersDto } from 'src/DTOs/usersDto/queryPagUsers.dto';
+import { apiGetUsersDocs } from './decorators/apiGetUsersDocs.decorator';
+import { ApiGetMyUserDocs } from './decorators/apiGetMyUserDocs.decorator';
+import { ApiGetUserByIdDocs } from './decorators/apiGetUserByIdDocs.decorator';
+import { ApiUpdateMyUserDocs } from './decorators/apiUpdateMyUserDocs.decorator';
+import { ApiUpgradeAdminDocs } from './decorators/apiUpgradeAdminDocs.decorator';
+import { ApiDeleteMyUserDocs } from './decorators/apiDeleteMyUserDocs.decorator';
+import { ApiDeleteUserDocs } from './decorators/apiDeleteUserDocs.decorator';
 
 @ApiExtraModels(UpdateUserInfoDto)
 @ApiBearerAuth()
@@ -40,39 +35,36 @@ import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // @apiGetUsersDocs()
+  @apiGetUsersDocs()
   @Get()
   @HttpCode(200)
   @Roles(Role.ADMIN)
-  async getUsers(@Query() paginationDto: ResponsePaginatedUsersDto): Promise<ResponsePaginatedUsersDto> {
+  async getUsers(@Query() paginationDto: QueryPagUsersDto): Promise<ResponsePagUsersDto> {
     return await this.usersService.getUsers(paginationDto);
   }
 
-  // @ApiGetMyUserDocs()
+  @ApiGetMyUserDocs()
   @Get('me')
   @HttpCode(200)
   async getMyUser(@UserAuthenticated('sub') id: string) {
     return await this.usersService.getMyUser(id);
   }
 
-  // @ApiGetUserByIdDocs()
+  @ApiGetUserByIdDocs()
   @Get(':id')
   @HttpCode(200)
   async getUserById(@Param('id', ParseUUIDPipe) id: string) {
     return await this.usersService.getUserById(id);
   }
 
-  // @ApiUpdateMyUserDocs()
+  @ApiUpdateMyUserDocs()
   @Patch('me')
   @HttpCode(200)
-  async updateUser(
-    @UserAuthenticated('sub') id: string,
-    @Body() newUser: UpdateUserInfoDto,
-  ) {
+  async updateUser(@UserAuthenticated('sub') id: string, @Body() newUser: UpdateUserInfoDto) {
     return await this.usersService.updateMyUser(id, newUser);
   }
 
-  // @ApiUpgradeAdminDocs()
+  @ApiUpgradeAdminDocs()
   @Patch(':id/role')
   @HttpCode(200)
   @Roles(Role.ADMIN)
@@ -80,14 +72,14 @@ export class UsersController {
     return await this.usersService.upgradeToAdmin(id);
   }
 
-  // @ApiDeleteMyUserDocs()
+  @ApiDeleteMyUserDocs()
   @Delete('me')
   @HttpCode(200)
   async deleteMyUser(@UserAuthenticated('sub') id: string) {
     return await this.usersService.deleteUser(id);
   }
 
-  // @ApiDeleteUserDocs()
+  @ApiDeleteUserDocs()
   @Delete(':id')
   @HttpCode(200)
   @Roles(Role.ADMIN)

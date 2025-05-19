@@ -1,8 +1,8 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { BaseUserDto } from './baseUsers.dto';
 import { IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import { CreateUserDto } from './createUser.dto';
 
-export class ChangePasswordDto extends PickType(BaseUserDto, ['password', 'confirmPassword']) {
+export class ChangePasswordDto extends PickType(CreateUserDto, ['password', 'confirmPassword']) {
   @IsString()
   @IsNotEmpty()
   @MinLength(8)
