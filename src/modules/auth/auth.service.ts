@@ -21,7 +21,7 @@ export class AuthService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  async register(user: Omit<CreateUserDto, 'confirmPassword'>) {
+  async register({ confirmPassword, ...user }: CreateUserDto) {
     const { email, password } = user;
     const userExist = await this.usersRepository.findOne({
       where: { email },
@@ -125,10 +125,7 @@ export class AuthService {
     };
   }
 
-  async changePassword(
-    id: string,
-    { oldPassword, password }: ChangePasswordDto,
-  ) {
+  async changePassword(id: string, { oldPassword, password }: ChangePasswordDto) {
     const user = await this.usersRepository.findOneBy({ id });
     if (!user) {
       throw new BadRequestException('User not found');

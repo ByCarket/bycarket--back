@@ -23,9 +23,7 @@ export class AuthController {
     summary: 'User Creation (email, password, name, phone, country, city, address)',
   })
   async register(@Body() createUserDto: CreateUserDto) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { confirmPassword, ...userWithoutConfirmPassword } = createUserDto;
-    return await this.authService.register(userWithoutConfirmPassword);
+    return await this.authService.register(createUserDto);
   }
 
   @Post('login')

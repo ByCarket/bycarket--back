@@ -8,54 +8,54 @@ import { UpdateVersionDto } from 'src/DTOs/vehicleDto/seederDto/update-version.d
 
 @Injectable()
 export class VersionsService {
-    constructor(
-        @InjectRepository(Version)
-        private readonly versionRepository: Repository<Version>,
-        @InjectRepository(Model)
-        private readonly modelRepository: Repository<Model>,
-    ) {}
+  constructor(
+    @InjectRepository(Version)
+    private readonly versionRepository: Repository<Version>,
+    @InjectRepository(Model)
+    private readonly modelRepository: Repository<Model>,
+  ) {}
 
-    findAll(): Promise<Version[]> {
-        return this.versionRepository.find({ relations: ['model', 'yearOptions'] });
+  async findAll(): Promise<Version[]> {
+    return await this.versionRepository.find({ relations: ['model'] });
+  }
+
+  async findOne(id: string): Promise<Version> {
+    const version = await this.versionRepository.findOne({
+      where: { id },
+      relations: ['model'],
+    });
+    if (!version) throw new NotFoundException(`Version with ID ${id} not found`);
+    return version;
+  }
+
+  async create(dto: CreateVersionDto): Promise<Version> {
+    const model = await this.modelRepository.findOneBy({ id: dto.modelId });
+    if (!model) throw new NotFoundException(`Model with ID ${dto.modelId} not found`);
+
+    const version = this.versionRepository.create({
+      name: dto.name,
+      model,
+    });
+
+    return this.versionRepository.save(version);
+  }
+
+  async update(id: string, dto: UpdateVersionDto): Promise<Version> {
+    const version = await this.findOne(id);
+
+    if (dto.modelId) {
+      const model = await this.modelRepository.findOneBy({ id: dto.modelId });
+      if (!model) throw new NotFoundException(`Model with ID ${dto.modelId} not found`);
+      version.model = model;
     }
 
-    async findOne(id: string): Promise<Version> {
-        const version = await this.versionRepository.findOne({
-            where: { id },
-            relations: ['model'],
-        });
-        if (!version) throw new NotFoundException(`Version with ID ${id} not found`);
-        return version;
-    }
+    if (dto.name !== undefined) version.name = dto.name;
 
-    async create(dto: CreateVersionDto): Promise<Version> {
-        const model = await this.modelRepository.findOneBy({ id: dto.modelId });
-        if (!model) throw new NotFoundException(`Model with ID ${dto.modelId} not found`);
+    return this.versionRepository.save(version);
+  }
 
-        const version = this.versionRepository.create({
-            name: dto.name,
-            model,
-        });
-
-        return this.versionRepository.save(version);
-    }
-
-    async update(id: string, dto: UpdateVersionDto): Promise<Version> {
-        const version = await this.findOne(id);
-
-        if (dto.modelId) {
-            const model = await this.modelRepository.findOneBy({ id: dto.modelId });
-            if (!model) throw new NotFoundException(`Model with ID ${dto.modelId} not found`);
-            version.model = model;
-        }
-
-        if (dto.name !== undefined) version.name = dto.name;
-
-        return this.versionRepository.save(version);
-    }
-
-    async delete(id: string): Promise<void> {
-        const result = await this.versionRepository.delete(id);
-        if (result.affected === 0) throw new NotFoundException(`Version with ID ${id} not found`);
-    }
+  async delete(id: string): Promise<void> {
+    const result = await this.versionRepository.delete(id);
+    if (result.affected === 0) throw new NotFoundException(`Version with ID ${id} not found`);
+  }
 }
