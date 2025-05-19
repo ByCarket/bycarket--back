@@ -1,10 +1,10 @@
-import { OmitType, PartialType } from '@nestjs/swagger';
+import { PartialType, PickType } from '@nestjs/swagger';
 import { BaseUserDto } from './baseUsers.dto';
-import { IsEmail, IsString, MaxLength } from 'class-validator';
+import { IsEmail, IsNumber, IsString, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional } from 'class-validator';
 
-export class UpdateUserInfoDto extends OmitType(PartialType(BaseUserDto), [
+export class UpdateUserInfoDto extends PickType(PartialType(BaseUserDto), [
   'name',
   'address',
   'phone',
@@ -20,17 +20,16 @@ export class UpdateUserInfoDto extends OmitType(PartialType(BaseUserDto), [
   @IsString()
   @MaxLength(100)
   @IsOptional() // This field is optional
-  newEmail?: string;
+  email?: string;
 
   @ApiProperty({
     description: 'New phone number',
     example: 1234567890,
     type: Number,
   })
-  @IsString()
-  @MaxLength(15)
+  @IsNumber()
   @IsOptional() // This field is optional
-  newPhone?: number;
+  phone?: number;
 
   @ApiProperty({
     description: 'New address',
@@ -40,7 +39,7 @@ export class UpdateUserInfoDto extends OmitType(PartialType(BaseUserDto), [
   @IsString()
   @MaxLength(100)
   @IsOptional() // This field is optional
-  newAddress?: string;
+  address?: string;
 
   @ApiProperty({
     description: 'New country',
@@ -50,7 +49,7 @@ export class UpdateUserInfoDto extends OmitType(PartialType(BaseUserDto), [
   @IsString()
   @MaxLength(50)
   @IsOptional() // This field is optional
-  newCountry?: string;
+  country?: string;
 
   @ApiProperty({
     description: 'New city',
@@ -60,5 +59,5 @@ export class UpdateUserInfoDto extends OmitType(PartialType(BaseUserDto), [
   @IsString()
   @MaxLength(50)
   @IsOptional() // This field is optional
-  newCity?: string;
+  city?: string;
 }
