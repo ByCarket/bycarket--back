@@ -2,7 +2,7 @@ import { IsString, IsNumber, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { PickType } from '@nestjs/swagger';
 import { BasePostDto } from './basePosts.dto';
-import { PostStatus } from 'src/entities/post.entity';
+import { PostStatus } from 'src/enums/postStatus.enum';
 import { IsEnum } from 'class-validator';
 
 

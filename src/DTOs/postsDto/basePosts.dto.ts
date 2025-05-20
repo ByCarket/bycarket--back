@@ -1,6 +1,6 @@
 import { IsUUID, IsOptional, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { PostStatus } from 'src/entities/post.entity';
+import { PostStatus } from 'src/enums/postStatus.enum';
 
 /**
  * Base DTO for post-related operations

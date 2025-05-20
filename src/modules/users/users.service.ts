@@ -18,6 +18,7 @@ import {
   ResponsePrivateUserDto,
   ResponsePublicUserDto,
 } from 'src/DTOs/usersDto/responses-user.dto';
+import { PostStatus } from 'src/enums/postStatus.enum';
 import { QueryPagUsersDto } from 'src/DTOs/usersDto/queryPagUsers.dto';
 
 @Injectable()
@@ -141,7 +142,7 @@ export class UsersService {
 
     if (user.posts?.length) {
       user.posts.forEach(async post => {
-        await this.postsRepository.update(post.id, { status: 'Inactive' });
+        await this.postsRepository.update(post.id, { status: PostStatus.INACTIVE });
       });
     }
 

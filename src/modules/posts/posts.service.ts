@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsOrder } from 'typeorm';
-import { Post, PostStatus } from 'src/entities/post.entity';
+import { Post } from 'src/entities/post.entity';
 import { Vehicle } from 'src/entities/vehicle.entity';
 import { User } from 'src/entities/user.entity';
+import { PostStatus } from 'src/enums/postStatus.enum';
 import { ResponsePaginatedPostsDto } from 'src/DTOs/postsDto/responsePaginatedPosts.dto';
 import { PostDetail } from 'src/DTOs/postsDto/postDetail.dto';
 import { CreatePostDto } from 'src/DTOs/postsDto/createPost.dto';
@@ -28,7 +29,7 @@ export class PostsService {
     const [posts, total] = await this.postsRepository.findAndCount({
       skip,
       take: limit,
-      where: { status: 'Active' },
+      where: { status: PostStatus.ACTIVE },
       relations: {
         user: true,
         vehicle: {
@@ -133,7 +134,7 @@ export class PostsService {
   }
 
   async createPost(createPostDto: CreatePostDto) {
-    const { userId, vehicleId, status = 'Active' } = createPostDto;
+    const { userId, vehicleId } = createPostDto;
 
     // Verificar que el usuario existe
     const user = await this.usersRepository.findOne({ where: { id: userId } });
@@ -153,7 +154,8 @@ export class PostsService {
 
     // Verificar si ya existe un post activo para este vehículo
     const existingPost = await this.postsRepository.findOne({
-      where: { vehicle: { id: vehicleId }, status: 'Active' },
+      where: { vehicle: { id: vehicleId }, status: PostStatus.ACTIVE },
+      relations: { vehicle: true },
     });
 
     if (existingPost) {
@@ -237,7 +239,7 @@ export class PostsService {
     }
 
     // Marcar el post como inactivo en lugar de eliminarlo físicamente
-    await this.postsRepository.update(id, { status: 'Inactive' });
+    await this.postsRepository.update(id, { status: PostStatus.INACTIVE });
 
     return {
       data: id,
@@ -253,7 +255,7 @@ export class PostsService {
     }
 
     // Marcar el post como rechazado
-    await this.postsRepository.update(id, { status: 'Rejected' });
+    await this.postsRepository.update(id, { status: PostStatus.REJECTED });
 
     return {
       data: id,
