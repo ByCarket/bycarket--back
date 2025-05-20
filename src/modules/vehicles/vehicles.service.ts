@@ -29,12 +29,15 @@ export class VehiclesService {
   ) {}
 
   // ✅ GET all vehicles paginated
-  async getVehicles(page: number, limit: number): Promise<Vehicle[]> {
+  async getVehicles(page: number, limit: number, userId: string): Promise<Vehicle[]> {
     const skip = (page - 1) * limit;
     return this.vehicleRepository.find({
       skip,
       take: limit,
       relations: ['brand', 'model', 'version'],
+      where: {
+        user: { id: userId },
+      },
     });
   }
 
@@ -86,9 +89,8 @@ export class VehiclesService {
       user,
     });
 
-  return this.vehicleRepository.save(vehicle);
-}
-
+    return this.vehicleRepository.save(vehicle);
+  }
 
   // ✅ UPDATE vehicle
   async updateVehicle(id: string, userId: string, updateVehicleInfo: UpdateVehicleDto) {
