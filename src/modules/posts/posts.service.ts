@@ -249,7 +249,7 @@ export class PostsService {
     }
 
     // Marcar el post como rechazado
-    await this.postsRepository.update(id, { status: PostStatus.REJECTED });
+    await this.postsRepository.update(id, { status: PostStatus.INACTIVE });
 
     return {
       data: id,
