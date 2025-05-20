@@ -53,7 +53,7 @@ export class PostsController {
   @HttpCode(200)
   async getUserPosts(
     @Param('userId', ParseUUIDPipe) userId: string,
-    @Query() paginationDto: ResponsePaginatedPostsDto,
+    @Query() paginationDto: QueryPostsDto,
   ): Promise<ResponsePaginatedPostsDto> {
     return await this.postsService.getUserPosts(userId, paginationDto);
   }
