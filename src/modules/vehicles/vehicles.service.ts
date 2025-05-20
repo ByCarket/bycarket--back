@@ -86,9 +86,8 @@ export class VehiclesService {
       user,
     });
 
-  return this.vehicleRepository.save(vehicle);
-}
-
+    return this.vehicleRepository.save(vehicle);
+  }
 
   // ✅ UPDATE vehicle
   async updateVehicle(id: string, userId: string, updateVehicleInfo: UpdateVehicleDto) {
@@ -127,28 +126,25 @@ export class VehiclesService {
   }
 
   // ✅ DELETE vehicle
-  async deleteVehicle(id: string, userId?: string): Promise<void> {
-    if (userId) {
-      // Verificar si el vehículo pertenece al usuario
-      const vehicle = await this.vehicleRepository.findOne({
-        where: { id },
-        relations: ['user'],
-      });
+  async deleteVehicle(id: string, userId: string) {
+    const vehicle = await this.vehicleRepository.findOne({
+      where: { id },
+    });
 
-      if (!vehicle) {
-        throw new NotFoundException(`Vehicle with ID ${id} not found`);
-      }
-
-      if (vehicle.user && vehicle.user.id !== userId) {
-        throw new ForbiddenException(
-          `Vehicle with ID ${id} does not belong to user with ID ${userId}`,
-        );
-      }
-      const result = await this.vehicleRepository.delete(id);
-
-      if (result.affected === 0) {
-        throw new NotFoundException(`Vehicle with ID ${id} not found`);
-      }
+    if (!vehicle) {
+      throw new NotFoundException(`Vehicle with ID ${id} not found`);
     }
+
+    if (vehicle.user && vehicle.user.id !== userId) {
+      throw new ForbiddenException(
+        `Vehicle with ID ${id} does not belong to user with ID ${userId}`,
+      );
+    }
+    await this.vehicleRepository.delete(id);
+
+    return {
+      data: id,
+      message: `Vehicle deleted successfully`,
+    };
   }
 }
