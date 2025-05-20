@@ -68,9 +68,7 @@ export class PostsController {
   @Post()
   @HttpCode(201)
   async createPost(@UserAuthenticated('sub') userId: string, @Body() createPostDto: CreatePostDto) {
-    // Asegurarnos de que el usuario que crea el post es el usuario autenticado
-    createPostDto.userId = userId;
-    return await this.postsService.createPost(createPostDto);
+    return await this.postsService.createPost(createPostDto, userId);
   }
 
   @Patch(':id')
