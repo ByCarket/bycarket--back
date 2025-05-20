@@ -6,10 +6,6 @@ import { PostStatus } from 'src/enums/postStatus.enum';
  * Base DTO for post-related operations
  */
 export class BasePostDto {
-  @ApiProperty({
-    description: 'ID del usuario que crea el post',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
   @IsUUID()
   userId: string;
 
