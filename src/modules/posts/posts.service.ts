@@ -84,9 +84,8 @@ export class PostsService {
 
   async getUserPosts(
     userId: string,
-    paginationDto: ResponsePaginatedPostsDto,
+    { page, limit }: QueryPostsDto,
   ): Promise<ResponsePaginatedPostsDto> {
-    const { page = 1, limit = 10 } = paginationDto;
     const skip = (page - 1) * limit;
 
     // Verificar que el usuario existe
