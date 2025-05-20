@@ -9,6 +9,7 @@ import { ResponsePaginatedPostsDto } from 'src/DTOs/postsDto/responsePaginatedPo
 import { PostDetail } from 'src/DTOs/postsDto/postDetail.dto';
 import { CreatePostDto } from 'src/DTOs/postsDto/createPost.dto';
 import { UpdatePostDto } from 'src/DTOs/postsDto/updatePost.dto';
+import { QueryPostsDto } from 'src/DTOs/postsDto/queryPosts.dto';
 
 @Injectable()
 export class PostsService {
@@ -21,8 +22,7 @@ export class PostsService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  async getPosts(paginationDto: ResponsePaginatedPostsDto): Promise<ResponsePaginatedPostsDto> {
-    const { page = 1, limit = 10 } = paginationDto;
+  async getPosts({ page, limit }: QueryPostsDto): Promise<ResponsePaginatedPostsDto> {
     const skip = (page - 1) * limit;
 
     // Obtener posts con paginación
@@ -66,7 +66,7 @@ export class PostsService {
   async getPostById(id: string): Promise<PostDetail> {
     const post = await this.postsRepository.findOne({
       where: { id },
-      relations: { user: true , vehicle: true },
+      relations: { user: true, vehicle: true },
     });
 
     if (!post) {
@@ -179,11 +179,7 @@ export class PostsService {
     };
   }
 
-  async updatePost(
-    id: string,
-    userId: string,
-    updatePostDto: UpdatePostDto,
-  ){
+  async updatePost(id: string, userId: string, updatePostDto: UpdatePostDto) {
     // Verificar que el post existe y pertenece al usuario
     const post = await this.postsRepository.findOne({
       where: { id },
