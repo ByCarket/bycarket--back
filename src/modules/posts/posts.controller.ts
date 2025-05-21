@@ -22,6 +22,7 @@ import { PostsService } from './posts.service';
 import { CreatePostDto } from 'src/DTOs/postsDto/createPost.dto';
 import { UpdatePostDto } from 'src/DTOs/postsDto/updatePost.dto';
 import { ResponsePaginatedPostsDto } from 'src/DTOs/postsDto/responsePaginatedPosts.dto';
+import { QueryPostsDto } from 'src/DTOs/postsDto/queryPosts.dto';
 
 @ApiTags('posts')
 @ApiExtraModels(CreatePostDto, UpdatePostDto)
@@ -34,9 +35,7 @@ export class PostsController {
   @Get()
   @Public()
   @HttpCode(200)
-  async getPosts(
-    @Query() paginationDto: ResponsePaginatedPostsDto,
-  ): Promise<ResponsePaginatedPostsDto> {
+  async getPosts(@Query() paginationDto: QueryPostsDto): Promise<ResponsePaginatedPostsDto> {
     return await this.postsService.getPosts(paginationDto);
   }
 
