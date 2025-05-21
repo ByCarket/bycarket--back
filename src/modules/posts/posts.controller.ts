@@ -34,18 +34,10 @@ export class PostsController {
   @Get()
   @Public()
   @HttpCode(200)
-  async getPosts(@Query() paginationDto: ResponsePaginatedPostsDto): Promise<ResponsePaginatedPostsDto> {
-    return await this.postsService.getPosts(paginationDto);
-  }
-
-  @Get(':userId')
-  @Public()
-  @HttpCode(200)
-  async getUserPosts(
-    @Param('userId', ParseUUIDPipe) userId: string,
+  async getPosts(
     @Query() paginationDto: ResponsePaginatedPostsDto,
   ): Promise<ResponsePaginatedPostsDto> {
-    return await this.postsService.getUserPosts(userId, paginationDto);
+    return await this.postsService.getPosts(paginationDto);
   }
 
   @Get('me')
@@ -57,6 +49,17 @@ export class PostsController {
     return await this.postsService.getUserPosts(userId, paginationDto);
   }
 
+  @Get('user/:userId')
+  @Public()
+  @HttpCode(200)
+  async getUserPosts(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Query() paginationDto: ResponsePaginatedPostsDto,
+  ): Promise<ResponsePaginatedPostsDto> {
+    return await this.postsService.getUserPosts(userId, paginationDto);
+  }
+
+  @Public()
   @Get(':id')
   @HttpCode(200)
   async getPostById(@Param('id', ParseUUIDPipe) id: string) {
@@ -65,10 +68,7 @@ export class PostsController {
 
   @Post()
   @HttpCode(201)
-  async createPost(
-    @UserAuthenticated('sub') userId: string,
-    @Body() createPostDto: CreatePostDto,
-  ) {
+  async createPost(@UserAuthenticated('sub') userId: string, @Body() createPostDto: CreatePostDto) {
     // Asegurarnos de que el usuario que crea el post es el usuario autenticado
     createPostDto.userId = userId;
     return await this.postsService.createPost(createPostDto);
