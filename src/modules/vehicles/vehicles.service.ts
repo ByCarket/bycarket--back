@@ -42,25 +42,36 @@ export class VehiclesService {
   }
 
   // ✅ GET vehicle by id
-  async getVehicleById(id: string, userId?: string): Promise<void | Vehicle> {
-    if (userId) {
-      // Verificar si el vehículo pertenece al usuario
-      const vehicle = await this.vehicleRepository.findOne({
-        where: { id },
-        relations: ['user'],
-      });
+  async getVehicleById(id: string, userId: string) {
+    const vehicle = await this.vehicleRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
 
-      if (!vehicle) {
-        throw new NotFoundException(`Vehicle with ID ${id} not found`);
-      }
-
-      if (vehicle.user && vehicle.user.id !== userId) {
-        throw new ForbiddenException(
-          `Vehicle with ID ${id} does not belong to user with ID ${userId}`,
-        );
-      }
-      return vehicle;
+    if (!vehicle) {
+      throw new NotFoundException(`Vehicle with ID ${id} not found`);
     }
+
+    if (vehicle.user && vehicle.user.id !== userId) {
+      throw new ForbiddenException(
+        `Vehicle with ID ${id} does not belong to user with ID ${userId}`,
+      );
+    }
+    vehicle.user = {
+      id: vehicle.user.id,
+      name: vehicle.user.name,
+      email: vehicle.user.email,
+      phone: vehicle.user.phone,
+      address: vehicle.user.address,
+      city: vehicle.user.city,
+      country: vehicle.user.country,
+      image: vehicle.user.image,
+    } as User;
+
+    return {
+      data: vehicle,
+      message: 'Vehicle found',
+    };
   }
 
   // ✅ CREATE vehicle
@@ -96,10 +107,15 @@ export class VehiclesService {
   async updateVehicle(id: string, userId: string, updateVehicleInfo: UpdateVehicleDto) {
     const vehicle = await this.vehicleRepository.findOne({
       where: { id },
-      relations: ['vehicle', 'brand', 'model', 'version'],
+      relations: ['brand', 'model', 'version'],
     });
 
     if (!vehicle) throw new NotFoundException(`Vehicle with ID ${id} not found`);
+    if (vehicle.user && vehicle.user.id !== userId) {
+      throw new ForbiddenException(
+        `Vehicle with ID ${id} does not belong to user with ID ${userId}`,
+      );
+    }
 
     const { brandId, modelId, versionId, year, price, mileage, description } = updateVehicleInfo;
 
@@ -129,28 +145,25 @@ export class VehiclesService {
   }
 
   // ✅ DELETE vehicle
-  async deleteVehicle(id: string, userId?: string): Promise<void> {
-    if (userId) {
-      // Verificar si el vehículo pertenece al usuario
-      const vehicle = await this.vehicleRepository.findOne({
-        where: { id },
-        relations: ['user'],
-      });
+  async deleteVehicle(id: string, userId: string) {
+    const vehicle = await this.vehicleRepository.findOne({
+      where: { id },
+    });
 
-      if (!vehicle) {
-        throw new NotFoundException(`Vehicle with ID ${id} not found`);
-      }
-
-      if (vehicle.user && vehicle.user.id !== userId) {
-        throw new ForbiddenException(
-          `Vehicle with ID ${id} does not belong to user with ID ${userId}`,
-        );
-      }
-      const result = await this.vehicleRepository.delete(id);
-
-      if (result.affected === 0) {
-        throw new NotFoundException(`Vehicle with ID ${id} not found`);
-      }
+    if (!vehicle) {
+      throw new NotFoundException(`Vehicle with ID ${id} not found`);
     }
+
+    if (vehicle.user && vehicle.user.id !== userId) {
+      throw new ForbiddenException(
+        `Vehicle with ID ${id} does not belong to user with ID ${userId}`,
+      );
+    }
+    await this.vehicleRepository.delete(id);
+
+    return {
+      data: id,
+      message: `Vehicle deleted successfully`,
+    };
   }
 }
