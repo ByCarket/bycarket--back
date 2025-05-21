@@ -12,7 +12,7 @@ export class Vehicle {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User, { onDelete: 'SET NULL', nullable: true })
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   user: User;
 
   @ManyToOne(() => Brand, { onDelete: 'SET NULL', nullable: true })
