@@ -1,7 +1,7 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { OpenAiService } from './openai.service';
-import { GenerateTextDto } from '../../DTOs/chatDto/generateText.dto';
+import { GenerateTextDto } from '../../DTOs/openaiDto/generateText.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { AuthGuard } from 'src/guards/auth.guard';
