@@ -54,6 +54,17 @@ export class VehiclesService {
         `Vehicle with ID ${id} does not belong to user with ID ${userId}`,
       );
     }
+    vehicle.user = {
+      id: vehicle.user.id,
+      name: vehicle.user.name,
+      email: vehicle.user.email,
+      phone: vehicle.user.phone,
+      address: vehicle.user.address,
+      city: vehicle.user.city,
+      country: vehicle.user.country,
+      image: vehicle.user.image,
+    } as User;
+
     return {
       data: vehicle,
       message: 'Vehicle found',
