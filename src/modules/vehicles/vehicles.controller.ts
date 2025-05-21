@@ -87,16 +87,7 @@ export class VehiclesController {
   async deleteVehicle(
     @UserAuthenticated('sub') userId: string,
     @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<void> {
+  ) {
     return this.vehiclesService.deleteVehicle(id, userId);
-  }
-
-  @Delete('admin/:id')
-  @ApiOperation({ summary: 'Eliminar un vehículo por ID (solo admin)' })
-  @ApiParam({ name: 'id', description: 'UUID del vehículo a eliminar' })
-  @ApiResponse({ status: 200, description: 'Vehículo eliminado exitosamente' })
-  @Roles(Role.ADMIN)
-  async adminDeleteVehicle(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
-    return this.vehiclesService.deleteVehicle(id);
   }
 }

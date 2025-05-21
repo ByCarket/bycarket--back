@@ -17,10 +17,10 @@ export class Post {
   @PrimaryGeneratedColumn('uuid')
   id: string = uuid();
 
-  @ManyToOne(() => User, (user) => user.posts)
+  @ManyToOne(() => User, user => user.posts, { onDelete: 'CASCADE' })
   user: User;
 
-  @ManyToOne(() => Vehicle)
+  @ManyToOne(() => Vehicle, { onDelete: 'CASCADE' })
   vehicle: Vehicle;
 
   @CreateDateColumn()
@@ -33,6 +33,6 @@ export class Post {
   })
   status: PostStatus;
 
-  @OneToMany(() => Question, (question) => question.post)
+  @OneToMany(() => Question, question => question.post)
   questions: Question[];
 }
