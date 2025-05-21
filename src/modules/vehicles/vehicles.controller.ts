@@ -29,7 +29,7 @@ import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
 @UseGuards(AuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
 export class VehiclesController {
-  constructor(private readonly vehiclesService: VehiclesService) { }
+  constructor(private readonly vehiclesService: VehiclesService) {}
 
   @Get()
   @HttpCode(200)
@@ -46,7 +46,10 @@ export class VehiclesController {
   @ApiOperation({ summary: 'Obtener vehículo por ID' })
   @ApiParam({ name: 'id', description: 'UUID del vehículo' })
   @ApiResponse({ status: 200, description: 'Vehículo encontrado' })
-  async getVehicleById(@UserAuthenticated('sub') userId: string,@Param('id', ParseUUIDPipe) id: string): Promise<Vehicle | void> {
+  async getVehicleById(
+    @UserAuthenticated('sub') userId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     return this.vehiclesService.getVehicleById(id, userId);
   }
 
@@ -57,8 +60,10 @@ export class VehiclesController {
   @ApiOperation({ summary: 'Crear un nuevo vehículo asignado al usuario autenticado' })
   @ApiResponse({ status: 201, description: 'Vehículo creado correctamente' })
   @ApiResponse({ status: 404, description: 'Marca, modelo o versión no encontrada' })
-  async createVehicle(@UserAuthenticated('sub') userId: string,
-    @Body() createVehicleDto: CreateVehicleDto): Promise<Vehicle> {
+  async createVehicle(
+    @UserAuthenticated('sub') userId: string,
+    @Body() createVehicleDto: CreateVehicleDto,
+  ): Promise<Vehicle> {
     return this.vehiclesService.createVehicle(createVehicleDto, userId);
   }
 
@@ -79,7 +84,10 @@ export class VehiclesController {
   @ApiOperation({ summary: 'Eliminar un vehículo por ID' })
   @ApiParam({ name: 'id', description: 'UUID del vehículo a eliminar' })
   @ApiResponse({ status: 200, description: 'Vehículo eliminado exitosamente' })
-  async deleteVehicle(@UserAuthenticated('sub') userId: string,@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+  async deleteVehicle(
+    @UserAuthenticated('sub') userId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<void> {
     return this.vehiclesService.deleteVehicle(id, userId);
   }
 
@@ -88,9 +96,7 @@ export class VehiclesController {
   @ApiParam({ name: 'id', description: 'UUID del vehículo a eliminar' })
   @ApiResponse({ status: 200, description: 'Vehículo eliminado exitosamente' })
   @Roles(Role.ADMIN)
-  async adminDeleteVehicle(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<void> {
+  async adminDeleteVehicle(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.vehiclesService.deleteVehicle(id);
   }
 }
