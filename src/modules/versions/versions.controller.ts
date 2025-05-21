@@ -18,6 +18,7 @@ import { AuthGuard } from 'src/guards/auth.guard';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/enums/roles.enum';
+import { Public } from 'src/decorators/publicRoutes.decorator';
 
 @ApiTags('Versions')
 @ApiBearerAuth()
@@ -27,11 +28,13 @@ import { Role } from 'src/enums/roles.enum';
 export class VersionsController {
   constructor(private readonly service: VersionsService) {}
 
+  @Public()
   @Get()
   findAll(): Promise<Version[]> {
     return this.service.findAll();
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Version> {
     return this.service.findOne(id);
