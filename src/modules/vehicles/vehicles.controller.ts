@@ -28,15 +28,16 @@ import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
 export class VehiclesController {
   constructor(private readonly vehiclesService: VehiclesService) {}
 
-  @Get()
+  @Get('me')
   @HttpCode(200)
   @ApiOperation({ summary: 'Obtener todos los vehículos (paginado)' })
   @ApiResponse({ status: 200, description: 'Listado de vehículos' })
   async getVehicles(
+    @UserAuthenticated('sub') id: string,
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '5',
   ): Promise<Vehicle[]> {
-    return this.vehiclesService.getVehicles(parseInt(page, 10), parseInt(limit, 10));
+    return this.vehiclesService.getVehicles(parseInt(page, 10), parseInt(limit, 10), id);
   }
 
   @Get(':id')
