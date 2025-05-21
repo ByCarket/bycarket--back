@@ -24,33 +24,33 @@ import { Public } from 'src/decorators/publicRoutes.decorator';
 @Controller('models')
 @ApiBearerAuth()
 @UseGuards(AuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
 export class ModelsController {
   constructor(private readonly service: ModelsService) {}
 
   @Get()
-  @Public()
   findAll(): Promise<Model[]> {
     return this.service.findAll();
   }
 
   @Get(':id')
-  @Public()
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Model> {
     return this.service.findOne(id);
   }
 
   @Post()
+  @Roles(Role.ADMIN)
   create(@Body() dto: CreateModelDto): Promise<Model> {
     return this.service.create(dto);
   }
 
   @Put(':id')
+  @Roles(Role.ADMIN)
   update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateModelDto): Promise<Model> {
     return this.service.update(id, dto);
   }
 
   @Delete(':id')
+  @Roles(Role.ADMIN)
   delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.service.delete(id);
   }
