@@ -10,8 +10,7 @@ import { v4 as uuid } from 'uuid';
 import { User } from './user.entity';
 import { Vehicle } from './vehicle.entity';
 import { Question } from './question.entity';
-
-export type PostStatus = 'Active' | 'Inactive' | 'Rejected' | 'Pending' | 'Sold';
+import { PostStatus } from 'src/enums/postStatus.enum';
 
 @Entity('posts')
 export class Post {
