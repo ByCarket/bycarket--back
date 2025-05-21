@@ -18,6 +18,7 @@ import { AuthGuard } from 'src/guards/auth.guard';
 import { Role } from 'src/enums/roles.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
+import { Public } from 'src/decorators/publicRoutes.decorator';
 
 @ApiTags('Models')
 @Controller('models')
@@ -28,11 +29,13 @@ export class ModelsController {
   constructor(private readonly service: ModelsService) {}
 
   @Get()
+  @Public()
   findAll(): Promise<Model[]> {
     return this.service.findAll();
   }
 
   @Get(':id')
+  @Public()
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Model> {
     return this.service.findOne(id);
   }
