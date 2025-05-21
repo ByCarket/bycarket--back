@@ -10,18 +10,17 @@ import { v4 as uuid } from 'uuid';
 import { User } from './user.entity';
 import { Vehicle } from './vehicle.entity';
 import { Question } from './question.entity';
-
-export type PostStatus = 'Active' | 'Inactive' | 'Rejected' | 'Pending' | 'Sold';
+import { PostStatus } from 'src/enums/postStatus.enum';
 
 @Entity('posts')
 export class Post {
   @PrimaryGeneratedColumn('uuid')
   id: string = uuid();
 
-  @ManyToOne(() => User, (user) => user.posts)
+  @ManyToOne(() => User, user => user.posts, { onDelete: 'CASCADE' })
   user: User;
 
-  @ManyToOne(() => Vehicle)
+  @ManyToOne(() => Vehicle, { onDelete: 'CASCADE' })
   vehicle: Vehicle;
 
   @CreateDateColumn()
@@ -34,6 +33,6 @@ export class Post {
   })
   status: PostStatus;
 
-  @OneToMany(() => Question, (question) => question.post)
+  @OneToMany(() => Question, question => question.post)
   questions: Question[];
 }

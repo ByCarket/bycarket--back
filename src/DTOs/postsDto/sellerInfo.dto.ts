@@ -1,8 +1,8 @@
 import { PickType } from '@nestjs/swagger';
-import { BaseUserDto } from '../usersDto/baseUsers.dto';
 import { ApiProperty } from '@nestjs/swagger';
+import { CreateUserDto } from '../usersDto/createUser.dto';
 
-export class SellerInfoDto extends PickType(BaseUserDto, ['name', 'phone']) {
+export class SellerInfoDto extends PickType(CreateUserDto, ['name', 'phone']) {
   @ApiProperty({
     description: 'Nombre del vendedor',
     example: 'Ana Gómez',

@@ -12,14 +12,12 @@ export const apiGetUsersDocs = () => {
       required: false,
       type: Number,
       description: 'Page number for pagination',
-      default: 1,
     }),
     ApiQuery({
       name: 'limit',
       required: false,
       type: Number,
       description: 'Number of users per page',
-      default: 10,
     }),
     ApiResponse({
       status: 200,

@@ -4,7 +4,6 @@ import { UpdateUserInfoDto } from 'src/DTOs/usersDto/updateUserInfo.dto';
 import { User } from 'src/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsOrder } from 'typeorm';
-import { ResponsePaginatedUsersDto } from 'src/DTOs/usersDto/responsePaginatedUsers.dto';
 // import {
 //   ResponseIdDto,
 //   ResponsePagUsersDto,
@@ -13,6 +12,14 @@ import { ResponsePaginatedUsersDto } from 'src/DTOs/usersDto/responsePaginatedUs
 // } from 'src/dto/usersDto/responses-user.dto';
 import { Role } from 'src/enums/roles.enum';
 import { Post } from 'src/entities/post.entity';
+import {
+  ResponseIdDto,
+  ResponsePagUsersDto,
+  ResponsePrivateUserDto,
+  ResponsePublicUserDto,
+} from 'src/DTOs/usersDto/responses-user.dto';
+import { PostStatus } from 'src/enums/postStatus.enum';
+import { QueryPagUsersDto } from 'src/DTOs/usersDto/queryPagUsers.dto';
 
 @Injectable()
 export class UsersService {
@@ -23,8 +30,7 @@ export class UsersService {
     private readonly postsRepository: Repository<Post>,
   ) {}
 
-  async getUsers(paginationDto: ResponsePaginatedUsersDto): Promise<ResponsePaginatedUsersDto> {
-    const { page = 1, limit = 10 } = paginationDto;
+  async getUsers({ page, limit }: QueryPagUsersDto): Promise<ResponsePagUsersDto> {
     const skip = (page - 1) * limit;
 
     // Obtener usuarios con paginación
@@ -64,7 +70,7 @@ export class UsersService {
     };
   }
 
-  async getMyUser(id: string) {
+  async getMyUser(id: string): Promise<ResponsePrivateUserDto> {
     const user = await this.usersRepository.findOne({
       where: { id },
       relations: {
@@ -84,7 +90,7 @@ export class UsersService {
     };
   }
 
-  async getUserById(id: string) {
+  async getUserById(id: string): Promise<ResponsePublicUserDto> {
     const data = await this.usersRepository.findOne({
       where: { id },
       select: ['id', 'name', 'email', 'address', 'city', 'country', 'phone'],
@@ -104,12 +110,7 @@ export class UsersService {
     return await this.usersRepository.findOne({ where: { email } });
   }
 
-  async createUser(user: CreateUserDto): Promise<CreateUserDto> {
-    const newUser = this.usersRepository.create(user);
-    return await this.usersRepository.save(newUser);
-  }
-
-  async updateMyUser(id: string, user: UpdateUserInfoDto) {
+  async updateMyUser(id: string, user: UpdateUserInfoDto): Promise<ResponseIdDto> {
     const result = await this.usersRepository.update(id, user);
     if (result.affected === 0) {
       throw new NotFoundException(`User with ID ${id} not found.`);
@@ -121,7 +122,7 @@ export class UsersService {
     };
   }
 
-  async upgradeToAdmin(id: string) {
+  async upgradeToAdmin(id: string): Promise<ResponseIdDto> {
     const result = await this.usersRepository.update(id, { role: Role.ADMIN });
     if (result.affected === 0) {
       throw new NotFoundException(`User with ID ${id} not found.`);
@@ -133,7 +134,7 @@ export class UsersService {
     };
   }
 
-  async deleteUser(id: string) {
+  async deleteUser(id: string): Promise<ResponseIdDto> {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) throw new NotFoundException(`User with ID ${id} not found.`);
     if (user.role === Role.ADMIN) throw new ForbiddenException('Cannot delete an admin user.');
@@ -141,7 +142,7 @@ export class UsersService {
 
     if (user.posts?.length) {
       user.posts.forEach(async post => {
-        await this.postsRepository.update(post.id, { status: 'Inactive' });
+        await this.postsRepository.update(post.id, { status: PostStatus.INACTIVE });
       });
     }
 

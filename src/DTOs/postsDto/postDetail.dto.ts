@@ -1,7 +1,7 @@
 import { SellerInfoDto } from "./sellerInfo.dto";
 import { ApiProperty } from "@nestjs/swagger";
 import { VehicleDetailDto } from "../vehicleDto/vehicleDetail.dto";
-import { PostStatus } from "src/entities/post.entity";
+import { PostStatus } from "src/enums/postStatus.enum";
 import { Type } from "class-transformer";
 
 export class PostDetail {

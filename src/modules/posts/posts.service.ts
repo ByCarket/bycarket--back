@@ -1,13 +1,14 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsOrder } from 'typeorm';
-import { Post, PostStatus } from 'src/entities/post.entity';
+import { Post } from 'src/entities/post.entity';
 import { Vehicle } from 'src/entities/vehicle.entity';
 import { User } from 'src/entities/user.entity';
+import { PostStatus } from 'src/enums/postStatus.enum';
 import { ResponsePaginatedPostsDto } from 'src/DTOs/postsDto/responsePaginatedPosts.dto';
 import { PostDetail } from 'src/DTOs/postsDto/postDetail.dto';
 import { CreatePostDto } from 'src/DTOs/postsDto/createPost.dto';
-import { UpdatePostDto } from 'src/DTOs/postsDto/updatePost.dto';
+import { QueryPostsDto } from 'src/DTOs/postsDto/queryPosts.dto';
 
 @Injectable()
 export class PostsService {
@@ -20,15 +21,14 @@ export class PostsService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  async getPosts(paginationDto: ResponsePaginatedPostsDto): Promise<ResponsePaginatedPostsDto> {
-    const { page = 1, limit = 10 } = paginationDto;
+  async getPosts({ page, limit }: QueryPostsDto): Promise<ResponsePaginatedPostsDto> {
     const skip = (page - 1) * limit;
 
     // Obtener posts con paginación
     const [posts, total] = await this.postsRepository.findAndCount({
       skip,
       take: limit,
-      where: { status: 'Active' },
+      where: { status: PostStatus.ACTIVE },
       relations: {
         user: true,
         vehicle: {
@@ -65,7 +65,7 @@ export class PostsService {
   async getPostById(id: string): Promise<PostDetail> {
     const post = await this.postsRepository.findOne({
       where: { id },
-      relations: { user: true , vehicle: true },
+      relations: { user: true, vehicle: true },
     });
 
     if (!post) {
@@ -83,9 +83,8 @@ export class PostsService {
 
   async getUserPosts(
     userId: string,
-    paginationDto: ResponsePaginatedPostsDto,
+    { page, limit }: QueryPostsDto,
   ): Promise<ResponsePaginatedPostsDto> {
-    const { page = 1, limit = 10 } = paginationDto;
     const skip = (page - 1) * limit;
 
     // Verificar que el usuario existe
@@ -132,9 +131,7 @@ export class PostsService {
     };
   }
 
-  async createPost(createPostDto: CreatePostDto) {
-    const { userId, vehicleId, status = 'Active' } = createPostDto;
-
+  async createPost({ vehicleId, description }: CreatePostDto, userId: string) {
     // Verificar que el usuario existe
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (!user) {
@@ -150,10 +147,13 @@ export class PostsService {
         `Vehicle with ID ${vehicleId} not found or does not belong to user with ID ${userId}.`,
       );
     }
+    vehicle.description = description;
+    await this.vehiclesRepository.save(vehicle);
 
     // Verificar si ya existe un post activo para este vehículo
     const existingPost = await this.postsRepository.findOne({
-      where: { vehicle: { id: vehicleId }, status: 'Active' },
+      where: { vehicle: { id: vehicleId }, status: PostStatus.ACTIVE },
+      relations: { vehicle: true },
     });
 
     if (existingPost) {
@@ -166,7 +166,7 @@ export class PostsService {
     const newPost = this.postsRepository.create({
       user,
       vehicle,
-      status: status as PostStatus,
+      postDate: new Date(),
     });
 
     const savedPost = await this.postsRepository.save(newPost);
@@ -177,11 +177,7 @@ export class PostsService {
     };
   }
 
-  async updatePost(
-    id: string,
-    userId: string,
-    updatePostDto: UpdatePostDto,
-  ){
+  async updatePost(id: string, userId: string) {
     // Verificar que el post existe y pertenece al usuario
     const post = await this.postsRepository.findOne({
       where: { id },
@@ -197,7 +193,7 @@ export class PostsService {
     }
 
     // Actualizar el post
-    await this.postsRepository.update(id, updatePostDto);
+    await this.postsRepository.update(id, { status: PostStatus.SOLD });
 
     return {
       data: id,
@@ -205,7 +201,7 @@ export class PostsService {
     };
   }
 
-  async adminUpdatePost(id: string, updatePostDto: UpdatePostDto) {
+  async adminUpdatePost(id: string, status: PostStatus) {
     // Verificar que el post existe
     const post = await this.postsRepository.findOne({ where: { id } });
     if (!post) {
@@ -213,7 +209,7 @@ export class PostsService {
     }
 
     // Actualizar el post
-    await this.postsRepository.update(id, updatePostDto);
+    await this.postsRepository.update(id, { status });
 
     return {
       data: id,
@@ -237,7 +233,7 @@ export class PostsService {
     }
 
     // Marcar el post como inactivo en lugar de eliminarlo físicamente
-    await this.postsRepository.update(id, { status: 'Inactive' });
+    await this.postsRepository.update(id, { status: PostStatus.INACTIVE });
 
     return {
       data: id,
@@ -253,7 +249,7 @@ export class PostsService {
     }
 
     // Marcar el post como rechazado
-    await this.postsRepository.update(id, { status: 'Rejected' });
+    await this.postsRepository.update(id, { status: PostStatus.INACTIVE });
 
     return {
       data: id,
