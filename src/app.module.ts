@@ -14,6 +14,7 @@ import { ModelsModule } from './modules/models/models.module';
 import { VersionsModule } from './modules/versions/versions.module';
 import { PassportModule } from '@nestjs/passport';
 import { FilesModule } from './modules/files/files.module';
+import { OpenAiModule } from './modules/openai/openai.module';
 
 dotenv.config({ path: '.env.development' });
 
@@ -44,6 +45,7 @@ dotenv.config({ path: '.env.development' });
     BrandsModule,
     ModelsModule,
     VersionsModule,
+    OpenAiModule,
   ],
   controllers: [],
   providers: [],
