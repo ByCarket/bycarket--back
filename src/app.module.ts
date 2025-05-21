@@ -44,6 +44,7 @@ dotenv.config({ path: '.env.development' });
     BrandsModule,
     ModelsModule,
     VersionsModule,
+    FilesModule,
   ],
   controllers: [],
   providers: [],
