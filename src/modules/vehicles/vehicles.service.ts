@@ -75,8 +75,8 @@ export class VehiclesService {
   }
 
   // ✅ CREATE vehicle
-  async createVehicle(createVehicleDto: CreateVehicleDto, userId: string): Promise<Vehicle> {
-    const { brandId, modelId, versionId, year, price, mileage, description } = createVehicleDto;
+  async createVehicle(createVehicleDto: CreateVehicleDto, userId: string){
+    const { brandId, modelId, versionId, year, price, mileage, description, typeOfVehicle, condition, currency } = createVehicleDto;
 
     const user = await this.userRepository.findOneBy({ id: userId });
     if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
@@ -98,9 +98,18 @@ export class VehiclesService {
       mileage,
       description,
       user,
+      typeOfVehicle,
+      condition,
+      currency,
     });
+    const savedVehicle = await this.vehicleRepository.save(vehicle);
+    savedVehicle.user = { 
+      id: savedVehicle.user.id,
+      name: savedVehicle.user.name,
+      email: savedVehicle.user.email,
+    } as User;
 
-    return this.vehicleRepository.save(vehicle);
+    return { data: savedVehicle, message: 'Vehicle created successfully.' };
   }
 
   // ✅ UPDATE vehicle
@@ -117,7 +126,7 @@ export class VehiclesService {
       );
     }
 
-    const { brandId, modelId, versionId, year, price, mileage, description } = updateVehicleInfo;
+    const { brandId, modelId, versionId, year, price, mileage, description, typeOfVehicle, condition, currency } = updateVehicleInfo;
 
     if (brandId) {
       const brand = await this.brandRepository.findOneBy({ id: brandId });
@@ -139,6 +148,9 @@ export class VehiclesService {
     vehicle.year = year ? year : vehicle.year;
     vehicle.price = price ? price : vehicle.price;
     vehicle.mileage = mileage ? mileage : vehicle.mileage;
+    vehicle.typeOfVehicle = typeOfVehicle ? typeOfVehicle : vehicle.typeOfVehicle;
+    vehicle.condition = condition ? condition : vehicle.condition;
+    vehicle.currency = currency ? currency : vehicle.currency;
     vehicle.description = description ? description : vehicle.description;
 
     return this.vehicleRepository.save(vehicle);

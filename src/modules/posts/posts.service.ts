@@ -62,7 +62,7 @@ export class PostsService {
     };
   }
 
-  async getPostById(id: string): Promise<PostDetail> {
+  async getPostById(id: string) {
     const post = await this.postsRepository.findOne({
       where: { id },
       relations: { user: true, vehicle: true },
@@ -78,7 +78,10 @@ export class PostsService {
       post.user = { name, phone } as User;
     }
 
-    return post;
+    return {
+      data: post,
+      message: 'Post found successfully.',
+    };
   }
 
   async getUserPosts(

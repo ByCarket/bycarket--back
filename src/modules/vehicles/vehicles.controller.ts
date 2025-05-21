@@ -60,7 +60,7 @@ export class VehiclesController {
   async createVehicle(
     @UserAuthenticated('sub') userId: string,
     @Body() createVehicleDto: CreateVehicleDto,
-  ): Promise<Vehicle> {
+  ) {
     return this.vehiclesService.createVehicle(createVehicleDto, userId);
   }
 

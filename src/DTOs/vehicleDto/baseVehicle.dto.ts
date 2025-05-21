@@ -5,8 +5,12 @@ import {
   Min,
   Max,
   IsNotEmpty,
+  IsEnum,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { VehicleTypeEnum } from 'src/enums/vehicleType.enum';
+import { VehicleCondition } from 'src/enums/vehicleCondition.enum';
+import { CurrencyEnum } from 'src/enums/currency.enum';
 
 /**
  * Base DTO for vehicle-related operations
@@ -25,11 +29,23 @@ export class BaseVehicleDto {
   @IsUUID()
   versionId: string;
 
+  @ApiProperty({ description: 'Tipo de vehículo', example: 'SUV' })
+  @IsEnum(VehicleTypeEnum)
+  typeOfVehicle: VehicleTypeEnum;
+
   @ApiProperty({ description: 'Año del vehículo', example: 2022 })
   @IsNumber()
   @Min(1950)
   @Max(new Date().getFullYear())
   year: number;
+
+  @ApiProperty({ description: 'Condición del vehículo', example: 'new' })
+  @IsEnum(VehicleCondition)
+  condition: VehicleCondition;
+
+  @ApiProperty({ description: 'Moneda del vehículo', example: 'U$D' })
+  @IsEnum(CurrencyEnum)
+  currency: CurrencyEnum;
 
   @ApiProperty({ description: 'Precio del vehículo', example: 15000 })
   @IsNumber()
@@ -43,39 +59,4 @@ export class BaseVehicleDto {
   @IsString()
   @IsNotEmpty()
   description: string;
-}
-
-export class BaseVehicleDetailDto {
-  @ApiProperty()
-  id: string;
-
-  @ApiProperty()
-  brand: {
-    id: string;
-    name: string;
-  };
-
-  @ApiProperty()
-  model: {
-    id: string;
-    name: string;
-  };
-
-  @ApiProperty()
-  yearOption: {
-    id: string;
-    year: number;
-  };
-
-  @ApiProperty()
-  price: number;
-
-  @ApiProperty()
-  mileage: number;
-
-  @ApiProperty()
-  description: string;
-
-  @ApiProperty()
-  photos: string[];
 }
