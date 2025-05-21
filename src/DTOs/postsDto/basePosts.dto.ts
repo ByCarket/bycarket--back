@@ -1,4 +1,4 @@
-import { IsUUID, IsOptional, IsEnum } from 'class-validator';
+import { IsUUID, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { PostStatus } from 'src/enums/postStatus.enum';
 
@@ -15,14 +15,4 @@ export class BasePostDto {
   })
   @IsUUID()
   vehicleId: string;
-
-  @ApiProperty({
-    description: 'Estado del post',
-    example: 'Pending',
-    enum: ['Active', 'Inactive', 'Rejected', 'Pending', 'Sold'],
-    default: 'Pending',
-  })
-  @IsOptional()
-  @IsEnum(['Active', 'Inactive', 'Rejected', 'Pending', 'Sold'])
-  status: PostStatus;
 }

@@ -20,12 +20,12 @@ import { Role } from 'src/enums/roles.enum';
 import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from 'src/DTOs/postsDto/createPost.dto';
-import { UpdatePostDto } from 'src/DTOs/postsDto/updatePost.dto';
 import { ResponsePaginatedPostsDto } from 'src/DTOs/postsDto/responsePaginatedPosts.dto';
 import { QueryPostsDto } from 'src/DTOs/postsDto/queryPosts.dto';
+import { PostStatus } from 'src/enums/postStatus.enum';
 
 @ApiTags('posts')
-@ApiExtraModels(CreatePostDto, UpdatePostDto)
+@ApiExtraModels(CreatePostDto)
 @ApiBearerAuth()
 @Controller('posts')
 @UseGuards(AuthGuard, RolesGuard)
@@ -43,7 +43,7 @@ export class PostsController {
   @HttpCode(200)
   async getMyPosts(
     @UserAuthenticated('sub') userId: string,
-    @Query() paginationDto: ResponsePaginatedPostsDto,
+    @Query() paginationDto: QueryPostsDto,
   ): Promise<ResponsePaginatedPostsDto> {
     return await this.postsService.getUserPosts(userId, paginationDto);
   }
@@ -53,7 +53,7 @@ export class PostsController {
   @HttpCode(200)
   async getUserPosts(
     @Param('userId', ParseUUIDPipe) userId: string,
-    @Query() paginationDto: ResponsePaginatedPostsDto,
+    @Query() paginationDto: QueryPostsDto,
   ): Promise<ResponsePaginatedPostsDto> {
     return await this.postsService.getUserPosts(userId, paginationDto);
   }
@@ -68,29 +68,30 @@ export class PostsController {
   @Post()
   @HttpCode(201)
   async createPost(@UserAuthenticated('sub') userId: string, @Body() createPostDto: CreatePostDto) {
-    // Asegurarnos de que el usuario que crea el post es el usuario autenticado
-    createPostDto.userId = userId;
-    return await this.postsService.createPost(createPostDto);
+    return await this.postsService.createPost(createPostDto, userId);
   }
 
-  @Patch(':id')
+  @Patch('sold/:id')
   @HttpCode(200)
   async updatePost(
     @Param('id', ParseUUIDPipe) id: string,
     @UserAuthenticated('sub') userId: string,
-    @Body() updatePostDto: UpdatePostDto,
   ) {
-    return await this.postsService.updatePost(id, userId, updatePostDto);
+    return await this.postsService.updatePost(id, userId);
   }
 
-  @Patch('admin/:id')
+  @Patch('accept/:id')
   @HttpCode(200)
   @Roles(Role.ADMIN)
-  async adminUpdatePost(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updatePostDto: UpdatePostDto,
-  ) {
-    return await this.postsService.adminUpdatePost(id, updatePostDto);
+  async adminAcceptPost(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.postsService.adminUpdatePost(id, PostStatus.ACTIVE);
+  }
+
+  @Patch('reject/:id')
+  @HttpCode(200)
+  @Roles(Role.ADMIN)
+  async adminRejectPost(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.postsService.adminUpdatePost(id, PostStatus.REJECTED);
   }
 
   @Delete(':id')
