@@ -49,7 +49,7 @@ export class VehiclesController {
   async getVehicleById(
     @UserAuthenticated('sub') userId: string,
     @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<Vehicle | void> {
+  ) {
     return this.vehiclesService.getVehicleById(id, userId);
   }
 
