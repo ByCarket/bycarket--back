@@ -18,8 +18,6 @@ import { UpdateVehicleDto } from 'src/DTOs/vehicleDto/updateVehicle.dto';
 import { Vehicle } from 'src/entities/vehicle.entity';
 import { VehiclesService } from './vehicles.service';
 import { AuthGuard } from 'src/guards/auth.guard';
-import { Roles } from 'src/decorators/roles.decorator';
-import { Role } from 'src/enums/roles.enum';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
 
@@ -27,7 +25,6 @@ import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
 @Controller('vehicles')
 @ApiBearerAuth()
 @UseGuards(AuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
 export class VehiclesController {
   constructor(private readonly vehiclesService: VehiclesService) {}
 
@@ -53,7 +50,6 @@ export class VehiclesController {
     return this.vehiclesService.getVehicleById(id, userId);
   }
 
-  @UseGuards(AuthGuard) // solo requiere que el usuario esté logueado
   @Post()
   @HttpCode(201)
   @ApiBearerAuth()
