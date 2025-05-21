@@ -104,10 +104,15 @@ export class VehiclesService {
   async updateVehicle(id: string, userId: string, updateVehicleInfo: UpdateVehicleDto) {
     const vehicle = await this.vehicleRepository.findOne({
       where: { id },
-      relations: ['vehicle', 'brand', 'model', 'version'],
+      relations: ['brand', 'model', 'version'],
     });
 
     if (!vehicle) throw new NotFoundException(`Vehicle with ID ${id} not found`);
+    if (vehicle.user && vehicle.user.id !== userId) {
+      throw new ForbiddenException(
+        `Vehicle with ID ${id} does not belong to user with ID ${userId}`,
+      );
+    }
 
     const { brandId, modelId, versionId, year, price, mileage, description } = updateVehicleInfo;
 
