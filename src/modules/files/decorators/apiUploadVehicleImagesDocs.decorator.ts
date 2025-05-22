@@ -1,24 +1,15 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ResponseIdDto } from 'src/DTOs/usersDto/responses-user.dto';
+import { CreateVehicleDto } from 'src/DTOs/vehicleDto/createVehicle.dto';
 
 export function ApiUploadVehicleImagesDocs() {
   return applyDecorators(
     ApiOperation({ summary: 'Subir imágenes para un vehículo' }),
     ApiConsumes('multipart/form-data'),
     ApiBody({
-      schema: {
-        type: 'object',
-        properties: {
-          images: {
-            type: 'array',
-            items: {
-              type: 'string',
-              format: 'binary',
-            },
-          },
-        },
-      },
+      description: 'Sube imágenes para un vehículo específico',
+      type: CreateVehicleDto,
     }),
     ApiResponse({
       status: 200,

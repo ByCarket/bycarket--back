@@ -11,6 +11,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { VehicleTypeEnum } from 'src/enums/vehicleType.enum';
 import { VehicleCondition } from 'src/enums/vehicleCondition.enum';
 import { CurrencyEnum } from 'src/enums/currency.enum';
+import { Transform } from 'class-transformer';
 
 /**
  * Base DTO for vehicle-related operations
@@ -34,8 +35,8 @@ export class BaseVehicleDto {
   typeOfVehicle: VehicleTypeEnum;
 
   @ApiProperty({ description: 'Año del vehículo', example: 2022 })
+  @Transform(({ value }) => Number(value))
   @IsNumber()
-  @Min(1950)
   @Max(new Date().getFullYear())
   year: number;
 
@@ -48,10 +49,12 @@ export class BaseVehicleDto {
   currency: CurrencyEnum;
 
   @ApiProperty({ description: 'Precio del vehículo', example: 15000 })
+  @Transform(({ value }) => Number(value))
   @IsNumber()
   price: number;
 
   @ApiProperty({ description: 'Kilometraje del vehículo', example: 90000 })
+  @Transform(({ value }) => Number(value))
   @IsNumber()
   mileage: number;
 
@@ -59,4 +62,6 @@ export class BaseVehicleDto {
   @IsString()
   @IsNotEmpty()
   description: string;
+  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' } })
+  images?: Express.Multer.File[];
 }

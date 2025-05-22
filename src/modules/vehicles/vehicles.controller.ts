@@ -2,15 +2,20 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
   HttpCode,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   ParseUUIDPipe,
   Patch,
   Post,
   Put,
   Query,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateVehicleDto } from 'src/DTOs/vehicleDto/createVehicle.dto';
@@ -20,6 +25,8 @@ import { VehiclesService } from './vehicles.service';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
+import { ApiUploadVehicleImagesDocs } from '../files/decorators/apiUploadVehicleImagesDocs.decorator';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Vehicles')
 @Controller('vehicles')
@@ -54,14 +61,28 @@ export class VehiclesController {
   @Post()
   @HttpCode(201)
   @ApiBearerAuth()
+  @UseInterceptors(FilesInterceptor('images'))
+  @ApiUploadVehicleImagesDocs()
   @ApiOperation({ summary: 'Crear un nuevo vehículo asignado al usuario autenticado' })
   @ApiResponse({ status: 201, description: 'Vehículo creado correctamente' })
   @ApiResponse({ status: 404, description: 'Marca, modelo o versión no encontrada' })
   async createVehicle(
     @UserAuthenticated('sub') userId: string,
     @Body() createVehicleDto: CreateVehicleDto,
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1000000 }), // 1MB por imagen
+          new FileTypeValidator({ fileType: /(jpg|jpeg|png|webp)/ }),
+        ],
+        fileIsRequired: false, // Las imágenes son opcionales
+      }),
+    )
+    files?: Express.Multer.File[]
   ) {
-    return this.vehiclesService.createVehicle(createVehicleDto, userId);
+    // Asociar las imágenes al DTO
+    createVehicleDto.images = files;
+    return this.vehiclesService.createVehicleWithImages(createVehicleDto, userId);
   }
 
   @Patch(':id')
