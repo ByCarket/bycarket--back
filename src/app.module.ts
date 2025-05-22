@@ -14,6 +14,8 @@ import { ModelsModule } from './modules/models/models.module';
 import { VersionsModule } from './modules/versions/versions.module';
 import { PassportModule } from '@nestjs/passport';
 import { FilesModule } from './modules/files/files.module';
+import { BillingModule } from './modules/billing/billing.module';
+import stripeConfig from './config/stripe.config';
 
 dotenv.config({ path: '.env.development' });
 
@@ -21,7 +23,8 @@ dotenv.config({ path: '.env.development' });
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [typeormConfig],
+      load: [typeormConfig, stripeConfig],
+      envFilePath: '.env.development',
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -45,6 +48,7 @@ dotenv.config({ path: '.env.development' });
     ModelsModule,
     VersionsModule,
     FilesModule,
+    BillingModule,
   ],
   controllers: [],
   providers: [],
