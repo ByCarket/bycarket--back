@@ -4,7 +4,7 @@ import Stripe from 'stripe';
 
 export const STRIPE_CLIENT = 'STRIPE_CLIENT';
 
-export const stripeProvider: Provider = {
+export const StripeProvider: Provider = {
   provide: STRIPE_CLIENT,
   inject: [ConfigService],
   useFactory: (configService: ConfigService): Stripe => {
