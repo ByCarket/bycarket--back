@@ -8,11 +8,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthGuard } from '../../guards/auth.guard';
 import { UsersModule } from '../users/users.module';
 import { UsersService } from '../users/users.service';
-import { CustomerService } from '../billing/customer/customer.service';
-import { StripeProvider } from 'src/providers/stripe.provider';
+import { BillingModule } from '../billing/billing.module';
 
 @Module({
   imports: [
+    BillingModule,
     UsersModule,
     TypeOrmModule.forFeature([User, Post]),
     JwtModule.register({
@@ -21,7 +21,7 @@ import { StripeProvider } from 'src/providers/stripe.provider';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthGuard, UsersService, CustomerService, StripeProvider],
+  providers: [AuthService, AuthGuard, UsersService],
   exports: [AuthService, JwtModule, AuthGuard],
 })
 export class AuthModule {}

@@ -7,5 +7,6 @@ import { StripeProvider } from 'src/providers/stripe.provider';
 @Module({
   controllers: [SubscriptionController],
   providers: [SubscriptionService, CustomerService, StripeProvider],
+  exports: [CustomerService],
 })
 export class BillingModule {}
