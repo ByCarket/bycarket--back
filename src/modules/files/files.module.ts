@@ -10,5 +10,6 @@ import { Vehicle } from 'src/entities/vehicle.entity';
   imports: [TypeOrmModule.forFeature([User, Vehicle])],
   controllers: [FilesController],
   providers: [FilesService, cloudinaryConfig],
+  exports: [FilesService],
 })
 export class FilesModule {}

@@ -1,6 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { FilesService } from '../files/files.service';
+import { CloudinaryImage } from 'src/interfaces/cloudinaryImage.interface';
 import { Vehicle } from 'src/entities/vehicle.entity';
 import { CreateVehicleDto } from 'src/DTOs/vehicleDto/createVehicle.dto';
 import { UpdateVehicleDto } from 'src/DTOs/vehicleDto/updateVehicle.dto';
@@ -26,6 +28,8 @@ export class VehiclesService {
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
+    private readonly filesService: FilesService,
   ) {}
 
   // ✅ GET all vehicles paginated
@@ -75,8 +79,20 @@ export class VehiclesService {
   }
 
   // ✅ CREATE vehicle
-  async createVehicle(createVehicleDto: CreateVehicleDto, userId: string){
-    const { brandId, modelId, versionId, year, price, mileage, description, typeOfVehicle, condition, currency } = createVehicleDto;
+  async createVehicleWithImages(createVehicleDto: CreateVehicleDto, userId: string) {
+    const {
+      brandId,
+      modelId,
+      versionId,
+      year,
+      price,
+      mileage,
+      description,
+      typeOfVehicle,
+      condition,
+      currency,
+      images,
+    } = createVehicleDto;
 
     const user = await this.userRepository.findOneBy({ id: userId });
     if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
@@ -89,27 +105,90 @@ export class VehiclesService {
     if (!model) throw new NotFoundException(`Model with ID ${modelId} not found`);
     if (!version) throw new NotFoundException(`Version with ID ${versionId} not found`);
 
-    const vehicle = this.vehicleRepository.create({
-      brand,
-      model,
-      version,
-      year,
-      price,
-      mileage,
-      description,
-      user,
-      typeOfVehicle,
-      condition,
-      currency,
-    });
-    const savedVehicle = await this.vehicleRepository.save(vehicle);
-    savedVehicle.user = { 
-      id: savedVehicle.user.id,
-      name: savedVehicle.user.name,
-      email: savedVehicle.user.email,
-    } as User;
+    // Iniciar la transacción
+    const queryRunner = this.vehicleRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    return { data: savedVehicle, message: 'Vehicle created successfully.' };
+    const uploadedImages: CloudinaryImage[] = [];
+
+    try {
+      // 1. Crear el vehículo (sin guardar en la base de datos todavía)
+      const vehicle = this.vehicleRepository.create({
+        brand,
+        model,
+        version,
+        year,
+        price,
+        mileage,
+        description,
+        user,
+        typeOfVehicle,
+        condition,
+        currency,
+        photos: [],
+      });
+
+      // 2. Subir imágenes a Cloudinary si existen
+      if (images && images.length > 0) {
+        if (images.length > 6) {
+          throw new HttpException(
+            {
+              status: 400,
+              error: 'A vehicle cannot have more than 6 images.',
+            },
+            400,
+          );
+        }
+
+        // Subir cada imagen a Cloudinary
+        for (const image of images) {
+          const uploadResult = await this.filesService.uploadImgCloudinary(image);
+
+          // Guardar tanto el public_id como la secure_url
+          uploadedImages.push({
+            public_id: uploadResult.public_id,
+            secure_url: uploadResult.secure_url,
+          });
+        }
+
+        // Asignar las imágenes al vehículo
+        vehicle.photos = uploadedImages;
+      }
+
+      // 3. Guardar el vehículo en la base de datos
+      const savedVehicle = await queryRunner.manager.save(vehicle);
+
+      // 4. Commit de la transacción
+      await queryRunner.commitTransaction();
+
+      // 5. Retornar la respuesta
+      savedVehicle.user = {
+        id: savedVehicle.user.id,
+        name: savedVehicle.user.name,
+        email: savedVehicle.user.email,
+      } as User;
+
+      return {
+        data: savedVehicle,
+        message: 'Vehicle created successfully with images.',
+      };
+    } catch (error) {
+      // Rollback de la transacción en caso de error
+      await queryRunner.rollbackTransaction();
+
+      // Si se subieron imágenes a Cloudinary, eliminarlas
+      if (uploadedImages.length > 0) {
+        // Extraer solo los public_ids de las imágenes subidas
+        const publicIds = uploadedImages.map(img => img.public_id);
+        await this.filesService.deleteMultipleCloudinaryImages(publicIds);
+      }
+
+      throw error;
+    } finally {
+      // Liberar el query runner
+      await queryRunner.release();
+    }
   }
 
   // ✅ UPDATE vehicle
@@ -126,24 +205,15 @@ export class VehiclesService {
       );
     }
 
-    const { brandId, modelId, versionId, year, price, mileage, description, typeOfVehicle, condition, currency } = updateVehicleInfo;
-
-    if (brandId) {
-      const brand = await this.brandRepository.findOneBy({ id: brandId });
-      if (!brand) throw new NotFoundException(`Brand with ID ${brandId} not found`);
-      vehicle.brand = brand;
-    }
-
-    if (modelId) {
-      const model = await this.modelRepository.findOneBy({ id: modelId });
-      if (!model) throw new NotFoundException(`Model with ID ${modelId} not found`);
-      vehicle.model = model;
-    }
-    if (versionId) {
-      const version = await this.versionRepository.findOneBy({ id: versionId });
-      if (!version) throw new NotFoundException(`Version with ID ${versionId} not found`);
-      vehicle.version = version;
-    }
+    const {
+      year,
+      price,
+      mileage,
+      description,
+      typeOfVehicle,
+      condition,
+      currency,
+    } = updateVehicleInfo;
 
     vehicle.year = year ? year : vehicle.year;
     vehicle.price = price ? price : vehicle.price;
