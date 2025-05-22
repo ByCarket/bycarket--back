@@ -5,9 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Post } from 'src/entities/post.entity';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthGuard } from '../../guards/auth.guard'; 
+import { AuthGuard } from '../../guards/auth.guard';
 import { UsersModule } from '../users/users.module';
 import { UsersService } from '../users/users.service';
+import { CustomerService } from '../billing/customer/customer.service';
+import { StripeProvider } from 'src/providers/stripe.provider';
 
 @Module({
   imports: [
@@ -19,7 +21,7 @@ import { UsersService } from '../users/users.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthGuard, UsersService],
+  providers: [AuthService, AuthGuard, UsersService, CustomerService, StripeProvider],
   exports: [AuthService, JwtModule, AuthGuard],
 })
 export class AuthModule {}

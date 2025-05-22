@@ -11,30 +11,36 @@ import * as bcrypt from 'bcrypt';
 import { JwtSign } from 'src/interfaces/jwtPayload.interface';
 import { ChangePasswordDto } from 'src/DTOs/usersDto/changePassword.dto';
 import { GoogleProfileDto } from 'src/DTOs/usersDto/google-profile.dto';
+import { CustomerService } from '../billing/customer/customer.service';
 
 @Injectable()
 export class AuthService {
   constructor(
+    private readonly customerService: CustomerService,
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  async register({ confirmPassword, ...user }: CreateUserDto) {
-    const { email, password } = user;
+  async register({ confirmPassword, password, ...user }: CreateUserDto) {
     const userExist = await this.usersRepository.findOne({
-      where: { email },
+      where: { email: user.email },
     });
-
     if (userExist) {
       throw new BadRequestException('Email already registered');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const stripeCustomerId = await this.customerService.createCustomer({
+      email: user.email,
+      name: user.name,
+    });
+
     const newUser = await this.usersRepository.save({
       ...user,
       password: hashedPassword,
+      stripeCustomerId,
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: newUserPassword, ...userWithoutPassword } = newUser;
@@ -61,6 +67,10 @@ export class AuthService {
     let user = await this.usersService.getUserByEmail(email);
 
     if (!user) {
+      const stripeCustomerId = await this.customerService.createCustomer({
+        email,
+        name: name || email.split('@')[0],
+      });
       const newUser = {
         email,
         name: name || email.split('@')[0],
@@ -70,6 +80,7 @@ export class AuthService {
         country: '',
         city: '',
         address: '',
+        stripeCustomerId,
       };
 
       user = await this.usersRepository.create(newUser);
@@ -118,6 +129,7 @@ export class AuthService {
 
     user.email = newEmail;
     await this.usersRepository.save(user);
+    await this.customerService.updateCustomer(user.stripeCustomerId, { email: newEmail });
 
     return {
       data: id,
