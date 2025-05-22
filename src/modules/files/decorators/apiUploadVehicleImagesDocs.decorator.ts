@@ -1,7 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ResponseIdDto } from 'src/DTOs/usersDto/responses-user.dto';
-import { CreateVehicleDto } from 'src/DTOs/vehicleDto/createVehicle.dto';
+import { UpdateVehicleImgDto } from 'src/DTOs/filesDto/updateVehicleImg.dto';
 
 export function ApiUploadVehicleImagesDocs() {
   return applyDecorators(
@@ -9,12 +8,11 @@ export function ApiUploadVehicleImagesDocs() {
     ApiConsumes('multipart/form-data'),
     ApiBody({
       description: 'Sube imágenes para un vehículo específico',
-      type: CreateVehicleDto,
+      type: UpdateVehicleImgDto
     }),
     ApiResponse({
       status: 200,
       description: 'Imágenes del vehículo cargadas exitosamente',
-      type: ResponseIdDto,
     }),
   );
 }

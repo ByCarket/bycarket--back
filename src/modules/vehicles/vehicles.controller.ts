@@ -27,6 +27,7 @@ import { RolesGuard } from 'src/guards/roles.guard';
 import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
 import { ApiUploadVehicleImagesDocs } from '../files/decorators/apiUploadVehicleImagesDocs.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { ApiCreateVehicleDocs } from './decorators/apiCreateVehicleDocs.decorator';
 
 @ApiTags('Vehicles')
 @Controller('vehicles')
@@ -60,12 +61,8 @@ export class VehiclesController {
 
   @Post()
   @HttpCode(201)
-  @ApiBearerAuth()
   @UseInterceptors(FilesInterceptor('images'))
-  @ApiUploadVehicleImagesDocs()
-  @ApiOperation({ summary: 'Crear un nuevo vehículo asignado al usuario autenticado' })
-  @ApiResponse({ status: 201, description: 'Vehículo creado correctamente' })
-  @ApiResponse({ status: 404, description: 'Marca, modelo o versión no encontrada' })
+  @ApiCreateVehicleDocs()
   async createVehicle(
     @UserAuthenticated('sub') userId: string,
     @Body() createVehicleDto: CreateVehicleDto,

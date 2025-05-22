@@ -6,7 +6,6 @@ import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { ResponseIdDto } from 'src/DTOs/usersDto/responses-user.dto';
 import { Vehicle } from 'src/entities/vehicle.entity';
-import { CloudinaryImage } from 'src/interfaces/cloudinaryImage.interface';
 
 @Injectable()
 export class FilesService {
@@ -119,7 +118,7 @@ export class FilesService {
     }
   }
 
-  async updateImgUser(id: string, file: Express.Multer.File): Promise<ResponseIdDto> {
+  async updateImgUser(id: string, file: Express.Multer.File) {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found.`);
@@ -138,7 +137,7 @@ export class FilesService {
     userId: string,
     files: Express.Multer.File[],
     vehicleId: string,
-  ): Promise<ResponseIdDto> {
+  ) {
     const vehicle = await this.vehicleRepository.findOne({
       where: {
         id: vehicleId,
@@ -154,13 +153,9 @@ export class FilesService {
     const currentPhotos = vehicle.photos ?? [];
 
     if (currentPhotos.length + files.length > 6) {
-      throw new HttpException(
-        {
-          status: 400,
-          error: 'A vehicle cannot have more than 6 images.',
-        },
-        400,
-      );
+      throw new BadRequestException({
+        error: 'A vehicle cannot have more than 6 images.',
+      });
     }
 
     const uploadResults = await Promise.all(files.map(file => this.uploadImgCloudinary(file)));
@@ -174,7 +169,7 @@ export class FilesService {
     await this.vehicleRepository.save(vehicle);
 
     return {
-      data: vehicleId,
+      data: vehicle,
       message: 'Vehicle images uploaded successfully.',
     };
   }

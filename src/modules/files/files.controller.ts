@@ -8,6 +8,7 @@ import {
   ParseFilePipe,
   ParseUUIDPipe,
   Patch,
+  Post,
   UploadedFile,
   UploadedFiles,
   UseGuards,
@@ -70,7 +71,7 @@ export class FilesController {
       }),
     )
     files: Express.Multer.File[],
-  ): Promise<ResponseIdDto> {
+  ){
     return this.filesService.updateVehicleImages(userId, files, vehicleId);
   }
 

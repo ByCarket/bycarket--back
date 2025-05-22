@@ -206,9 +206,6 @@ export class VehiclesService {
     }
 
     const {
-      brandId,
-      modelId,
-      versionId,
       year,
       price,
       mileage,
@@ -217,23 +214,6 @@ export class VehiclesService {
       condition,
       currency,
     } = updateVehicleInfo;
-
-    if (brandId) {
-      const brand = await this.brandRepository.findOneBy({ id: brandId });
-      if (!brand) throw new NotFoundException(`Brand with ID ${brandId} not found`);
-      vehicle.brand = brand;
-    }
-
-    if (modelId) {
-      const model = await this.modelRepository.findOneBy({ id: modelId });
-      if (!model) throw new NotFoundException(`Model with ID ${modelId} not found`);
-      vehicle.model = model;
-    }
-    if (versionId) {
-      const version = await this.versionRepository.findOneBy({ id: versionId });
-      if (!version) throw new NotFoundException(`Version with ID ${versionId} not found`);
-      vehicle.version = version;
-    }
 
     vehicle.year = year ? year : vehicle.year;
     vehicle.price = price ? price : vehicle.price;
