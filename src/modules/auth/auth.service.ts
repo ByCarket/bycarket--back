@@ -82,7 +82,12 @@ export class AuthService {
     const jwtPayload = { sub: user.id, email: user.email };
     const token = this.jwtService.sign(jwtPayload);
 
-    return { success: 'Login successfully', token };
+    return { success: 'Login successfully', token, user: {
+		id: user.id,
+		name: user.name,
+		email: user.email,
+		role: user.role
+	} };
   }
 
   async createAdmin(user: Omit<CreateUserDto, 'confirmPassword'>) {
