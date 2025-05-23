@@ -55,12 +55,12 @@ export class VehiclesService {
     if (!vehicle) {
       throw new NotFoundException(`Vehicle with ID ${id} not found`);
     }
-
     if (vehicle.user && vehicle.user.id !== userId) {
       throw new ForbiddenException(
         `Vehicle with ID ${id} does not belong to user with ID ${userId}`,
       );
     }
+
     vehicle.user = {
       id: vehicle.user.id,
       name: vehicle.user.name,
@@ -79,21 +79,10 @@ export class VehiclesService {
   }
 
   // ✅ CREATE vehicle
-  async createVehicleWithImages(createVehicleDto: CreateVehicleDto, userId: string) {
-    const {
-      brandId,
-      modelId,
-      versionId,
-      year,
-      price,
-      mileage,
-      description,
-      typeOfVehicle,
-      condition,
-      currency,
-      images,
-    } = createVehicleDto;
-
+  async createVehicleWithImages(
+    { images, brandId, modelId, versionId, ...CreateVehicleDto }: CreateVehicleDto,
+    userId: string,
+  ) {
     const user = await this.userRepository.findOneBy({ id: userId });
     if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
 
@@ -118,15 +107,7 @@ export class VehiclesService {
         brand,
         model,
         version,
-        year,
-        price,
-        mileage,
-        description,
-        user,
-        typeOfVehicle,
-        condition,
-        currency,
-        photos: [],
+        ...CreateVehicleDto,
       });
 
       // 2. Subir imágenes a Cloudinary si existen
@@ -153,7 +134,7 @@ export class VehiclesService {
         }
 
         // Asignar las imágenes al vehículo
-        vehicle.photos = uploadedImages;
+        vehicle.images = uploadedImages;
       }
 
       // 3. Guardar el vehículo en la base de datos
@@ -205,25 +186,11 @@ export class VehiclesService {
       );
     }
 
-    const {
-      year,
-      price,
-      mileage,
-      description,
-      typeOfVehicle,
-      condition,
-      currency,
-    } = updateVehicleInfo;
-
-    vehicle.year = year ? year : vehicle.year;
-    vehicle.price = price ? price : vehicle.price;
-    vehicle.mileage = mileage ? mileage : vehicle.mileage;
-    vehicle.typeOfVehicle = typeOfVehicle ? typeOfVehicle : vehicle.typeOfVehicle;
-    vehicle.condition = condition ? condition : vehicle.condition;
-    vehicle.currency = currency ? currency : vehicle.currency;
-    vehicle.description = description ? description : vehicle.description;
-
-    return this.vehicleRepository.save(vehicle);
+    await this.vehicleRepository.update(id, updateVehicleInfo);
+    return {
+      data: id,
+      message: 'Vehicle updated successfully',
+    };
   }
 
   // ✅ DELETE vehicle
@@ -245,7 +212,7 @@ export class VehiclesService {
 
     return {
       data: id,
-      message: `Vehicle deleted successfully`,
+      message: 'Vehicle deleted successfully',
     };
   }
 }
