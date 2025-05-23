@@ -45,6 +45,9 @@ export class User {
   @Column({ type: 'varchar', length: 100, nullable: true })
   googleId: string;
 
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  stripeCustomerId: string;
+
   @OneToMany(() => Post, post => post.user)
   posts: Post[];
 
