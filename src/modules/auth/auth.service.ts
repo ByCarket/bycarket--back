@@ -170,6 +170,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // Enviar notificación de cambio de contraseña
+    try {
+      await this.mailService.sendPasswordChangeNotification(user.email, user.name);
+    } catch (emailError) {emailError}
+
     const hashedPassword = await bcrypt.hash(password, 10);
     await this.usersRepository.update(id, { password: hashedPassword });
     return {
