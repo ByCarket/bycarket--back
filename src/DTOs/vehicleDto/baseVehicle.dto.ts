@@ -6,16 +6,17 @@ import {
   Max,
   IsNotEmpty,
   IsEnum,
+  IsOptional,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { VehicleTypeEnum } from 'src/enums/vehicleType.enum';
 import { VehicleCondition } from 'src/enums/vehicleCondition.enum';
 import { CurrencyEnum } from 'src/enums/currency.enum';
+import { TransmissionType } from '../../enums/transmission.enum';
 import { Transform } from 'class-transformer';
 
 /**
  * Base DTO for vehicle-related operations
- * Contains all possible vehicle properties
  */
 export class BaseVehicleDto {
   @ApiProperty({ description: 'ID de la marca (Brand)', example: 'uuid' })
@@ -44,6 +45,15 @@ export class BaseVehicleDto {
   @IsEnum(VehicleCondition)
   condition: VehicleCondition;
 
+  @ApiPropertyOptional({
+    enum: TransmissionType,
+    example: TransmissionType.MANUAL,
+    description: 'Tipo de transmisión del vehículo',
+  })
+  @IsOptional()
+  @IsEnum(TransmissionType)
+  transmission?: TransmissionType;
+
   @ApiProperty({ description: 'Moneda del vehículo', example: 'U$D' })
   @IsEnum(CurrencyEnum)
   currency: CurrencyEnum;
@@ -62,6 +72,12 @@ export class BaseVehicleDto {
   @IsString()
   @IsNotEmpty()
   description: string;
-  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' } })
+
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    isArray: true,
+    description: 'Imágenes del vehículo en formato file',
+  })
   images?: Express.Multer.File[];
 }

@@ -35,4 +35,7 @@ export class Post {
 
   @OneToMany(() => Question, question => question.post)
   questions: Question[];
+
+  @Column({ type: 'varchar', nullable: true })
+meliItemId: string | null;
 }

@@ -4,6 +4,7 @@ import { Role } from '../enums/roles.enum';
 import { Post } from './post.entity';
 import { Question } from './question.entity';
 import { Vehicle } from './vehicle.entity';
+import { MeliToken } from './meliToken.entity'; // 👈 Importá la entidad
 
 @Entity({
   name: 'users',
@@ -56,4 +57,7 @@ export class User {
 
   @OneToMany(() => Vehicle, vehicle => vehicle.user)
   vehicles: Vehicle[];
+
+  @OneToMany(() => MeliToken, (meliToken) => meliToken.user)
+meliTokens: MeliToken[];
 }
