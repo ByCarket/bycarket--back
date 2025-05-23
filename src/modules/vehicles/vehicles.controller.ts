@@ -75,7 +75,7 @@ export class VehiclesController {
         fileIsRequired: false, // Las imágenes son opcionales
       }),
     )
-    files?: Express.Multer.File[]
+    files?: Express.Multer.File[],
   ) {
     // Asociar las imágenes al DTO
     createVehicleDto.images = files;
@@ -91,7 +91,7 @@ export class VehiclesController {
     @Param('id', ParseUUIDPipe) id: string,
     @UserAuthenticated('sub') userId: string,
     @Body() updateVehicleInfo: UpdateVehicleDto,
-  ): Promise<Vehicle> {
+  ) {
     return this.vehiclesService.updateVehicle(id, userId, updateVehicleInfo);
   }
 
