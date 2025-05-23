@@ -51,5 +51,5 @@ export class Vehicle {
   photos: CloudinaryImage[]; // Array de URLs (JSON)
 
   @Column({ type: 'enum', enum: TransmissionType, nullable: true })
-transmission?: TransmissionType;
+  transmission?: TransmissionType;
 }

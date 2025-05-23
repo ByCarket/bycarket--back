@@ -91,7 +91,7 @@ export class VehiclesController {
     @Param('id', ParseUUIDPipe) id: string,
     @UserAuthenticated('sub') userId: string,
     @Body() updateVehicleInfo: UpdateVehicleDto,
-  ): Promise<Vehicle> {
+  ) {
     return this.vehiclesService.updateVehicle(id, userId, updateVehicleInfo);
   }
 
