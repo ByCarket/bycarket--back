@@ -18,5 +18,7 @@ export const ApiGetPostsDocs = () => {
     ApiQuery({ name: 'maxPrice', required: false, description: '' }),
     ApiQuery({ name: 'minMileage', required: false, description: '' }),
     ApiQuery({ name: 'maxMileage', required: false, description: '' }),
+    ApiQuery({ name: 'orderBy', required: false, description: '' }),
+    ApiQuery({ name: 'order', required: false, description: '' }),
   );
 };

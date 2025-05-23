@@ -24,6 +24,8 @@ export class PostsService {
     page,
     limit,
     search,
+    orderBy,
+    order,
     ...filters
   }: QueryPostsDto): Promise<ResponsePaginatedPostsDto> {
     const query = await this.postsRepository
@@ -31,7 +33,8 @@ export class PostsService {
       .leftJoinAndSelect('posts.vehicle', 'vehicle')
       .leftJoinAndSelect('vehicle.brand', 'brand')
       .leftJoinAndSelect('vehicle.model', 'model')
-      .leftJoinAndSelect('vehicle.version', 'version');
+      .leftJoinAndSelect('vehicle.version', 'version')
+      .where('posts.status = :status', { status: PostStatus.ACTIVE });
 
     const exactFilters = {
       brandId: 'brand.id',
@@ -53,6 +56,10 @@ export class PostsService {
       maxMileage: { column: 'vehicle.mileage', operator: '<=' },
     };
 
+    const cleanedFilters = Object.entries(filters).filter(
+      ([_, value]) => value !== undefined && value !== null && value !== '',
+    );
+
     if (search) {
       query.andWhere(
         `(LOWER(vehicle.description) ILIKE :search OR
@@ -63,7 +70,7 @@ export class PostsService {
       );
     }
 
-    for (const [key, value] of Object.entries(filters)) {
+    for (const [key, value] of cleanedFilters) {
       if (exactFilters[key]) {
         query.andWhere(`${exactFilters[key]} = :${key}`, { [key]: value });
       }
@@ -73,6 +80,8 @@ export class PostsService {
         query.andWhere(`${column} ${operator} :${key}`, { [key]: value });
       }
     }
+
+    query.orderBy(orderBy, order);
 
     const skip = (page - 1) * limit;
     const [data, total] = await query.take(limit).skip(skip).getManyAndCount();

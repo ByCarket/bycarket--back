@@ -1,3 +1,4 @@
+import { PartialType, PickType } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   IsEnum,
@@ -6,15 +7,21 @@ import {
   IsOptional,
   IsPositive,
   IsString,
-  IsUUID,
   Max,
   Min,
 } from 'class-validator';
-import { CurrencyEnum } from 'src/enums/currency.enum';
-import { VehicleCondition } from 'src/enums/vehicleCondition.enum';
-import { VehicleTypeEnum } from 'src/enums/vehicleType.enum';
+import { BaseVehicleDto } from '../vehicleDto/baseVehicle.dto';
+import { OrderByPostsEnum } from 'src/enums/orderByPosts.enum';
+import { OrderDirectionEnum } from 'src/enums/order.enum';
 
-export class QueryPostsDto {
+export class QueryPostsDto extends PickType(PartialType(BaseVehicleDto), [
+  'brandId',
+  'modelId',
+  'versionId',
+  'typeOfVehicle',
+  'condition',
+  'currency',
+]) {
   // Pagination
   @Transform(({ value }) => value ?? 1)
   @Type(() => Number)
@@ -28,38 +35,19 @@ export class QueryPostsDto {
   @Min(1)
   limit: number = 10;
 
+  // Order
+  @IsOptional()
+  @IsEnum(OrderByPostsEnum)
+  orderBy: OrderByPostsEnum = OrderByPostsEnum.POST_DATE;
+
+  @IsOptional()
+  @IsEnum(OrderDirectionEnum)
+  order: OrderDirectionEnum = OrderDirectionEnum.DESC;
+
   // Search
   @IsOptional()
   @IsString()
   search?: string;
-
-  // Exact filters
-  @IsOptional()
-  @IsString()
-  @IsUUID()
-  brandId?: string;
-
-  @IsOptional()
-  @IsString()
-  @IsUUID()
-  modelId?: string;
-
-  @IsOptional()
-  @IsString()
-  @IsUUID()
-  versionId?: string;
-
-  @IsOptional()
-  @IsEnum(VehicleTypeEnum)
-  typeOfVehicle?: VehicleTypeEnum;
-
-  @IsOptional()
-  @IsEnum(VehicleCondition)
-  condition?: VehicleCondition;
-
-  @IsOptional()
-  @IsEnum(CurrencyEnum)
-  currency?: CurrencyEnum;
 
   // Range Filters
   @IsOptional()
