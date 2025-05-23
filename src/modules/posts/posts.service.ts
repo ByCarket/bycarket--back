@@ -6,7 +6,6 @@ import { Vehicle } from 'src/entities/vehicle.entity';
 import { User } from 'src/entities/user.entity';
 import { PostStatus } from 'src/enums/postStatus.enum';
 import { ResponsePaginatedPostsDto } from 'src/DTOs/postsDto/responsePaginatedPosts.dto';
-import { PostDetail } from 'src/DTOs/postsDto/postDetail.dto';
 import { CreatePostDto } from 'src/DTOs/postsDto/createPost.dto';
 import { QueryPostsDto } from 'src/DTOs/postsDto/queryPosts.dto';
 
@@ -21,44 +20,68 @@ export class PostsService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  async getPosts({ page, limit }: QueryPostsDto): Promise<ResponsePaginatedPostsDto> {
-    const skip = (page - 1) * limit;
+  async getPosts({
+    page,
+    limit,
+    search,
+    ...filters
+  }: QueryPostsDto): Promise<ResponsePaginatedPostsDto> {
+    const query = await this.postsRepository
+      .createQueryBuilder('posts')
+      .leftJoinAndSelect('posts.vehicle', 'vehicle')
+      .leftJoinAndSelect('vehicle.brand', 'brand')
+      .leftJoinAndSelect('vehicle.model', 'model')
+      .leftJoinAndSelect('vehicle.version', 'version');
 
-    // Obtener posts con paginación
-    const [posts, total] = await this.postsRepository.findAndCount({
-      skip,
-      take: limit,
-      where: { status: PostStatus.ACTIVE },
-      relations: {
-        user: true,
-        vehicle: {
-          brand: true,
-          model: true,
-          version: true,
-        },
-      },
-      order: { postDate: 'DESC' } as FindOptionsOrder<Post>,
-    });
+    const exactFilters = {
+      brandId: 'brand.id',
+      modelId: 'model.id',
+      versionId: 'version.id',
+      typeOfVehicle: 'vehicle.typeOfVehicle',
+      condition: 'vehicle.condition',
+      currency: 'vehicle.currency',
+    };
 
-    // Calcular número total de páginas
-    const totalPages = Math.ceil(total / limit);
+    const rangeFilters = {
+      minYear: { column: 'vehicle.year', operator: '>=' },
+      maxYear: { column: 'vehicle.year', operator: '<=' },
 
-    // Filtrar datos del usuario para mostrar solo lo necesario
-    const securePosts = posts.map(post => {
-      if (post.user) {
-        const { id, name, phone } = post.user;
-        post.user = { id, name, phone } as User;
+      minPrice: { column: 'vehicle.price', operator: '>=' },
+      maxPrice: { column: 'vehicle.price', operator: '<=' },
+
+      minMileage: { column: 'vehicle.mileage', operator: '>=' },
+      maxMileage: { column: 'vehicle.mileage', operator: '<=' },
+    };
+
+    if (search) {
+      query.andWhere(
+        `(LOWER(vehicle.description) ILIKE :search OR
+        LOWER(brand.name) ILIKE :search OR
+        LOWER(model.name) ILIKE :search OR
+        LOWER(version.name) ILIKE :search)`,
+        { search: `%${search.toLowerCase()}%` },
+      );
+    }
+
+    for (const [key, value] of Object.entries(filters)) {
+      if (exactFilters[key]) {
+        query.andWhere(`${exactFilters[key]} = :${key}`, { [key]: value });
       }
-      return post;
-    });
 
-    // Devolver objeto con datos paginados
+      if (rangeFilters[key]) {
+        const { column, operator } = rangeFilters[key];
+        query.andWhere(`${column} ${operator} :${key}`, { [key]: value });
+      }
+    }
+
+    const skip = (page - 1) * limit;
+    const [data, total] = await query.take(limit).skip(skip).getManyAndCount();
     return {
-      data: securePosts,
+      data,
       total,
       page,
       limit,
-      totalPages,
+      totalPages: Math.ceil(total / limit),
     };
   }
 
