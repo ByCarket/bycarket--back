@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Bienvenido!</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .welcome-message {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>¡Bienvenido {{name}}!</h1>
+            <p>Gracias por registrarte en nuestra plataforma</p>
+        </div>
+
+        <div class="welcome-message">
+            <p>Hola <strong>{{name}}</strong>,</p>
+            <p>¡Nos complace darte la bienvenida a nuestra plataforma! Tu cuenta ha sido creada exitosamente el <strong>{{date}}</strong>.</p>
+            <p>Ahora puedes acceder a todas las funcionalidades disponibles y comenzar a disfrutar de nuestros servicios.</p>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="#" class="button">Comenzar Ahora</a>
+        </div>
+
+        <div class="footer">
+            <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
+            <p>¡Gracias por confiar en nosotros!</p>
+            <small>Este es un email automático, por favor no respondas a este mensaje.</small>
+        </div>
+    </div>
+</body>
+</html>
