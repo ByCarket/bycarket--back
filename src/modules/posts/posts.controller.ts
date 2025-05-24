@@ -23,6 +23,7 @@ import { CreatePostDto } from 'src/DTOs/postsDto/createPost.dto';
 import { ResponsePaginatedPostsDto } from 'src/DTOs/postsDto/responsePaginatedPosts.dto';
 import { QueryPostsDto } from 'src/DTOs/postsDto/queryPosts.dto';
 import { PostStatus } from 'src/enums/postStatus.enum';
+import { ApiGetPostsDocs } from './decorators/apiGetPostsDocs.decorator';
 
 @ApiTags('posts')
 @ApiExtraModels(CreatePostDto)
@@ -32,11 +33,12 @@ import { PostStatus } from 'src/enums/postStatus.enum';
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
+  @ApiGetPostsDocs()
   @Get()
   @Public()
   @HttpCode(200)
-  async getPosts(@Query() paginationDto: QueryPostsDto): Promise<ResponsePaginatedPostsDto> {
-    return await this.postsService.getPosts(paginationDto);
+  async getPosts(@Query() queryDto: QueryPostsDto): Promise<ResponsePaginatedPostsDto> {
+    return await this.postsService.getPosts(queryDto);
   }
 
   @Get('me')
