@@ -1,6 +1,11 @@
-import { ForbiddenException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { FilesService } from '../files/files.service';
 import { CloudinaryImage } from 'src/interfaces/cloudinaryImage.interface';
 import { Vehicle } from 'src/entities/vehicle.entity';
@@ -30,6 +35,8 @@ export class VehiclesService {
     private readonly userRepository: Repository<User>,
 
     private readonly filesService: FilesService,
+
+    private readonly dataSource: DataSource,
   ) {}
 
   // ✅ GET all vehicles paginated
@@ -61,6 +68,7 @@ export class VehiclesService {
         `Vehicle with ID ${id} does not belong to user with ID ${userId}`,
       );
     }
+
     vehicle.user = {
       id: vehicle.user.id,
       name: vehicle.user.name,
@@ -95,7 +103,7 @@ export class VehiclesService {
     if (!version) throw new NotFoundException(`Version with ID ${versionId} not found`);
 
     // Iniciar la transacción
-    const queryRunner = this.vehicleRepository.manager.connection.createQueryRunner();
+    const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -103,10 +111,11 @@ export class VehiclesService {
 
     try {
       // 1. Crear el vehículo (sin guardar en la base de datos todavía)
-      const vehicle = this.vehicleRepository.create({
+      const vehicle = queryRunner.manager.create(Vehicle, {
         brand,
         model,
         version,
+        user,
         ...CreateVehicleDto,
       });
 
@@ -160,7 +169,6 @@ export class VehiclesService {
 
       // Si se subieron imágenes a Cloudinary, eliminarlas
       if (uploadedImages.length > 0) {
-        // Extraer solo los public_ids de las imágenes subidas
         const publicIds = uploadedImages.map(img => img.public_id);
         await this.filesService.deleteMultipleCloudinaryImages(publicIds);
       }

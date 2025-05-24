@@ -41,42 +41,53 @@ export class MeliService {
     this.redirectUri = this.configService.get<string>('MELI_REDIRECT_URI') ?? (() => { throw new Error('MELI_REDIRECT_URI is not set'); })();
   }
 
-  getAuthUrl(vehicleId: string) {
-    const state = encodeURIComponent(vehicleId);
-    return `https://auth.mercadolibre.com.ar/authorization?response_type=code&client_id=${this.clientId}&redirect_uri=${this.redirectUri}?vehicleId=${state}`;
-  }
+getAuthUrl(vehicleId: string) {
+  const state = encodeURIComponent(JSON.stringify({ vehicleId }));
+  return `https://auth.mercadolibre.com.ar/authorization?response_type=code&client_id=${this.clientId}&redirect_uri=${this.redirectUri}&state=${state}`;
+}
+
+
 
   async getAccessToken(code: string, userId: string, vehicleId?: string) {
-    const data = {
-      grant_type: 'authorization_code',
-      client_id: this.clientId,
-      client_secret: this.clientSecret,
-      code,
-      redirect_uri: this.redirectUri + (vehicleId ? `?vehicleId=${vehicleId}` : ''),
-    };
+  const data = {
+    grant_type: 'authorization_code',
+    client_id: this.clientId,
+    client_secret: this.clientSecret,
+    code,
+    redirect_uri: this.redirectUri, // sin `vehicleId`
+  };
 
-    const response = await firstValueFrom(
-      this.httpService.post('https://api.mercadolibre.com/oauth/token', qs.stringify(data), {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      }),
-    );
+  const response = await firstValueFrom(
+    this.httpService.post('https://api.mercadolibre.com/oauth/token', qs.stringify(data), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    }),
+  );
 
-    const { access_token, refresh_token, user_id, expires_in } = response.data;
+  const { access_token, refresh_token, user_id, expires_in } = response.data;
 
-    const expiresAt = new Date(Date.now() + expires_in * 1000);
+  const expiresAt = new Date(Date.now() + expires_in * 1000);
 
-    const meliToken = this.tokenRepository.create({
-      user: { id: userId },
-      meliUserId: user_id,
-      accessToken: access_token,
-      refreshToken: refresh_token,
-      expiresAt,
-    });
+  const meliToken = this.tokenRepository.create({
+    user: { id: userId },
+    meliUserId: user_id,
+    accessToken: access_token,
+    refreshToken: refresh_token,
+    expiresAt,
+  });
 
-    await this.tokenRepository.save(meliToken);
+  await this.tokenRepository.save(meliToken);
 
-    return response.data;
+  // Si vehicleId está presente, podrías iniciar automáticamente la publicación
+  if (vehicleId) {
+    await this.publicarDesdePostId(vehicleId, userId); // O podrías guardar en una cola
   }
+
+  return {
+    message: 'Token guardado correctamente y publicación realizada (si corresponde)',
+    meliUserId: user_id,
+  };
+}
+
 
   async renovarTokenSiHaceFalta(token: MeliToken): Promise<MeliToken> {
     if (new Date() < token.expiresAt) return token;

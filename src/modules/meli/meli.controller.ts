@@ -32,22 +32,47 @@ export class MeliController {
     const url = this.meliService.getAuthUrl(vehicleId);
     return res.redirect(url);
   }
+  // src/modules/meli/meli.controller.ts
 
-  @Get('callback')
-  @ApiOperation({
-    summary: 'Callback desde Mercado Libre después de la autorización',
-    description: 'Guarda el token y publica el vehículo si se proporcionó vehicleId.',
-  })
-  @ApiResponse({ status: 200, description: 'Token guardado correctamente' })
-  async callback(
-    @Query('code') code: string,
-    @Query('vehicleId') vehicleId: string,
-    @Req() req: Request,
-  ) {
-    // En producción deberías obtener el userId del token JWT o sesión
-    const userId = (req as any).user?.id || 'temporal';
-    return this.meliService.getAccessToken(code, userId, vehicleId);
+@Get('auth/test')
+@ApiOperation({ summary: 'Prueba de autorización con Mercado Libre' })
+@ApiResponse({ status: 302, description: 'Redirección a Mercado Libre para autorización' })
+authTest(@Query('vehicleId') vehicleId: string, @Res() res: Response) {
+  const url = this.meliService.getAuthUrl(vehicleId || 'prueba-vehicle-id');
+  return res.redirect(url);
+}
+
+
+@Get('callback')
+// @UseGuards(AuthGuard)
+@ApiOperation({
+  summary: 'Callback desde Mercado Libre después de la autorización',
+  description: 'Guarda el token y publica el vehículo si se proporcionó vehicleId.',
+})
+@ApiResponse({ status: 200, description: 'Token guardado correctamente' })
+async callback(
+  @Query('code') code: string,
+  @Query('state') state: string,
+  @Req() req: Request,
+) {
+  let vehicleId: string;
+
+  try {
+    const parsedState = JSON.parse(decodeURIComponent(state));
+    vehicleId = parsedState.vehicleId;
+  } catch (error) {
+    throw new Error('Error al parsear el parámetro state');
   }
+
+  const userId = (req as any).user?.id;
+  if (!code || !vehicleId || !userId) {
+    throw new Error('Faltan parámetros en el callback');
+  }
+
+  return this.meliService.getAccessToken(code, userId, vehicleId);
+}
+
+
 
   @Post('publicar')
   @UseGuards(AuthGuard)
