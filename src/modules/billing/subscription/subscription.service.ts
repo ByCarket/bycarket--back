@@ -27,7 +27,7 @@ export class SubscriptionService {
     return session;
   }
 
-  async createSession({ customer, price }: CreateSessionDto) {
+  async createSession({ customer, price, user_id }: CreateSessionDto) {
     const success_url = this.configService.get<string>('STRIPE_SUCCESS_URL');
     if (!success_url) {
       throw new InternalServerErrorException('Stripe success url is not defined in configuration');
@@ -38,6 +38,9 @@ export class SubscriptionService {
       mode: 'subscription',
       ui_mode: 'hosted',
       success_url: success_url,
+      metadata: {
+        user_id,
+      },
     });
     session.success_url = `${success_url}?session_id=${session.id}`;
 
@@ -49,6 +52,7 @@ export class SubscriptionService {
     if (!userDb) throw new NotFoundException('User not found.');
 
     return await this.createSession({
+      user_id: userDb.id,
       customer: userDb.stripeCustomerId,
       price,
     });
