@@ -91,12 +91,11 @@ export class VehiclesService {
 
     try {
       const user = await this.userRepository.findOneBy({ id: userId });
-      if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
-
       const brand = await this.brandRepository.findOneBy({ id: brandId });
       const model = await this.modelRepository.findOneBy({ id: modelId });
       const version = await this.versionRepository.findOneBy({ id: versionId });
 
+      if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
       if (!brand) throw new NotFoundException(`Brand with ID ${brandId} not found`);
       if (!model) throw new NotFoundException(`Model with ID ${modelId} not found`);
       if (!version) throw new NotFoundException(`Version with ID ${versionId} not found`);
@@ -106,10 +105,9 @@ export class VehiclesService {
         brand,
         model,
         version,
+        user,
         ...CreateVehicleDto,
       });
-
-      vehicle.user = user;
 
       // 2. Subir imágenes a Cloudinary si existen
       if (images && images.length > 0) {
