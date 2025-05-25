@@ -3,15 +3,20 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
+import { User } from 'src/entities/user.entity';
+import { Role } from 'src/enums/roles.enum';
 import { STRIPE_CLIENT } from 'src/providers/stripe.provider';
 import Stripe from 'stripe';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class WebhooksService {
   constructor(
+    private readonly usersRepository: Repository<User>,
     @Inject(STRIPE_CLIENT) private readonly stripe: Stripe,
     private readonly configService: ConfigService,
   ) {}
@@ -27,10 +32,16 @@ export class WebhooksService {
       case 'customer.subscription.created':
         const subscription = event.data.object;
 
+        const user = await this.usersRepository.findOneBy({ id: subscription.metadata.user_id });
+        if (!user) throw new NotFoundException('User not found.');
+
+        user.role = Role.PREMIUM;
+        await this.usersRepository.save(user);
+
         break;
       case 'customer.subscription.trial_will_end':
         const trial_end = event.data.object;
-
+        // Enviar un email de que la prueba se va a acabar.
         break;
       case 'invoice.paid':
         const invoice = event.data.object;
