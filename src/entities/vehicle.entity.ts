@@ -43,6 +43,14 @@ export class Vehicle {
 
   @Column({ type: 'int', nullable: true })
   mileage: number;
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  state: string;  // 📌 nuevo: estado de la ubicación
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  city: string;  // 📌 nuevo: ciudad
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  country: string;  // 📌 nuevo: país
 
   @Column({ type: 'text', nullable: true })
   description: string;

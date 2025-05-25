@@ -1,4 +1,4 @@
-// src/modules/meli/dto/publicar-meli.dto.ts
+// src/modules/meli/dto/publicarMeli.dto.ts
 
 import { IsNotEmpty, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';

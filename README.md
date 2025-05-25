@@ -241,3 +241,54 @@ DELETE /vehicles/:id                 → Eliminar un vehiculo
 ```
 
 ---
+# 🧪 Pruebas con usuarios test de Mercado Libre
+Para poder realizar pruebas reales con la API de Mercado Libre, utilizamos usuarios test. Estos usuarios permiten simular compras, ventas y toda la integración con ML sin afectar cuentas reales.
+
+## 🔗 Variables de entorno necesarias
+En tu archivo .env, asegurate de tener:
+
+```env
+MELI_APP_ACCESS_TOKEN=APP_USR-xxxxxxxx-xxxxxx-xxxxxx
+```
+⚠️ Este token se obtiene desde tu panel de Mercado Libre (en la sección de credenciales de la app).
+
+## 🔨 Endpoints de prueba disponibles
+Una vez que tengas el backend corriendo (npm run start:dev), podés crear usuarios test directamente usando Swagger o Postman:
+
+## Crear usuario test vendedor
+```bash
+POST /meli/create-test-user/seller
+```
+## Crear usuario test comprador
+```bash
+POST /meli/create-test-user/buyer
+```
+
+🟡 Nota: estos endpoints utilizan el APP_ACCESS_TOKEN configurado en el .env para crear usuarios test automáticamente y guardarlos en la base de datos.
+
+# 🚀 Flujo general de integración con Mercado Libre
+- 1️⃣ El usuario (ya registrado en ByCarKet) hace clic en “Conectar con Mercado Libre”.
+- 2️⃣ El backend redirecciona a la autorización de ML y guarda el token de acceso en la tabla MeliToken.
+- 3️⃣ Una vez que el usuario tiene su token, puede hacer clic en “Publicar” en el frontend:
+
+Se llama a POST /meli/publicar con el postId del vehículo.
+
+El backend valida que el usuario tiene un token válido y envía los datos a ML para crear la publicación.
+
+ML devuelve el meliItemId y el permalink de la publicación, y el backend los guarda en la tabla Post.
+- 4️⃣ El usuario puede dar de baja la publicación en ML usando DELETE /meli/:postId, que la cierra en Mercado Libre.
+
+## 📂 Estructura de datos relevante
+- Tabla MeliToken: guarda el accessToken y refreshToken de ML.
+
+- Tabla Post: tiene el meliItemId y permalink de la publicación en ML (si ya está publicada).
+
+- Tabla TestUser: guarda los datos de los usuarios test creados (meliUserId, nickname, password, etc.).
+
+# 💡 Consejos finales
+- ✅ Podés ver todos los endpoints y probarlos con Swagger en:
+http://localhost:3000/docs
+
+- ✅ Para ver qué usuarios test ya fueron creados, podés agregar un endpoint en el futuro como GET /meli/test-users o revisar directamente la tabla TestUser en la base de datos.
+
+- ✅ Estos usuarios test son compartidos por todo el equipo, por lo que no es necesario que cada dev los cree de nuevo (¡a menos que necesiten usuarios adicionales!).

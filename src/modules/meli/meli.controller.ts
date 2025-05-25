@@ -18,18 +18,21 @@ import { MeliService } from './meli.service';
 import { Request, Response } from 'express';
 import { AuthGuard } from '../../guards/auth.guard';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { PublicarMeliDto } from '../../DTOs/meliDto/publicar-meli.dto';
+import { PublicarMeliDto } from '../../DTOs/meliDto/publicarMeli.dto';
+import { ConfigService } from '@nestjs/config';
 
 @ApiTags('Mercado Libre')
 @Controller('meli')
 export class MeliController {
-  constructor(private readonly meliService: MeliService) {}
+  constructor(private readonly meliService: MeliService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Get('auth')
   @ApiOperation({ summary: 'Redirige al usuario a Mercado Libre para autorizar la app' })
   @ApiResponse({ status: 302, description: 'Redirección hacia Mercado Libre' })
-  auth(@Query('vehicleId') vehicleId: string, @Res() res: Response) {
-    const url = this.meliService.getAuthUrl(vehicleId);
+  auth(@Res() res: Response) {
+    const url = this.meliService.getAuthUrl();
     return res.redirect(url);
   }
   // src/modules/meli/meli.controller.ts
@@ -37,8 +40,8 @@ export class MeliController {
 @Get('auth/test')
 @ApiOperation({ summary: 'Prueba de autorización con Mercado Libre' })
 @ApiResponse({ status: 302, description: 'Redirección a Mercado Libre para autorización' })
-authTest(@Query('vehicleId') vehicleId: string, @Res() res: Response) {
-  const url = this.meliService.getAuthUrl(vehicleId || 'prueba-vehicle-id');
+authTest(@Res() res: Response) {
+  const url = this.meliService.getAuthUrl();
   return res.redirect(url);
 }
 
@@ -47,29 +50,24 @@ authTest(@Query('vehicleId') vehicleId: string, @Res() res: Response) {
 // @UseGuards(AuthGuard)
 @ApiOperation({
   summary: 'Callback desde Mercado Libre después de la autorización',
-  description: 'Guarda el token y publica el vehículo si se proporcionó vehicleId.',
+  description: 'Guarda el token ',
 })
 @ApiResponse({ status: 200, description: 'Token guardado correctamente' })
 async callback(
   @Query('code') code: string,
-  @Query('state') state: string,
   @Req() req: Request,
 ) {
-  let vehicleId: string;
 
-  try {
-    const parsedState = JSON.parse(decodeURIComponent(state));
-    vehicleId = parsedState.vehicleId;
-  } catch (error) {
-    throw new Error('Error al parsear el parámetro state');
+const userId = (req as any).user?.id || this.configService.get<string>('TEST_USER_ID') // Aquí deberías obtener el ID del usuario autenticado
+  // Si estás usando un guard de autenticación, puedes obtener el userId del objeto req.user, pero si no, en desarrollo puedes usar un ID de usuario fijo para pruebas.
+  // Asegúrate de que el userId sea válido y esté asociado al usuario que está haciendo la solicitud.
+  
+  if (!code || !userId) {
+   
+    throw new Error(`Faltan parámetros en el callback,${code},${userId}`);
   }
 
-  const userId = (req as any).user?.id;
-  if (!code || !vehicleId || !userId) {
-    throw new Error('Faltan parámetros en el callback');
-  }
-
-  return this.meliService.getAccessToken(code, userId, vehicleId);
+  return this.meliService.getAccessToken(code, userId);
 }
 
 
@@ -93,8 +91,10 @@ async callback(
     },
   })
   async publicar(@Req() req, @Body() body: PublicarMeliDto) {
-    const userId = req.user.id;
-    return this.meliService.publicarDesdePostId(body.postId, userId);
+    // const userId = req.user.id;
+    const userId = req.user.sub;
+
+    return {status: 'ok', data: await this.meliService.publicarDesdePostId(body.postId, userId)};
   }
 
   @Post('webhook')
@@ -125,6 +125,32 @@ async callback(
 async eliminar(@Req() req, @Param('postId') postId: string) {
   const userId = req.user.id;
   return this.meliService.eliminarPublicacion(postId, userId);
+}
+@Post('create-test-user')
+@ApiOperation({ summary: 'Crea un usuario de prueba (test user) en Mercado Libre' })
+@ApiBody({
+  schema: {
+    example: {
+      type: 'seller', // o 'buyer'
+    },
+  },
+})
+async createTestUser(@Body('type') type: 'seller' | 'buyer') {
+  return this.meliService.createTestUser(type);
+}
+@Get('generate-app-token')
+@ApiOperation({ summary: 'Genera el APP_ACCESS_TOKEN de la aplicación' })
+@ApiResponse({
+  status: 200,
+  description: 'Token generado correctamente.',
+  schema: {
+    example: {
+      access_token: 'APP_USR-1234567890-052422-abcdef',
+    },
+  },
+})
+async generateAppToken() {
+  return this.meliService.generateAppAccessToken();
 }
 
 }

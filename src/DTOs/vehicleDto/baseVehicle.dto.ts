@@ -80,4 +80,16 @@ export class BaseVehicleDto {
     description: 'Imágenes del vehículo en formato file',
   })
   images?: Express.Multer.File[];
+  // 🆕 CAMPOS NUEVOS para la publicación de ML
+  @ApiProperty({ description: 'País', example: 'Argentina' })
+  @IsString()
+  country: string;
+
+  @ApiProperty({ description: 'Estado o provincia', example: 'Buenos Aires' })
+  @IsString()
+  state: string;
+
+  @ApiProperty({ description: 'Ciudad', example: 'La Plata' })
+  @IsString()
+  city: string;
 }

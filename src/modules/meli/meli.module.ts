@@ -11,10 +11,11 @@ import { Post } from '../../entities/post.entity';
 import { Vehicle } from '../../entities/vehicle.entity';
 import { User } from '../../entities/user.entity';
 import { MeliToken } from '../../entities/meliToken.entity';
+import { TestUser } from 'src/entities/testUser.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Post, Vehicle, User, MeliToken]),
+    TypeOrmModule.forFeature([Post, Vehicle, User, MeliToken, TestUser]),
     ConfigModule,
     HttpModule,
   ],

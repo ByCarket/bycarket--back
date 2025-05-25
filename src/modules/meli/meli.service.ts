@@ -13,10 +13,10 @@ import { Repository } from 'typeorm';
 import { firstValueFrom } from 'rxjs';
 import * as qs from 'qs';
 import { Post } from '../../entities/post.entity';
-import { Vehicle } from '../../entities/vehicle.entity';
 import { MeliToken } from '../../entities/meliToken.entity';
 import { ConfigService } from '@nestjs/config';
 import { BadRequestException } from '@nestjs/common';
+import { TestUser } from 'src/entities/testUser.entity';
 
 
 @Injectable()
@@ -32,6 +32,8 @@ export class MeliService {
 
     @InjectRepository(MeliToken)
     private tokenRepository: Repository<MeliToken>,
+    @InjectRepository(TestUser)
+    private readonly testUserRepository: Repository<TestUser>,
 
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
@@ -41,9 +43,8 @@ export class MeliService {
     this.redirectUri = this.configService.get<string>('MELI_REDIRECT_URI') ?? (() => { throw new Error('MELI_REDIRECT_URI is not set'); })();
   }
 
-getAuthUrl(vehicleId: string) {
-  const state = encodeURIComponent(JSON.stringify({ vehicleId }));
-  return `https://auth.mercadolibre.com.ar/authorization?response_type=code&client_id=${this.clientId}&redirect_uri=${this.redirectUri}&state=${state}`;
+getAuthUrl() {
+  return `https://auth.mercadolibre.com.ar/authorization?response_type=code&client_id=${this.clientId}&redirect_uri=${this.redirectUri}`;
 }
 
 
@@ -76,16 +77,11 @@ getAuthUrl(vehicleId: string) {
   });
 
   await this.tokenRepository.save(meliToken);
-
-  // Si vehicleId está presente, podrías iniciar automáticamente la publicación
-  if (vehicleId) {
-    await this.publicarDesdePostId(vehicleId, userId); // O podrías guardar en una cola
-  }
-
-  return {
-    message: 'Token guardado correctamente y publicación realizada (si corresponde)',
+   return {
+    message: 'Token guardado correctamente.',
     meliUserId: user_id,
   };
+
 }
 
 
@@ -117,7 +113,9 @@ getAuthUrl(vehicleId: string) {
       where: { id: postId },
       relations: ['user', 'vehicle'],
     });
-
+ console.log('Viendo que tiene post: ', post)
+ console.log('Viendo que tiene userId: ', userId)
+ console.log('Viendo que tiene post.user.id: ', post?.user?.id)
     if (!post || post.user.id !== userId) {
       throw new UnauthorizedException('No tienes acceso a este post.');
     }
@@ -132,6 +130,7 @@ getAuthUrl(vehicleId: string) {
     }
 
     const validToken = await this.renovarTokenSiHaceFalta(token);
+    // console.log('Viendo que tiene itemData: ', itemData)
 
     const itemData = this.mapPostToMeliItem(post);
 
@@ -165,26 +164,32 @@ getAuthUrl(vehicleId: string) {
   }
 
   private mapPostToMeliItem(post: Post) {
-    const vehicle = post.vehicle;
+  const vehicle = post.vehicle;
 
-    return {
-      title: `${vehicle.brand} ${vehicle.model} ${vehicle.year}`,
-      category_id: 'MLA1743',
-      price: vehicle.price,
-      currency_id: 'ARS',
-      available_quantity: 1,
-      buying_mode: 'buy_it_now',
-      condition: 'used',
-      listing_type_id: 'gold_special',
-      pictures: vehicle.photos.map((url) => ({ source: url })),
-      attributes: [
-        { id: 'BRAND', value_name: vehicle.brand },
-        { id: 'MODEL', value_name: vehicle.model },
-        { id: 'VEHICLE_YEAR', value_name: vehicle.year.toString() },
-        { id: 'TRANSMISSION', value_name: vehicle.transmission || 'Manual' },
-      ],
-    };
-  }
+  return {
+    title: `${vehicle.brand} ${vehicle.model} ${vehicle.year}`,
+    category_id: 'MLA1743', // o ajustá a la categoría "leaf" correcta!
+    price: vehicle.price,
+    currency_id: 'ARS',
+    available_quantity: 1,
+    buying_mode: 'classified',  // OJO: según error de ML, debe ser 'classified' en MLA1743
+    condition: 'used',
+    listing_type_id: 'free', // revisá cuál corresponde según ML para test user
+    pictures: vehicle.photos.map((url) => ({ source: url })),
+    attributes: [
+      { id: 'BRAND', value_name: vehicle.brand },
+      { id: 'MODEL', value_name: vehicle.model },
+      { id: 'VEHICLE_YEAR', value_name: vehicle.year.toString() },
+      { id: 'TRANSMISSION', value_name: vehicle.transmission || 'Manual' },
+    ],
+    description: { plain_text: vehicle.description },
+    location: {
+      country: { name: vehicle.country },
+      state: { name: vehicle.state },
+      city: { name: vehicle.city },
+    },
+  };
+}
 
 
   async eliminarPublicacion(postId: string, userId: string) {
@@ -240,5 +245,58 @@ getAuthUrl(vehicleId: string) {
     );
   }
 }
+
+// src/modules/meli/meli.service.ts
+
+async createTestUser(type: 'seller' | 'buyer') {
+  const data = { site_id: 'MLA' };
+
+  // 🔴 Ajuste: usa el access token de tu app (no el clientId)
+  // const appAccessToken = this.configService.get<string>('MELI_APP_ACCESS_TOKEN') ?? (() => { throw new Error('MELI_APP_ACCESS_TOKEN is not set'); })();
+const { access_token: appAccessToken } = await this.generateAppAccessToken();
+  const response = await firstValueFrom(
+    this.httpService.post('https://api.mercadolibre.com/users/test_user', data, {
+      headers: {
+        Authorization: `Bearer ${appAccessToken}`,
+      },
+    }),
+  );
+
+  const { id, nickname, password } = response.data;
+
+  // Guardalo en la DB
+  const testUser = this.testUserRepository.create({
+    meliUserId: id,
+    nickname,
+    password,
+    type,
+  });
+  await this.testUserRepository.save(testUser);
+
+  return {
+    message: 'Usuario de prueba creado correctamente.',
+    testUser,
+  };
+  
+}
+
+async generateAppAccessToken(): Promise<{ access_token: string }> {
+  const data = {
+    grant_type: 'client_credentials',
+    client_id: this.clientId,
+    client_secret: this.clientSecret,
+  };
+
+  const response = await firstValueFrom(
+    this.httpService.post('https://api.mercadolibre.com/oauth/token', qs.stringify(data), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    }),
+  );
+
+  const { access_token } = response.data;
+
+  return { access_token };
+}
+
 
 }
