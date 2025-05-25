@@ -63,7 +63,7 @@ const userId = (req as any).user?.id || this.configService.get<string>('TEST_USE
   // Asegúrate de que el userId sea válido y esté asociado al usuario que está haciendo la solicitud.
   
   if (!code || !userId) {
-   
+  
     throw new Error(`Faltan parámetros en el callback,${code},${userId}`);
   }
 

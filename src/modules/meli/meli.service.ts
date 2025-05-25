@@ -77,7 +77,7 @@ getAuthUrl() {
   });
 
   await this.tokenRepository.save(meliToken);
-   return {
+  return {
     message: 'Token guardado correctamente.',
     meliUserId: user_id,
   };
@@ -113,9 +113,9 @@ getAuthUrl() {
       where: { id: postId },
       relations: ['user', 'vehicle'],
     });
- console.log('Viendo que tiene post: ', post)
- console.log('Viendo que tiene userId: ', userId)
- console.log('Viendo que tiene post.user.id: ', post?.user?.id)
+  console.log('Viendo que tiene post: ', post)
+  console.log('Viendo que tiene userId: ', userId)
+  console.log('Viendo que tiene post.user.id: ', post?.user?.id)
     if (!post || post.user.id !== userId) {
       throw new UnauthorizedException('No tienes acceso a este post.');
     }
@@ -175,7 +175,7 @@ getAuthUrl() {
     buying_mode: 'classified',  // OJO: según error de ML, debe ser 'classified' en MLA1743
     condition: 'used',
     listing_type_id: 'free', // revisá cuál corresponde según ML para test user
-    pictures: vehicle.photos.map((url) => ({ source: url })),
+    pictures: vehicle.images.map((url) => ({ source: url })),
     attributes: [
       { id: 'BRAND', value_name: vehicle.brand },
       { id: 'MODEL', value_name: vehicle.model },

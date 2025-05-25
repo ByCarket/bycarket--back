@@ -43,6 +43,7 @@ export class Vehicle {
 
   @Column({ type: 'int', nullable: true })
   mileage: number;
+
   @Column({ type: 'varchar', length: 100, nullable: true })
   state: string;  // 📌 nuevo: estado de la ubicación
 
@@ -56,7 +57,7 @@ export class Vehicle {
   description: string;
 
   @Column({ type: 'simple-json', nullable: true, default: '[]' })
-  photos: CloudinaryImage[]; // Array de URLs (JSON)
+  images: CloudinaryImage[]; // Array de URLs (JSON)
 
   @Column({ type: 'enum', enum: TransmissionType, nullable: true })
   transmission?: TransmissionType;
