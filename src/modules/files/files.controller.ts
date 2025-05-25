@@ -40,8 +40,8 @@ export class FilesController {
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({
-            maxSize: 1000000,
-            message: 'The file must not exceed 1Mb.',
+            maxSize: 15000000,
+            message: 'The file must not exceed 15Mb.',
           }),
           new FileTypeValidator({
             fileType: /(jpg|jpeg|png|webp)/,
@@ -65,13 +65,16 @@ export class FilesController {
     @UploadedFiles(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 1000000 }), // 1 MB por imagen
+          new MaxFileSizeValidator({
+            maxSize: 15000000,
+            message: 'The file must not exceed 15Mb.',
+          }),
           new FileTypeValidator({ fileType: /(jpg|jpeg|png|webp)/ }),
         ],
       }),
     )
     files: Express.Multer.File[],
-  ){
+  ) {
     return this.filesService.updateVehicleImages(userId, files, vehicleId);
   }
 

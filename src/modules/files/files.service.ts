@@ -160,9 +160,21 @@ export class FilesService {
       public_id: res.public_id,
       secure_url: res.secure_url,
     }));
-    vehicle.images = newImages;
+    vehicle.images = [...currentImages, ...newImages];
 
     await this.vehicleRepository.save(vehicle);
+
+    vehicle.user = {
+      id: vehicle.user.id,
+      name: vehicle.user.name,
+      email: vehicle.user.email,
+      address: vehicle.user.address,
+      city: vehicle.user.city,
+      country: vehicle.user.country,
+      phone: vehicle.user.phone,
+      role: vehicle.user.role,
+      image: vehicle.user.image,
+    } as User;
 
     return {
       data: vehicle,
