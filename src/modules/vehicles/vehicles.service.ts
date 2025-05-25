@@ -141,7 +141,7 @@ export class VehiclesService {
         }
 
         // Asignar las imágenes al vehículo
-        vehicle.photos = uploadedImages;
+        vehicle.images = uploadedImages;
       }
 
       // 3. Guardar el vehículo en la base de datos

@@ -63,12 +63,12 @@ export class FilesService {
     }
 
     // Verificar que el vehículo tenga fotos
-    if (!vehicle.photos || vehicle.photos.length === 0) {
+    if (!vehicle.images || vehicle.images.length === 0) {
       throw new NotFoundException(`No photos found for vehicle with ID ${vehicleId}.`);
     }
 
     // Buscar la foto específica por public_id
-    const photoToDelete = vehicle.photos.find(photo => photo.public_id === publicId);
+    const photoToDelete = vehicle.images.find(photo => photo.public_id === publicId);
 
     if (!photoToDelete) {
       throw new NotFoundException(`Photo with publicId ${publicId} not found in vehicle.`);
@@ -79,7 +79,7 @@ export class FilesService {
       await this.deleteCloudinaryImage(publicId);
 
       // Remover la foto específica del array
-      vehicle.photos = vehicle.photos.filter(photo => photo.public_id !== publicId);
+      vehicle.images = vehicle.images.filter(photo => photo.public_id !== publicId);
 
       // Guardar el vehículo actualizado
       await this.vehicleRepository.save(vehicle);
@@ -88,7 +88,7 @@ export class FilesService {
         data: {
           vehicleId: vehicleId,
           deletedImageId: publicId,
-          remainingPhotos: vehicle.photos.length,
+          remainingPhotos: vehicle.images.length,
         },
         message: 'Vehicle photo deleted successfully.',
       };
@@ -150,7 +150,7 @@ export class FilesService {
       throw new NotFoundException(`Vehicle with ID ${vehicleId} not found for user.`);
     }
 
-    const currentPhotos = vehicle.photos ?? [];
+    const currentPhotos = vehicle.images ?? [];
 
     if (currentPhotos.length + files.length > 6) {
       throw new BadRequestException({
@@ -164,7 +164,7 @@ export class FilesService {
       public_id: res.public_id,
       secure_url: res.secure_url,
     }));
-    vehicle.photos = newImages;
+    vehicle.images = newImages;
 
     await this.vehicleRepository.save(vehicle);
 
