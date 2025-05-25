@@ -12,6 +12,7 @@ import { JwtSign } from 'src/interfaces/jwtPayload.interface';
 import { ChangePasswordDto } from 'src/DTOs/usersDto/changePassword.dto';
 import { GoogleProfileDto } from 'src/DTOs/usersDto/google-profile.dto';
 import { CustomerService } from '../billing/customer/customer.service';
+import { MailService } from '../mail-notification/mailNotificacion.service';
 
 @Injectable()
 export class AuthService {
@@ -21,6 +22,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    private readonly mailService: MailService,
   ) {}
 
   async register({ confirmPassword, password, ...user }: CreateUserDto) {
@@ -42,6 +44,12 @@ export class AuthService {
       password: hashedPassword,
       stripeCustomerId,
     });
+
+    // Enviar email de bienvenida
+    try {
+      await this.mailService.sendWelcomeEmail(newUser.email, newUser.name);
+    } catch (emailError) {emailError}
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: newUserPassword, ...userWithoutPassword } = newUser;
     return userWithoutPassword;
@@ -85,6 +93,12 @@ export class AuthService {
 
       user = await this.usersRepository.create(newUser);
       await this.usersRepository.save(user);
+
+      // Enviar email de bienvenida para usuarios de Google nuevos
+      try {
+        await this.mailService.sendWelcomeEmail(user.email, user.name);
+
+      } catch (emailError) {emailError}
     } else if (!user.googleId) {
       user.googleId = sub;
       await this.usersRepository.save(user);
@@ -93,12 +107,16 @@ export class AuthService {
     const jwtPayload = { sub: user.id, email: user.email };
     const token = this.jwtService.sign(jwtPayload);
 
-    return { success: 'Login successfully', token, user: {
-		id: user.id,
-		name: user.name,
-		email: user.email,
-		role: user.role
-	} };
+    return {
+      success: 'Login successfully',
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    };
   }
 
   async createAdmin(user: Omit<CreateUserDto, 'confirmPassword'>) {
@@ -151,6 +169,11 @@ export class AuthService {
     if (!(await bcrypt.compare(oldPassword, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
     }
+
+    // Enviar notificación de cambio de contraseña
+    try {
+      await this.mailService.sendPasswordChangeNotification(user.email, user.name);
+    } catch (emailError) {emailError}
 
     const hashedPassword = await bcrypt.hash(password, 10);
     await this.usersRepository.update(id, { password: hashedPassword });

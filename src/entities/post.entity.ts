@@ -28,8 +28,8 @@ export class Post {
 
   @Column({
     type: 'enum',
-    enum: ['Active', 'Inactive', 'Rejected', 'Pending', 'Sold'],
-    default: 'Pending',
+    enum: PostStatus,
+    default: PostStatus.ACTIVE,
   })
   status: PostStatus;
 
