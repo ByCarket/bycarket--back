@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Request } from 'express';
 import { User } from 'src/entities/user.entity';
 import { Role } from 'src/enums/roles.enum';
@@ -16,6 +17,7 @@ import { Repository } from 'typeorm';
 @Injectable()
 export class WebhooksService {
   constructor(
+    @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     @Inject(STRIPE_CLIENT) private readonly stripe: Stripe,
     private readonly configService: ConfigService,
