@@ -8,7 +8,7 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
+    "start": "node --max-old-space-size=2048 ./node_modules/@nestjs/cli/bin/nest.js start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
@@ -29,6 +30,7 @@
     "@nestjs/swagger": "^11.2.0",
     "@nestjs/typeorm": "^11.0.0",
     "@types/cors": "^2.8.18",
+    "@types/stripe": "^8.0.416",
     "bcrypt": "^5.1.1",
     "buffer-to-stream": "^1.0.0",
     "class-transformer": "^0.5.1",
@@ -38,12 +40,15 @@
     "dotenv": "^16.4.7",
     "express-oauth2-jwt-bearer": "^1.6.1",
     "jwks-rsa": "^3.2.0",
+    "nodemailer": "^7.0.3",
     "passport": "^0.7.0",
     "passport-auth0": "^1.4.4",
     "passport-jwt": "^4.0.1",
     "pg": "^8.14.1",
+    "raw-body": "^3.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
+    "stripe": "^18.1.1",
     "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.24",
     "uuid": "^11.1.0"
@@ -61,6 +66,7 @@
     "@types/jest": "^29.5.14",
     "@types/multer": "^1.4.12",
     "@types/node": "^22.15.17",
+    "@types/nodemailer": "^6.4.17",
     "@types/passport-auth0": "^1.0.9",
     "@types/passport-jwt": "^4.0.1",
     "@types/supertest": "^6.0.2",

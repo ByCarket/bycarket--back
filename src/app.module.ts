@@ -14,6 +14,10 @@ import { ModelsModule } from './modules/models/models.module';
 import { VersionsModule } from './modules/versions/versions.module';
 import { PassportModule } from '@nestjs/passport';
 import { FilesModule } from './modules/files/files.module';
+import { BillingModule } from './modules/billing/billing.module';
+import stripeConfig from './config/stripe.config';
+import { MailModule } from './modules/mail-notification/mailNotification.module';
+import { PricesModule } from './modules/prices/prices.module';
 
 dotenv.config();
 
@@ -48,8 +52,11 @@ dotenv.config();
     ModelsModule,
     VersionsModule,
     FilesModule,
+    BillingModule,
+    MailModule,
+    PricesModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}
