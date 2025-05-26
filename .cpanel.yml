@@ -4,4 +4,4 @@ deployment:
     - export NODE_ENV=production
     - /opt/cpanel/ea-nodejs18/bin/npm install
     - /opt/cpanel/ea-nodejs18/bin/npm run build
-    - rsync -av --delete dist/ /home/zoes1nyqb4m0/repositories/bycarket--back 
+    - rsync -av --delete dist/ /home/zoes1nyqb4m0/public_html/
