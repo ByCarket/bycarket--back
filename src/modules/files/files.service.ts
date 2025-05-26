@@ -1,4 +1,10 @@
-import { BadRequestException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import * as toStream from 'buffer-to-stream';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -118,19 +124,50 @@ export class FilesService {
     }
   }
 
-  async updateImgUser(id: string, file: Express.Multer.File) {
+  async updateImgUser(id: string, file: Express.Multer.File): Promise<ResponseIdDto> {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found.`);
     }
 
-    const uploadedImg = await this.uploadImgCloudinary(file);
-    await this.usersRepository.update(id, { image: uploadedImg.secure_url });
+    const queryRunner = this.vehicleRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    return {
-      data: id,
-      message: 'User image updated successfully.',
-    };
+    try {
+      const public_id = user.image.public_id;
+
+      const uploadedImg = await this.uploadImgCloudinary(file);
+      await queryRunner.manager.update(User, id, {
+        image: {
+          public_id: uploadedImg.public_id,
+          secure_url: uploadedImg.secure_url,
+        },
+      });
+
+      if (public_id) {
+        await this.deleteCloudinaryImage(public_id);
+      }
+      await queryRunner.commitTransaction();
+
+      return {
+        data: id,
+        message: 'User image updated successfully.',
+      };
+    } catch (error) {
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction();
+      }
+      if (error instanceof HttpException) {
+        throw new HttpException(error.getResponse(), error.getStatus());
+      }
+      if (error instanceof Error) {
+        throw new InternalServerErrorException(error.message);
+      }
+      throw new InternalServerErrorException('Unexpected error');
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async updateVehicleImages(userId: string, files: Express.Multer.File[], vehicleId: string) {
@@ -160,9 +197,21 @@ export class FilesService {
       public_id: res.public_id,
       secure_url: res.secure_url,
     }));
-    vehicle.images = newImages;
+    vehicle.images = [...currentImages, ...newImages];
 
     await this.vehicleRepository.save(vehicle);
+
+    vehicle.user = {
+      id: vehicle.user.id,
+      name: vehicle.user.name,
+      email: vehicle.user.email,
+      address: vehicle.user.address,
+      city: vehicle.user.city,
+      country: vehicle.user.country,
+      phone: vehicle.user.phone,
+      role: vehicle.user.role,
+      image: vehicle.user.image,
+    } as User;
 
     return {
       data: vehicle,

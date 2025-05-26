@@ -4,6 +4,7 @@ import { Role } from '../enums/roles.enum';
 import { Post } from './post.entity';
 import { Question } from './question.entity';
 import { Vehicle } from './vehicle.entity';
+import { CloudinaryUserImage } from 'src/interfaces/cloudinaryUserImage.interface';
 
 @Entity({
   name: 'users',
@@ -36,8 +37,15 @@ export class User {
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  image: string;
+  @Column({
+    type: 'simple-json',
+    nullable: true,
+    default: {
+      secure_url:
+        'https://res.cloudinary.com/dps04b1up/image/upload/v1748212732/rl5hbrtgudxyvfbybuhk.jpg',
+    },
+  })
+  image: CloudinaryUserImage;
 
   @Column({ type: 'enum', enum: Role, default: Role.USER })
   role: Role;
