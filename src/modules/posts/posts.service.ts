@@ -189,8 +189,12 @@ export class PostsService {
         `Vehicle with ID ${vehicleId} not found or does not belong to user with ID ${userId}.`,
       );
     }
-    vehicle.description = description;
-    await this.vehiclesRepository.save(vehicle);
+
+    // Solo actualizar la descripción del vehículo si se proporciona una nueva
+    if (description !== undefined && description !== null && description.trim() !== '') {
+      vehicle.description = description;
+      await this.vehiclesRepository.save(vehicle);
+    }
 
     // Verificar si ya existe un post activo para este vehículo
     const existingPost = await this.postsRepository.findOne({
