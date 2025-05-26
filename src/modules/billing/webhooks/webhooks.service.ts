@@ -4,6 +4,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  RawBodyRequest,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -23,7 +24,7 @@ export class WebhooksService {
     private readonly configService: ConfigService,
   ) {}
 
-  async handleSub(req: Request) {
+  async handleSub(req: RawBodyRequest<Request>) {
     const event: Stripe.Event = await this.verifySignature(req);
 
     switch (event.type) {
@@ -54,7 +55,7 @@ export class WebhooksService {
     }
   }
 
-  async verifySignature(req: Request) {
+  async verifySignature(req: RawBodyRequest<Request>) {
     const rawBody = req.rawBody;
     const signature = req.headers['stripe-signature'];
     const secret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');

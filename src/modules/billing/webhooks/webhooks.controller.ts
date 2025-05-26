@@ -1,4 +1,4 @@
-import { Controller, HttpCode, Post, Req } from '@nestjs/common';
+import { Controller, HttpCode, Post, RawBodyRequest, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { WebhooksService } from './webhooks.service';
 
@@ -8,7 +8,7 @@ export class WebhooksController {
 
   @Post('stripe')
   @HttpCode(200)
-  async handleSubscription(@Req() req: Request) {
+  async handleSubscription(@Req() req: RawBodyRequest<Request>) {
     await this.webhooksService.handleSub(req);
     return { received: true };
   }

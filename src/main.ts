@@ -3,21 +3,11 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { LoggerGlobal } from './middlewares/logger.middleware';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
-import * as bodyParser from 'body-parser';
-import { Request } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors();
-  app.use(
-    '/webhook/stripe',
-    bodyParser.json({
-      verify: (req: Request, res, buf) => {
-        req.rawBody = buf;
-      },
-    }),
-  );
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Bycarket API')
