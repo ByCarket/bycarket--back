@@ -15,7 +15,7 @@ import { VersionsModule } from './modules/versions/versions.module';
 import { PassportModule } from '@nestjs/passport';
 import { FilesModule } from './modules/files/files.module';
 
-dotenv.config({ path: '.env.development' });
+dotenv.config();
 
 @Module({
   imports: [
