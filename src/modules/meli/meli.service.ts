@@ -111,7 +111,7 @@ getAuthUrl() {
   async publicarDesdePostId(postId: string, userId: string) {
     const post = await this.postRepository.findOne({
       where: { id: postId },
-      relations: ['user', 'vehicle'],
+      relations: {user:true, vehicle:{brand:true, model:true, version:true}},
     });
   console.log('Viendo que tiene post: ', post)
   console.log('Viendo que tiene userId: ', userId)
@@ -175,10 +175,10 @@ getAuthUrl() {
     buying_mode: 'classified',  // OJO: según error de ML, debe ser 'classified' en MLA1743
     condition: 'used',
     listing_type_id: 'free', // revisá cuál corresponde según ML para test user
-    pictures: vehicle.images.map((url) => ({ source: url })),
+    pictures: vehicle.images.map((img) => ({ source: img.secure_url })),
     attributes: [
-      { id: 'BRAND', value_name: vehicle.brand },
-      { id: 'MODEL', value_name: vehicle.model },
+      { id: 'BRAND', value_name: vehicle.brand.name },
+      { id: 'MODEL', value_name: vehicle.model.name },
       { id: 'VEHICLE_YEAR', value_name: vehicle.year.toString() },
       { id: 'TRANSMISSION', value_name: vehicle.transmission || 'Manual' },
     ],

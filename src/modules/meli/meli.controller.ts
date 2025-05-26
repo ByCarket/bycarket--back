@@ -20,6 +20,7 @@ import { AuthGuard } from '../../guards/auth.guard';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PublicarMeliDto } from '../../DTOs/meliDto/publicarMeli.dto';
 import { ConfigService } from '@nestjs/config';
+import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
 
 @ApiTags('Mercado Libre')
 @Controller('meli')
@@ -90,10 +91,10 @@ const userId = (req as any).user?.id || this.configService.get<string>('TEST_USE
       },
     },
   })
-  async publicar(@Req() req, @Body() body: PublicarMeliDto) {
+  
+  async publicar(@UserAuthenticated('sub') userId: string, @Body() body: PublicarMeliDto) {
     // const userId = req.user.id;
-    const userId = req.user.sub;
-
+    // const userId = req.user.sub
     return {status: 'ok', data: await this.meliService.publicarDesdePostId(body.postId, userId)};
   }
 

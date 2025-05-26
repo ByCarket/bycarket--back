@@ -56,7 +56,7 @@ export class VehiclesService {
   async getVehicleById(id: string, userId: string) {
     const vehicle = await this.vehicleRepository.findOne({
       where: { id },
-      relations: ['user'],
+      relations: ['user', 'brand', 'model', 'version'],
     });
 
     if (!vehicle) {
