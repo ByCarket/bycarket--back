@@ -17,21 +17,24 @@ import { FilesModule } from './modules/files/files.module';
 import { BillingModule } from './modules/billing/billing.module';
 import stripeConfig from './config/stripe.config';
 import { MailModule } from './modules/mail-notification/mailNotification.module';
+import { PricesModule } from './modules/prices/prices.module';
 import { MeliModule } from './modules/meli/meli.module';
 
-dotenv.config({ path: '.env.development' });
+dotenv.config();
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [typeormConfig, stripeConfig],
-      envFilePath: '.env.development',
+      load: [typeormConfig],
+      ignoreEnvFile: true,
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService): TypeOrmModuleOptions => {
         const config = configService.get<TypeOrmModuleOptions>('typeorm');
+        console.log('DB_HOST usado:', process.env.DB_HOST);
+        console.log('TypeORM config:', configService.get<TypeOrmModuleOptions>('typeorm'));
         return config as TypeOrmModuleOptions;
       },
     }),
@@ -52,6 +55,7 @@ dotenv.config({ path: '.env.development' });
     FilesModule,
     BillingModule,
     MeliModule,
+    PricesModule,
   ],
   controllers: [],
   providers: [],

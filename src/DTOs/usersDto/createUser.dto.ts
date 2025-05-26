@@ -102,13 +102,13 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(5)
+  @MinLength(2)
   @MaxLength(50)
   @ApiProperty({
     description: 'User city of residence',
     example: 'New York',
     type: String,
-    minLength: 5,
+    minLength: 2,
     maxLength: 20,
   })
   city: string;

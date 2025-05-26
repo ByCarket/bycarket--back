@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { FilesService } from '../files/files.service';
-import { CloudinaryImage } from 'src/interfaces/cloudinaryImage.interface';
+import { CloudinaryVehicleImage } from 'src/interfaces/cloudinaryImage.interface';
 import { Vehicle } from 'src/entities/vehicle.entity';
 import { CreateVehicleDto } from 'src/DTOs/vehicleDto/createVehicle.dto';
 import { UpdateVehicleDto } from 'src/DTOs/vehicleDto/updateVehicle.dto';
@@ -95,7 +95,7 @@ export class VehiclesService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    const uploadedImages: CloudinaryImage[] = [];
+    const uploadedImages: CloudinaryVehicleImage[] = [];
 
     try {
       const user = await this.userRepository.findOneBy({ id: userId });

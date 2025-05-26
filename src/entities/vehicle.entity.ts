@@ -6,7 +6,7 @@ import { User } from './user.entity';
 import { Version } from './version.entity';
 import { VehicleTypeEnum } from '../enums/vehicleType.enum';
 import { VehicleCondition } from 'src/enums/vehicleCondition.enum';
-import { CloudinaryImage } from 'src/interfaces/cloudinaryImage.interface';
+import { CloudinaryVehicleImage } from 'src/interfaces/cloudinaryImage.interface';
 import { TransmissionType } from '../enums/transmission.enum';
 
 @Entity('vehicles')
@@ -57,7 +57,7 @@ export class Vehicle {
   description: string;
 
   @Column({ type: 'simple-json', nullable: true, default: '[]' })
-  images: CloudinaryImage[]; // Array de URLs (JSON)
+  images: CloudinaryVehicleImage[]; // Array de URLs (JSON)
 
   @Column({ type: 'enum', enum: TransmissionType, nullable: true })
   transmission?: TransmissionType;
