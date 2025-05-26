@@ -37,12 +37,11 @@ export class SubscriptionService {
       line_items: [{ price, quantity: 1 }],
       mode: 'subscription',
       ui_mode: 'hosted',
-      success_url: success_url,
+      success_url: `${success_url}?session_id={CHECKOUT_SESSION_ID}`,
       metadata: {
         user_id,
       },
     });
-    session.success_url = `${success_url}?session_id=${session.id}`;
 
     return session.url;
   }
