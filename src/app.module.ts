@@ -19,14 +19,14 @@ import stripeConfig from './config/stripe.config';
 import { MailModule } from './modules/mail-notification/mailNotification.module';
 import { PricesModule } from './modules/prices/prices.module';
 
-dotenv.config();
+dotenv.config({ path: '.env.development' });
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [typeormConfig],
-      ignoreEnvFile: true,
+      load: [typeormConfig, stripeConfig],
+      envFilePath: '.env.development',
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
