@@ -22,6 +22,7 @@ dotenv.config({ path: '.env.development' });
     ConfigModule.forRoot({
       isGlobal: true,
       load: [typeormConfig],
+      ignoreEnvFile: true,
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
