@@ -16,6 +16,8 @@ import { PassportModule } from '@nestjs/passport';
 import { FilesModule } from './modules/files/files.module';
 import { BillingModule } from './modules/billing/billing.module';
 import stripeConfig from './config/stripe.config';
+import { MailModule } from './modules/mail-notification/mailNotification.module';
+import { PricesModule } from './modules/prices/prices.module';
 
 dotenv.config({ path: '.env.development' });
 
@@ -49,6 +51,8 @@ dotenv.config({ path: '.env.development' });
     VersionsModule,
     FilesModule,
     BillingModule,
+    MailModule,
+    PricesModule,
   ],
   controllers: [],
   providers: [],

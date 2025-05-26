@@ -2,7 +2,7 @@ import { ForbiddenException, HttpException, Injectable, NotFoundException } from
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FilesService } from '../files/files.service';
-import { CloudinaryImage } from 'src/interfaces/cloudinaryImage.interface';
+import { CloudinaryVehicleImage } from 'src/interfaces/cloudinaryImage.interface';
 import { Vehicle } from 'src/entities/vehicle.entity';
 import { CreateVehicleDto } from 'src/DTOs/vehicleDto/createVehicle.dto';
 import { UpdateVehicleDto } from 'src/DTOs/vehicleDto/updateVehicle.dto';
@@ -83,30 +83,29 @@ export class VehiclesService {
     { images, brandId, modelId, versionId, ...CreateVehicleDto }: CreateVehicleDto,
     userId: string,
   ) {
-    const user = await this.userRepository.findOneBy({ id: userId });
-    if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
-
-    const brand = await this.brandRepository.findOneBy({ id: brandId });
-    const model = await this.modelRepository.findOneBy({ id: modelId });
-    const version = await this.versionRepository.findOneBy({ id: versionId });
-
-    if (!brand) throw new NotFoundException(`Brand with ID ${brandId} not found`);
-    if (!model) throw new NotFoundException(`Model with ID ${modelId} not found`);
-    if (!version) throw new NotFoundException(`Version with ID ${versionId} not found`);
-
-    // Iniciar la transacción
     const queryRunner = this.vehicleRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    const uploadedImages: CloudinaryImage[] = [];
+    const uploadedImages: CloudinaryVehicleImage[] = [];
 
     try {
+      const user = await this.userRepository.findOneBy({ id: userId });
+      const brand = await this.brandRepository.findOneBy({ id: brandId });
+      const model = await this.modelRepository.findOneBy({ id: modelId });
+      const version = await this.versionRepository.findOneBy({ id: versionId });
+
+      if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
+      if (!brand) throw new NotFoundException(`Brand with ID ${brandId} not found`);
+      if (!model) throw new NotFoundException(`Model with ID ${modelId} not found`);
+      if (!version) throw new NotFoundException(`Version with ID ${versionId} not found`);
+
       // 1. Crear el vehículo (sin guardar en la base de datos todavía)
       const vehicle = this.vehicleRepository.create({
         brand,
         model,
         version,
+        user,
         ...CreateVehicleDto,
       });
 
@@ -156,7 +155,9 @@ export class VehiclesService {
       };
     } catch (error) {
       // Rollback de la transacción en caso de error
-      await queryRunner.rollbackTransaction();
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction();
+      }
 
       // Si se subieron imágenes a Cloudinary, eliminarlas
       if (uploadedImages.length > 0) {
