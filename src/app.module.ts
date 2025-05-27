@@ -25,15 +25,13 @@ dotenv.config();
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [typeormConfig],
-      ignoreEnvFile: true,
+      load: [typeormConfig, stripeConfig],
+      envFilePath: '.env',
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService): TypeOrmModuleOptions => {
         const config = configService.get<TypeOrmModuleOptions>('typeorm');
-        console.log('DB_HOST usado:', process.env.DB_HOST);
-        console.log('TypeORM config:', configService.get<TypeOrmModuleOptions>('typeorm'));
         return config as TypeOrmModuleOptions;
       },
     }),
