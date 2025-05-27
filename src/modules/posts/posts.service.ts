@@ -8,6 +8,7 @@ import { PostStatus } from 'src/enums/postStatus.enum';
 import { ResponsePaginatedPostsDto } from 'src/DTOs/postsDto/responsePaginatedPosts.dto';
 import { CreatePostDto } from 'src/DTOs/postsDto/createPost.dto';
 import { QueryPostsDto } from 'src/DTOs/postsDto/queryPosts.dto';
+import { FiltersDto } from 'src/DTOs/postsDto/filters.dto';
 
 @Injectable()
 export class PostsService {
@@ -70,7 +71,7 @@ export class PostsService {
     };
   }
 
-  async buildPostFilters(filters: Partial<QueryPostsDto>) {
+  async buildPostFilters(filters: FiltersDto) {
     const exactFilters = {
       brandId: 'brand.id',
       modelId: 'model.id',
