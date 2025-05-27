@@ -176,14 +176,23 @@ export class PostsService {
 
   async createPost({ vehicleId, description, price }: CreatePostDto, userId: string) {
     // Verificar que el usuario existe
-    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['posts'],
+    });
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found.`);
     }
-    if (user.role === Role.USER && user.posts.length === 3) {
-      throw new ForbiddenException(
-        'You are not allowed to create more posts. Please upgrade to a premium plan.',
+
+    if (user.role === Role.USER && user.posts !== undefined) {
+      const validPosts: Post[] = user.posts.filter(
+        post => post.status === PostStatus.ACTIVE || PostStatus.PENDING,
       );
+      if (validPosts.length >= 3) {
+        throw new ForbiddenException(
+          'You are not allowed to create more posts. Please upgrade to a premium plan.',
+        );
+      }
     }
 
     // Verificar que el vehículo existe y pertenece al usuario
@@ -196,6 +205,20 @@ export class PostsService {
       );
     }
 
+    // Verificar si ya existe un post activo para este vehículo
+    const existingPost = await this.postsRepository
+      .createQueryBuilder('posts')
+      .leftJoinAndSelect('posts.vehicle', 'vehicle')
+      .where('vehicle.id = :vehicleId', { vehicleId })
+      .andWhere('posts.status IN (:...status)', { status: [PostStatus.ACTIVE, PostStatus.PENDING] })
+      .getOne();
+
+    if (existingPost) {
+      throw new ForbiddenException(
+        `An active or pending post already exists for vehicle with ID ${vehicleId}.`,
+      );
+    }
+
     // Solo actualizar la descripción del vehículo si se proporciona una nueva
     if (description !== undefined && description !== null && description.trim() !== '') {
       vehicle.description = description;
@@ -205,18 +228,6 @@ export class PostsService {
     if (price) {
       vehicle.price = price;
       await this.vehiclesRepository.save(vehicle);
-    }
-
-    // Verificar si ya existe un post activo para este vehículo
-    const existingPost = await this.postsRepository.findOne({
-      where: { vehicle: { id: vehicleId }, status: PostStatus.ACTIVE },
-      relations: { vehicle: true },
-    });
-
-    if (existingPost) {
-      throw new ForbiddenException(
-        `An active post already exists for vehicle with ID ${vehicleId}.`,
-      );
     }
 
     // Crear y guardar el nuevo post
