@@ -1,27 +1,10 @@
-import { PartialType, PickType } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import {
-  IsEnum,
-  IsInt,
-  IsNumber,
-  IsOptional,
-  IsPositive,
-  IsString,
-  Max,
-  Min,
-} from 'class-validator';
-import { BaseVehicleDto } from '../vehicleDto/baseVehicle.dto';
+import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { OrderByPostsEnum } from 'src/enums/orderByPosts.enum';
 import { OrderDirectionEnum } from 'src/enums/order.enum';
+import { FiltersDto } from './filters.dto';
 
-export class QueryPostsDto extends PickType(PartialType(BaseVehicleDto), [
-  'brandId',
-  'modelId',
-  'versionId',
-  'typeOfVehicle',
-  'condition',
-  'currency',
-]) {
+export class QueryPostsDto extends FiltersDto {
   // Pagination
   @Transform(({ value }) => value ?? 1)
   @Type(() => Number)
@@ -48,40 +31,4 @@ export class QueryPostsDto extends PickType(PartialType(BaseVehicleDto), [
   @IsOptional()
   @IsString()
   search?: string;
-
-  // Range Filters
-  @IsOptional()
-  @Type(() => Number)
-  @Min(1950)
-  @IsInt()
-  minYear?: number;
-  @IsOptional()
-  @Type(() => Number)
-  @Max(new Date().getFullYear())
-  @IsInt()
-  maxYear?: number;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @IsPositive()
-  @IsInt()
-  minPrice?: number;
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @IsPositive()
-  @IsInt()
-  maxPrice?: number;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @IsPositive()
-  minMileage?: number;
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @IsPositive()
-  maxMileage?: number;
 }

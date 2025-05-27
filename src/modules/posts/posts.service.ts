@@ -8,6 +8,7 @@ import { PostStatus } from 'src/enums/postStatus.enum';
 import { ResponsePaginatedPostsDto } from 'src/DTOs/postsDto/responsePaginatedPosts.dto';
 import { CreatePostDto } from 'src/DTOs/postsDto/createPost.dto';
 import { QueryPostsDto } from 'src/DTOs/postsDto/queryPosts.dto';
+import { FiltersDto } from 'src/DTOs/postsDto/filters.dto';
 
 @Injectable()
 export class PostsService {
@@ -36,29 +37,8 @@ export class PostsService {
       .leftJoinAndSelect('vehicle.version', 'version')
       .where('posts.status = :status', { status: PostStatus.ACTIVE });
 
-    const exactFilters = {
-      brandId: 'brand.id',
-      modelId: 'model.id',
-      versionId: 'version.id',
-      typeOfVehicle: 'vehicle.typeOfVehicle',
-      condition: 'vehicle.condition',
-      currency: 'vehicle.currency',
-    };
-
-    const rangeFilters = {
-      minYear: { column: 'vehicle.year', operator: '>=' },
-      maxYear: { column: 'vehicle.year', operator: '<=' },
-
-      minPrice: { column: 'vehicle.price', operator: '>=' },
-      maxPrice: { column: 'vehicle.price', operator: '<=' },
-
-      minMileage: { column: 'vehicle.mileage', operator: '>=' },
-      maxMileage: { column: 'vehicle.mileage', operator: '<=' },
-    };
-
-    const cleanedFilters = Object.entries(filters).filter(
-      ([_, value]) => value !== undefined && value !== null && value !== '',
-    );
+    const { orConditions, orParams, andConditions, andParams } =
+      await this.buildPostFilters(filters);
 
     if (search) {
       query.andWhere(
@@ -70,15 +50,12 @@ export class PostsService {
       );
     }
 
-    for (const [key, value] of cleanedFilters) {
-      if (exactFilters[key]) {
-        query.andWhere(`${exactFilters[key]} = :${key}`, { [key]: value });
-      }
+    if (orConditions.length > 0) {
+      query.andWhere(`(${orConditions.join(' OR ')})`, orParams);
+    }
 
-      if (rangeFilters[key]) {
-        const { column, operator } = rangeFilters[key];
-        query.andWhere(`${column} ${operator} :${key}`, { [key]: value });
-      }
+    if (andConditions.length > 0) {
+      query.andWhere(andConditions.join(' AND '), andParams);
     }
 
     query.orderBy(orderBy, order);
@@ -91,6 +68,71 @@ export class PostsService {
       page,
       limit,
       totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async buildPostFilters(filters: FiltersDto) {
+    const exactFilters = {
+      brandId: 'brand.id',
+      modelId: 'model.id',
+      versionId: 'version.id',
+      typeOfVehicle: 'vehicle.typeOfVehicle',
+      condition: 'vehicle.condition',
+      currency: 'vehicle.currency',
+    };
+
+    const rangeFilters = {
+      minYear: { column: 'vehicle.year', operator: '>=' },
+      maxYear: { column: 'vehicle.year', operator: '<=' },
+      minPrice: { column: 'vehicle.price', operator: '>=' },
+      maxPrice: { column: 'vehicle.price', operator: '<=' },
+      minMileage: { column: 'vehicle.mileage', operator: '>=' },
+      maxMileage: { column: 'vehicle.mileage', operator: '<=' },
+    };
+
+    const orFilterKeys = ['brandId', 'modelId', 'versionId'];
+
+    const orConditions: string[] = [];
+    const orParams: Record<string, any> = {};
+    const andConditions: string[] = [];
+    const andParams: Record<string, any> = {};
+
+    const cleanedFilters = Object.entries(filters).filter(
+      ([_, value]) =>
+        (Array.isArray(value) && value.length > 0) ||
+        (!Array.isArray(value) && value !== undefined && value !== null),
+    );
+
+    for (const [key, value] of cleanedFilters) {
+      if (exactFilters[key]) {
+        const column = exactFilters[key];
+
+        if (orFilterKeys.includes(key)) {
+          orConditions.push(`${column} IN (:...${key})`);
+          orParams[key] = value;
+        } else {
+          if (Array.isArray(value)) {
+            andConditions.push(`${column} IN (:...${key})`);
+            andParams[key] = value;
+          } else {
+            andConditions.push(`${column} = :${key}`);
+            andParams[key] = value;
+          }
+        }
+      }
+
+      if (rangeFilters[key]) {
+        const { column, operator } = rangeFilters[key];
+        andConditions.push(`${column} ${operator} :${key}`);
+        andParams[key] = value;
+      }
+    }
+
+    return {
+      orConditions,
+      orParams,
+      andConditions,
+      andParams,
     };
   }
 
