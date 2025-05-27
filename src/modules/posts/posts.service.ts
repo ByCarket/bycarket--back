@@ -8,6 +8,7 @@ import { PostStatus } from 'src/enums/postStatus.enum';
 import { ResponsePaginatedPostsDto } from 'src/DTOs/postsDto/responsePaginatedPosts.dto';
 import { CreatePostDto } from 'src/DTOs/postsDto/createPost.dto';
 import { QueryPostsDto } from 'src/DTOs/postsDto/queryPosts.dto';
+import { Role } from 'src/enums/roles.enum';
 
 @Injectable()
 export class PostsService {
@@ -173,11 +174,16 @@ export class PostsService {
     };
   }
 
-  async createPost({ vehicleId, description }: CreatePostDto, userId: string) {
+  async createPost({ vehicleId, description, price }: CreatePostDto, userId: string) {
     // Verificar que el usuario existe
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found.`);
+    }
+    if (user.role === Role.USER && user.posts.length === 3) {
+      throw new ForbiddenException(
+        'You are not allowed to create more posts. Please upgrade to a premium plan.',
+      );
     }
 
     // Verificar que el vehículo existe y pertenece al usuario
@@ -193,6 +199,11 @@ export class PostsService {
     // Solo actualizar la descripción del vehículo si se proporciona una nueva
     if (description !== undefined && description !== null && description.trim() !== '') {
       vehicle.description = description;
+      await this.vehiclesRepository.save(vehicle);
+    }
+
+    if (price) {
+      vehicle.price = price;
       await this.vehiclesRepository.save(vehicle);
     }
 
