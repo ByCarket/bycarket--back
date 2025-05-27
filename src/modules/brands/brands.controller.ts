@@ -23,7 +23,6 @@ import { RolesGuard } from 'src/guards/roles.guard';
 @Controller('brands')
 @ApiBearerAuth()
 @UseGuards(AuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
 export class BrandsController {
   constructor(private readonly service: BrandsService) {}
 
@@ -37,16 +36,19 @@ export class BrandsController {
     return this.service.findOne(id);
   }
 
+  @Roles(Role.ADMIN)
   @Post()
   create(@Body() dto: CreateBrandDto): Promise<Brand> {
     return this.service.create(dto);
   }
 
+  @Roles(Role.ADMIN)
   @Put(':id')
   update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateBrandDto): Promise<Brand> {
     return this.service.update(id, dto);
   }
 
+  @Roles(Role.ADMIN)
   @Delete(':id')
   delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.service.delete(id);

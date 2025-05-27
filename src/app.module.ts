@@ -14,15 +14,20 @@ import { ModelsModule } from './modules/models/models.module';
 import { VersionsModule } from './modules/versions/versions.module';
 import { PassportModule } from '@nestjs/passport';
 import { FilesModule } from './modules/files/files.module';
+import { BillingModule } from './modules/billing/billing.module';
+import stripeConfig from './config/stripe.config';
+import { MailModule } from './modules/mail-notification/mailNotification.module';
+import { PricesModule } from './modules/prices/prices.module';
 import { OpenAiModule } from './modules/openai/openai.module';
 
-dotenv.config({ path: '.env.development' });
+dotenv.config();
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [typeormConfig],
+      load: [typeormConfig, stripeConfig],
+      envFilePath: '.env',
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -45,6 +50,10 @@ dotenv.config({ path: '.env.development' });
     BrandsModule,
     ModelsModule,
     VersionsModule,
+    FilesModule,
+    BillingModule,
+    MailModule,
+    PricesModule,
     OpenAiModule,
   ],
   controllers: [],

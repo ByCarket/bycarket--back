@@ -5,12 +5,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Post } from 'src/entities/post.entity';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthGuard } from '../../guards/auth.guard'; 
+import { AuthGuard } from '../../guards/auth.guard';
 import { UsersModule } from '../users/users.module';
 import { UsersService } from '../users/users.service';
+import { BillingModule } from '../billing/billing.module';
+import { MailModule } from '../mail-notification/mailNotification.module';
 
 @Module({
   imports: [
+    BillingModule,
+    MailModule,
     UsersModule,
     TypeOrmModule.forFeature([User, Post]),
     JwtModule.register({

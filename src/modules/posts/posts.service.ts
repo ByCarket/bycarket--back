@@ -6,9 +6,9 @@ import { Vehicle } from 'src/entities/vehicle.entity';
 import { User } from 'src/entities/user.entity';
 import { PostStatus } from 'src/enums/postStatus.enum';
 import { ResponsePaginatedPostsDto } from 'src/DTOs/postsDto/responsePaginatedPosts.dto';
-import { PostDetail } from 'src/DTOs/postsDto/postDetail.dto';
 import { CreatePostDto } from 'src/DTOs/postsDto/createPost.dto';
 import { QueryPostsDto } from 'src/DTOs/postsDto/queryPosts.dto';
+import { FiltersDto } from 'src/DTOs/postsDto/filters.dto';
 
 @Injectable()
 export class PostsService {
@@ -21,14 +21,124 @@ export class PostsService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  async getPosts({ page, limit }: QueryPostsDto): Promise<ResponsePaginatedPostsDto> {
-    const skip = (page - 1) * limit;
+  async getPosts({
+    page,
+    limit,
+    search,
+    orderBy,
+    order,
+    ...filters
+  }: QueryPostsDto): Promise<ResponsePaginatedPostsDto> {
+    const query = await this.postsRepository
+      .createQueryBuilder('posts')
+      .leftJoinAndSelect('posts.vehicle', 'vehicle')
+      .leftJoinAndSelect('vehicle.brand', 'brand')
+      .leftJoinAndSelect('vehicle.model', 'model')
+      .leftJoinAndSelect('vehicle.version', 'version')
+      .where('posts.status = :status', { status: PostStatus.ACTIVE });
 
-    // Obtener posts con paginación
-    const [posts, total] = await this.postsRepository.findAndCount({
-      skip,
-      take: limit,
-      where: { status: PostStatus.ACTIVE },
+    const { orConditions, orParams, andConditions, andParams } =
+      await this.buildPostFilters(filters);
+
+    if (search) {
+      query.andWhere(
+        `(LOWER(vehicle.description) ILIKE :search OR
+        LOWER(brand.name) ILIKE :search OR
+        LOWER(model.name) ILIKE :search OR
+        LOWER(version.name) ILIKE :search)`,
+        { search: `%${search.toLowerCase()}%` },
+      );
+    }
+
+    if (orConditions.length > 0) {
+      query.andWhere(`(${orConditions.join(' OR ')})`, orParams);
+    }
+
+    if (andConditions.length > 0) {
+      query.andWhere(andConditions.join(' AND '), andParams);
+    }
+
+    query.orderBy(orderBy, order);
+
+    const skip = (page - 1) * limit;
+    const [data, total] = await query.take(limit).skip(skip).getManyAndCount();
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async buildPostFilters(filters: FiltersDto) {
+    const exactFilters = {
+      brandId: 'brand.id',
+      modelId: 'model.id',
+      versionId: 'version.id',
+      typeOfVehicle: 'vehicle.typeOfVehicle',
+      condition: 'vehicle.condition',
+      currency: 'vehicle.currency',
+    };
+
+    const rangeFilters = {
+      minYear: { column: 'vehicle.year', operator: '>=' },
+      maxYear: { column: 'vehicle.year', operator: '<=' },
+      minPrice: { column: 'vehicle.price', operator: '>=' },
+      maxPrice: { column: 'vehicle.price', operator: '<=' },
+      minMileage: { column: 'vehicle.mileage', operator: '>=' },
+      maxMileage: { column: 'vehicle.mileage', operator: '<=' },
+    };
+
+    const orFilterKeys = ['brandId', 'modelId', 'versionId'];
+
+    const orConditions: string[] = [];
+    const orParams: Record<string, any> = {};
+    const andConditions: string[] = [];
+    const andParams: Record<string, any> = {};
+
+    const cleanedFilters = Object.entries(filters).filter(
+      ([_, value]) =>
+        (Array.isArray(value) && value.length > 0) ||
+        (!Array.isArray(value) && value !== undefined && value !== null),
+    );
+
+    for (const [key, value] of cleanedFilters) {
+      if (exactFilters[key]) {
+        const column = exactFilters[key];
+
+        if (orFilterKeys.includes(key)) {
+          orConditions.push(`${column} IN (:...${key})`);
+          orParams[key] = value;
+        } else {
+          if (Array.isArray(value)) {
+            andConditions.push(`${column} IN (:...${key})`);
+            andParams[key] = value;
+          } else {
+            andConditions.push(`${column} = :${key}`);
+            andParams[key] = value;
+          }
+        }
+      }
+
+      if (rangeFilters[key]) {
+        const { column, operator } = rangeFilters[key];
+        andConditions.push(`${column} ${operator} :${key}`);
+        andParams[key] = value;
+      }
+    }
+
+    return {
+      orConditions,
+      orParams,
+      andConditions,
+      andParams,
+    };
+  }
+
+  async getPostById(id: string) {
+    const post = await this.postsRepository.findOne({
+      where: { id },
       relations: {
         user: true,
         vehicle: {
@@ -37,35 +147,6 @@ export class PostsService {
           version: true,
         },
       },
-      order: { postDate: 'DESC' } as FindOptionsOrder<Post>,
-    });
-
-    // Calcular número total de páginas
-    const totalPages = Math.ceil(total / limit);
-
-    // Filtrar datos del usuario para mostrar solo lo necesario
-    const securePosts = posts.map(post => {
-      if (post.user) {
-        const { id, name, phone } = post.user;
-        post.user = { id, name, phone } as User;
-      }
-      return post;
-    });
-
-    // Devolver objeto con datos paginados
-    return {
-      data: securePosts,
-      total,
-      page,
-      limit,
-      totalPages,
-    };
-  }
-
-  async getPostById(id: string): Promise<PostDetail> {
-    const post = await this.postsRepository.findOne({
-      where: { id },
-      relations: { user: true, vehicle: true },
     });
 
     if (!post) {
@@ -78,7 +159,10 @@ export class PostsService {
       post.user = { name, phone } as User;
     }
 
-    return post;
+    return {
+      data: post,
+      message: 'Post found successfully.',
+    };
   }
 
   async getUserPosts(
@@ -147,8 +231,12 @@ export class PostsService {
         `Vehicle with ID ${vehicleId} not found or does not belong to user with ID ${userId}.`,
       );
     }
-    vehicle.description = description;
-    await this.vehiclesRepository.save(vehicle);
+
+    // Solo actualizar la descripción del vehículo si se proporciona una nueva
+    if (description !== undefined && description !== null && description.trim() !== '') {
+      vehicle.description = description;
+      await this.vehiclesRepository.save(vehicle);
+    }
 
     // Verificar si ya existe un post activo para este vehículo
     const existingPost = await this.postsRepository.findOne({
