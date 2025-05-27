@@ -8,5 +8,5 @@ export class GenerateTextDto {
   })
   @IsString()
   @MinLength(10)
-  prompt: string;
+  description: string;
 }

@@ -19,7 +19,7 @@ export class OpenAiController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.PREMIUM)
   async generate(@Body() dto: GenerateTextDto) {
-    const description = await this.openAiService.generateDescription(dto.prompt);
+    const description = await this.openAiService.generateDescription(dto.description);
     return { description };
   }
 }

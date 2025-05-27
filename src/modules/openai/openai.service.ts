@@ -11,32 +11,34 @@ export class OpenAiService {
     });
   }
 
-//   async generateDescription(prompt: string): Promise<string> {
-//     try {
-//       const chatCompletion = await this.openai.chat.completions.create({
-//         model: 'gpt-3.5-turbo',
-//         messages: [
-//           {
-//             role: 'system',
-//             content: 'Actúa como un redactor de una concesionaria. Tu tarea es escribir una descripción breve, atractiva y profesional para publicar un auto en venta.'
-//           },
-//           {
-//             role: 'user',
-//             content: prompt,
-//           },
-//         ],
-//         temperature: 0.7,
-//         max_tokens: 250,
-//       });
+  // async generateDescription(description: string): Promise<string> {
+  //   try {
+  //     const chatCompletion = await this.openai.chat.completions.create({
+  //       model: 'gpt-3.5-turbo',
+  //       messages: [
+  //         {
+  //           role: 'system',
+  //           content: 'Actúa como un redactor de una concesionaria. Tu tarea es escribir una descripción breve, atractiva y profesional para publicar un auto en venta.'
+  //         },
+  //         {
+  //           role: 'user',
+  //           content: description,
+  //         },
+  //       ],
+  //       temperature: 0.7,
+  //       max_tokens: 250,
+        
+  //     });
 
-//       return chatCompletion.choices[0]?.message?.content?.trim() || '';
-//     } catch (error) {
-//       console.error('Error en OpenAI:', error);
-//       throw new InternalServerErrorException('Error generando descripción con IA');
-//     }
-//   }
+  //     return chatCompletion.choices[0]?.message?.content?.trim() || '';
+  //   } catch (error) {
+  //     console.error('Error en OpenAI:', error);
+  //     throw new InternalServerErrorException('Error generando descripción con IA');
+  //   }
+  // }
 
 
-async generateDescription(prompt: string): Promise<string> {
-  return `Simulación IA: Descripción generada para -> ${prompt}`;
-}}
+async generateDescription(description: string): Promise<string> {
+  return `Simulación IA: Descripción generada para -> ${description}`;
+}
+}
