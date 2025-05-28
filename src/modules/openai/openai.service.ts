@@ -1,11 +1,11 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import OpenAI from 'openai';
+import { ChatCompletionMessageParam } from 'openai/resources/chat';
+import { ChatComplationMessageDto } from 'src/DTOs/openaiDto/ChatComplationMessage.dto';
 
 @Injectable()
 export class OpenAiService {
-  private readonly openai: OpenAI;
-
-  constructor() {
+  constructor( private readonly openai: OpenAI) {
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
@@ -41,4 +41,10 @@ export class OpenAiService {
 async generateDescription(description: string): Promise<string> {
   return `Simulación IA: Descripción generada para -> ${description}`;
 }
-}
+
+async createChatCompletion(messages:ChatComplationMessageDto[]): Promise<any> {
+  return this.openai.chat.completions.create({
+    messages: messages as ChatCompletionMessageParam[],
+    model: 'gpt-3.5-turbo',
+  });
+}}

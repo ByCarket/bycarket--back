@@ -6,6 +6,7 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { Role } from 'src/enums/roles.enum';
+import { createChatCompletionRequestDto } from 'src/DTOs/openaiDto/createChatCompletion-request.dto';
 
 @ApiTags('OpenAI')
 @Controller('openai')
@@ -22,4 +23,9 @@ export class OpenAiController {
     const description = await this.openAiService.generateDescription(dto.description);
     return { description };
   }
-}
+
+  @Post('chatCompletion')
+  async createChatCompletion(@Body() body: createChatCompletionRequestDto) {
+ return await  this.openAiService.createChatCompletion(body.messages);
+
+}}
