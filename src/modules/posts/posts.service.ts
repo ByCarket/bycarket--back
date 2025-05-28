@@ -226,11 +226,14 @@ export class PostsService {
       throw new NotFoundException(`User with ID ${userId} not found.`);
     }
 
-    if (user.role === Role.USER && user.posts !== undefined) {
-      const validPosts: Post[] = user.posts.filter(
-        post => post.status === PostStatus.ACTIVE || PostStatus.PENDING,
-      );
-      if (validPosts.length >= 3) {
+    if (user.role === Role.USER) {
+      const [_, total] = await this.postsRepository.findAndCount({
+        where: [
+          { user: { id: user.id }, status: PostStatus.ACTIVE },
+          { user: { id: user.id }, status: PostStatus.PENDING },
+        ],
+      });
+      if (total >= 3) {
         throw new ForbiddenException(
           'You are not allowed to create more posts. Please upgrade to a premium plan.',
         );
