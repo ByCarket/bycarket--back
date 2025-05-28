@@ -1,11 +1,7 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Body, Controller, Post } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { OpenAiService } from './openai.service';
 import { GenerateTextDto } from '../../DTOs/openaiDto/generateText.dto';
-import { Roles } from 'src/decorators/roles.decorator';
-import { RolesGuard } from 'src/guards/roles.guard';
-import { AuthGuard } from 'src/guards/auth.guard';
-import { Role } from 'src/enums/roles.enum';
 import { createChatCompletionRequestDto } from 'src/DTOs/openaiDto/createChatCompletion-request.dto';
 
 @ApiTags('OpenAI')
@@ -16,16 +12,17 @@ export class OpenAiController {
   @Post('generate-description')
   @ApiOperation({ summary: 'Generar descripción de vehículo con IA' })
   @ApiResponse({ status: 201, description: 'Descripción generada exitosamente' })
-  @ApiBearerAuth()
-  // @UseGuards(AuthGuard, RolesGuard)
-  // @Roles(Role.ADMIN, Role.PREMIUM)
   async generate(@Body() dto: GenerateTextDto) {
     const description = await this.openAiService.generateDescription(dto.description);
     return { description };
   }
 
-  @Post('chatCompletion')
-  async createChatCompletion(@Body() body: createChatCompletionRequestDto) {
- return await  this.openAiService.createChatCompletion(body.messages);
-
-}}
+ @Post('chatCompletion')
+@ApiOperation({ summary: 'Chat de preguntas sobre el vehículo' })
+@ApiResponse({ status: 200, description: 'Respuesta del chatbot' })
+async createChatCompletion(@Body() body: createChatCompletionRequestDto) {
+  const { messages, postId } = body;
+  const response = await this.openAiService.createChatCompletion(messages, postId);
+  return { response };
+}
+}
