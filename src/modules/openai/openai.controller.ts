@@ -17,8 +17,8 @@ export class OpenAiController {
   @ApiOperation({ summary: 'Generar descripción de vehículo con IA' })
   @ApiResponse({ status: 201, description: 'Descripción generada exitosamente' })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.PREMIUM)
+  // @UseGuards(AuthGuard, RolesGuard)
+  // @Roles(Role.ADMIN, Role.PREMIUM)
   async generate(@Body() dto: GenerateTextDto) {
     const description = await this.openAiService.generateDescription(dto.description);
     return { description };
