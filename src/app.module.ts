@@ -19,6 +19,7 @@ import stripeConfig from './config/stripe.config';
 import { MailModule } from './modules/mail-notification/mailNotification.module';
 import { PricesModule } from './modules/prices/prices.module';
 import { OpenAiModule } from './modules/openai/openai.module';
+import { ChatModule } from './modules/chat/chat.module';
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ dotenv.config();
     MailModule,
     PricesModule,
     OpenAiModule,
+    ChatModule,
   ],
   controllers: [],
   providers: [],

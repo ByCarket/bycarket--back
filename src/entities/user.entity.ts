@@ -2,9 +2,9 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import { Role } from '../enums/roles.enum';
 import { Post } from './post.entity';
-import { Question } from './question.entity';
 import { Vehicle } from './vehicle.entity';
 import { CloudinaryUserImage } from 'src/interfaces/cloudinaryUserImage.interface';
+import { Message } from './message.entity';
 
 @Entity({
   name: 'users',
@@ -59,9 +59,12 @@ export class User {
   @OneToMany(() => Post, post => post.user)
   posts: Post[];
 
-  @OneToMany(() => Question, question => question.user)
-  questions: Question[];
-
   @OneToMany(() => Vehicle, vehicle => vehicle.user)
   vehicles: Vehicle[];
+
+  @OneToMany(() => Message, message => message.sender)
+  sentMessages: Message[];
+
+  @OneToMany(() => Message, message => message.receiver)
+  receivedMessages: Message[];
 }
