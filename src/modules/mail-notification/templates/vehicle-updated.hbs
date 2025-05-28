@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Vehículo Actualizado</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #2196F3; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; background-color: #f9f9f9; }
+        .vehicle-info { background-color: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        .footer { text-align: center; padding: 20px; color: #666; }
+        .update-icon { font-size: 48px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="update-icon">🔄</div>
+        <h1>Información de Vehículo Actualizada</h1>
+    </div>
+    
+    <div class="content">
+        <p>Hola <strong>{{name}}</strong>,</p>
+        
+        <p>Te informamos que la información de tu vehículo ha sido actualizada correctamente.</p>
+        
+        <div class="vehicle-info">
+            <h3>📋 Información Actual del Vehículo:</h3>
+            <ul>
+                <li><strong>Marca:</strong> {{vehicleBrand}}</li>
+                <li><strong>Modelo:</strong> {{vehicleModel}}</li>
+                <li><strong>Versión:</strong> {{vehicleVersion}}</li>
+                <li><strong>Año:</strong> {{vehicleYear}}</li>
+            </ul>
+        </div>
+        
+        <p>Si no realizaste esta actualización, por favor contacta con nuestro equipo de soporte inmediatamente.</p>
+        
+        <p>Gracias por mantener tu información actualizada.</p>
+    </div>
+    
+    <div class="footer">
+        <p>Fecha de actualización: {{date}} a las {{time}}</p>
+        <p>Este es un mensaje automático, por favor no responder a este email.</p>
+    </div>
+</body>
+</html>
