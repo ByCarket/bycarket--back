@@ -2,6 +2,8 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import OpenAI from 'openai';
 import { ChatCompletionMessageParam } from 'openai/resources/chat';
 import { ChatComplationMessageDto } from 'src/DTOs/openaiDto/ChatComplationMessage.dto';
+import { queryPosts } from './tools/queryPosts';
+
 
 @Injectable()
 export class OpenAiService {
@@ -46,5 +48,14 @@ async createChatCompletion(messages:ChatComplationMessageDto[]): Promise<any> {
   return this.openai.chat.completions.create({
     messages: messages as ChatCompletionMessageParam[],
     model: 'gpt-3.5-turbo',
+      response_format: {
+    "type": "text"
+  },
+  tools: [queryPosts],
+  temperature: 1,
+  max_completion_tokens: 2048,
+  top_p: 1,
+  frequency_penalty: 0,
+  presence_penalty: 0
   });
 }}
