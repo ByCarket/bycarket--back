@@ -34,8 +34,14 @@ export class User {
   @Column({ type: 'varchar', length: 50, nullable: true })
   address: string;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ type: 'boolean', default: true }) //poner en false en producción
   isActive: boolean;
+
+  @Column({ nullable: true })
+  activationToken: string;
+
+  @Column({ nullable: true })
+  activationTokenExpires: Date;
 
   @Column({
     type: 'simple-json',

@@ -13,6 +13,7 @@ import { ChangePasswordDto } from 'src/DTOs/usersDto/changePassword.dto';
 import { GoogleProfileDto } from 'src/DTOs/usersDto/google-profile.dto';
 import { CustomerService } from '../billing/customer/customer.service';
 import { MailService } from '../mail-notification/mailNotificacion.service';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -25,6 +26,11 @@ export class AuthService {
     private readonly mailService: MailService,
   ) {}
 
+   // Método auxiliar para generar token de activación
+  private generateActivationToken(): string {
+    return crypto.randomBytes(32).toString('hex');
+  }
+
   async register({ confirmPassword, password, ...user }: CreateUserDto) {
     const userExist = await this.usersRepository.findOne({
       where: { email: user.email },
@@ -33,21 +39,33 @@ export class AuthService {
       throw new BadRequestException('Email already registered');
     }
 
+    // Generar token de activación
+      const activationToken = this.generateActivationToken();
+      const activationTokenExpires = new Date();
+      activationTokenExpires.setHours(activationTokenExpires.getHours() + 24); // Expira en 24 horas
     const hashedPassword = await bcrypt.hash(password, 10);
     const stripeCustomerId = await this.customerService.createCustomer({
       email: user.email,
       name: user.name,
     });
 
-    const newUser = await this.usersRepository.save({
+    const newUser = await this.usersRepository.create({
       ...user,
       password: hashedPassword,
       stripeCustomerId,
+      isActive: false, // Usuario inactivo por defecto
+      activationToken,
+      activationTokenExpires,
     });
-
+    const savedUser = await this.usersRepository.save(newUser);
     // Enviar email de bienvenida
     try {
-      await this.mailService.sendWelcomeEmail(newUser.email, newUser.name);
+      // Enviar email de activación
+      await this.mailService.sendAccountActivationEmail(
+        savedUser.email,
+        savedUser.name,
+        activationToken
+      );
     } catch (emailError) {emailError}
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
