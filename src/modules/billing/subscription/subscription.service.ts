@@ -36,14 +36,16 @@ export class SubscriptionService {
       customer,
       line_items: [{ price, quantity: 1 }],
       mode: 'subscription',
-      ui_mode: 'hosted',
-      success_url: `${success_url}?session_id={CHECKOUT_SESSION_ID}`,
-      metadata: {
-        user_id,
-      },
+      ui_mode: 'custom',
+      return_url: `${success_url}?session_id={CHECKOUT_SESSION_ID}`,
+      metadata: { user_id },
+      subscription_data: { metadata: { user_id } },
     });
 
-    return session.url;
+    return {
+      session_id: session.id,
+      client_secret: session.client_secret,
+    };
   }
 
   async createSubMembership(userId: string, price: string) {
