@@ -28,6 +28,7 @@ export class PostsService {
     search,
     orderBy,
     order,
+    status,
     ...filters
   }: QueryPostsDto): Promise<ResponsePaginatedPostsDto> {
     const query = await this.postsRepository
@@ -35,8 +36,14 @@ export class PostsService {
       .leftJoinAndSelect('posts.vehicle', 'vehicle')
       .leftJoinAndSelect('vehicle.brand', 'brand')
       .leftJoinAndSelect('vehicle.model', 'model')
-      .leftJoinAndSelect('vehicle.version', 'version')
-      .where('posts.status = :status', { status: PostStatus.ACTIVE });
+      .leftJoinAndSelect('vehicle.version', 'version');
+
+    // Si no se especifica status, filtrar solo activos por defecto
+    if (!status) {
+      query.andWhere('posts.status = :status', { status: PostStatus.ACTIVE });
+    } else {
+      query.andWhere('posts.status = :status', { status });
+    }
 
     const { orConditions, orParams, andConditions, andParams } =
       await this.buildPostFilters(filters);
@@ -168,7 +175,7 @@ export class PostsService {
 
   async getUserPosts(
     userId: string,
-    { page, limit }: QueryPostsDto,
+    { page, limit, status }: QueryPostsDto,
   ): Promise<ResponsePaginatedPostsDto> {
     const skip = (page - 1) * limit;
 
@@ -179,10 +186,14 @@ export class PostsService {
     }
 
     // Obtener posts del usuario con paginación
+    const whereCondition: any = { user: { id: userId } };
+    if (status) {
+      whereCondition.status = status;
+    }
     const [posts, total] = await this.postsRepository.findAndCount({
       skip,
       take: limit,
-      where: { user: { id: userId } },
+      where: whereCondition,
       relations: {
         user: true,
         vehicle: {
