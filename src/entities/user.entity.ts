@@ -37,11 +37,11 @@ export class User {
   @Column({ type: 'boolean', default: true }) //poner en false en producción
   isActive: boolean;
 
-  @Column({ nullable: true })
-  activationToken: string;
+  @Column({ type: 'varchar', nullable: true })
+  activationToken: string | null;
 
-  @Column({ nullable: true })
-  activationTokenExpires: Date;
+  @Column({ type: 'timestamp', nullable: true })
+  activationTokenExpires: Date | null;
 
   @Column({
     type: 'simple-json',
