@@ -355,9 +355,8 @@ export class PostsService {
     if (post.user.id !== userId) {
       throw new ForbiddenException(`Post with ID ${id} does not belong to user with ID ${userId}.`);
     }
-
     // Marcar el post como inactivo en lugar de eliminarlo físicamente
-    await this.postsRepository.update(id, { status: PostStatus.INACTIVE });
+    await this.postsRepository.delete(id);
 
     return {
       data: id,
