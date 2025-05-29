@@ -27,7 +27,6 @@ export class MailService {
     }
   }
 
-
   async sendPasswordChangeNotification(email: string, name: string) {
     try {
       await this.mailerService.sendMail({
@@ -53,14 +52,14 @@ export class MailService {
   }
 
   async sendVehicleCreatedNotification(
-    email: string, 
-    name: string, 
+    email: string,
+    name: string,
     vehicleInfo: {
       brand: string;
       model: string;
       version: string;
       year: number;
-    }
+    },
   ) {
     try {
       await this.mailerService.sendMail({
@@ -89,14 +88,14 @@ export class MailService {
   }
 
   async sendVehicleUpdatedNotification(
-    email: string, 
-    name: string, 
+    email: string,
+    name: string,
     vehicleInfo: {
       brand: string;
       model: string;
       version: string;
       year: number;
-    }
+    },
   ) {
     try {
       await this.mailerService.sendMail({
@@ -124,19 +123,21 @@ export class MailService {
     } catch (error) {
       console.error('Error enviando notificación de vehículo actualizado:', error);
       // No lanzamos el error para que no afecte la actualización del vehículo
-      console.warn('La notificación de email falló, pero el vehículo fue actualizado correctamente');
+      console.warn(
+        'La notificación de email falló, pero el vehículo fue actualizado correctamente',
+      );
     }
   }
 
   async sendVehicleDeletedNotification(
-    email: string, 
-    name: string, 
+    email: string,
+    name: string,
     vehicleInfo: {
       brand: string;
       model: string;
       version: string;
       year: number;
-    }
+    },
   ) {
     try {
       await this.mailerService.sendMail({

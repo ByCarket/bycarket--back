@@ -54,7 +54,7 @@ dotenv.config();
     BillingModule,
     MailModule,
     PricesModule,
-    OpenAiModule,
+    //OpenAiModule,
   ],
   controllers: [],
   providers: [],

@@ -10,6 +10,7 @@ import { Brand } from 'src/entities/brand.entity';
 import { Model } from 'src/entities/model.entity';
 import { User } from 'src/entities/user.entity';
 import { Version } from 'src/entities/version.entity';
+import { MailService } from 'src/modules/mail-notification/mailNotificacion.service';
 
 @Injectable()
 export class VehiclesService {
@@ -30,6 +31,8 @@ export class VehiclesService {
     private readonly userRepository: Repository<User>,
 
     private readonly filesService: FilesService,
+
+    private readonly mailService: MailService,
   ) {}
 
   // ✅ GET all vehicles paginated
@@ -142,7 +145,20 @@ export class VehiclesService {
       // 4. Commit de la transacción
       await queryRunner.commitTransaction();
 
-      // 5. Retornar la respuesta
+      // ✅ 5. Enviar notificación por email (después del commit exitoso)
+      try {
+        await this.mailService.sendVehicleCreatedNotification(user.email, user.name, {
+          brand: brand.name,
+          model: model.name,
+          version: version.name,
+          year: savedVehicle.year,
+        });
+      } catch (emailError) {
+        // Log del error pero no fallar la operación
+        console.error('Error enviando notificación de vehículo creado:', emailError);
+      }
+
+      // 6. Retornar la respuesta
       savedVehicle.user = {
         id: savedVehicle.user.id,
         name: savedVehicle.user.name,
@@ -173,31 +189,59 @@ export class VehiclesService {
     }
   }
 
-  // ✅ UPDATE vehicle
-  async updateVehicle(id: string, userId: string, updateVehicleInfo: UpdateVehicleDto) {
-    const vehicle = await this.vehicleRepository.findOne({
-      where: { id },
-      relations: ['brand', 'model', 'version'],
-    });
+// ✅ UPDATE vehicle con notificación simple por email
+async updateVehicle(id: string, userId: string, updateVehicleInfo: UpdateVehicleDto) {
+  // Obtener datos del vehículo ANTES del update
+  const originalVehicle = await this.vehicleRepository.findOne({
+    where: { id },
+    relations: ['brand', 'model', 'version', 'user'],
+  });
 
-    if (!vehicle) throw new NotFoundException(`Vehicle with ID ${id} not found`);
-    if (vehicle.user && vehicle.user.id !== userId) {
-      throw new ForbiddenException(
-        `Vehicle with ID ${id} does not belong to user with ID ${userId}`,
-      );
-    }
-
-    await this.vehicleRepository.update(id, updateVehicleInfo);
-    return {
-      data: id,
-      message: 'Vehicle updated successfully',
-    };
+  if (!originalVehicle) throw new NotFoundException(`Vehicle with ID ${id} not found`);
+  if (originalVehicle.user && originalVehicle.user.id !== userId) {
+    throw new ForbiddenException(
+      `Vehicle with ID ${id} does not belong to user with ID ${userId}`,
+    );
   }
 
-  // ✅ DELETE vehicle
+  // Guardar información del vehículo para el email
+  const vehicleInfo = {
+    brand: originalVehicle.brand.name,
+    model: originalVehicle.model.name,
+    version: originalVehicle.version.name,
+    year: originalVehicle.year,
+  };
+
+  const userInfo = {
+    email: originalVehicle.user.email,
+    name: originalVehicle.user.name,
+  };
+
+  // Actualizar el vehículo
+  await this.vehicleRepository.update(id, updateVehicleInfo);
+
+  // ✅ Enviar notificación simple por email después de la actualización exitosa
+  try {
+    await this.mailService.sendVehicleUpdatedNotification(
+      userInfo.email,
+      userInfo.name,
+      vehicleInfo
+    );
+  } catch (emailError) {
+    console.error('Error enviando notificación de vehículo actualizado:', emailError);
+  }
+
+  return {
+    data: id,
+    message: 'Vehicle updated successfully',
+  };
+}
+
+  // ✅ DELETE vehicle con notificación por email
   async deleteVehicle(id: string, userId: string) {
     const vehicle = await this.vehicleRepository.findOne({
       where: { id },
+      relations: ['brand', 'model', 'version', 'user'],
     });
 
     if (!vehicle) {
@@ -209,7 +253,34 @@ export class VehiclesService {
         `Vehicle with ID ${id} does not belong to user with ID ${userId}`,
       );
     }
+
+    // ✅ Guardar información del vehículo antes de eliminarlo (para el email)
+    const vehicleInfo = {
+      brand: vehicle.brand.name,
+      model: vehicle.model.name,
+      version: vehicle.version.name,
+      year: vehicle.year,
+    };
+
+    const userInfo = {
+      email: vehicle.user.email,
+      name: vehicle.user.name,
+    };
+
+    // Eliminar el vehículo
     await this.vehicleRepository.delete(id);
+
+    // ✅ Enviar notificación por email después de la eliminación exitosa
+    try {
+      await this.mailService.sendVehicleDeletedNotification(
+        userInfo.email,
+        userInfo.name,
+        vehicleInfo,
+      );
+    } catch (emailError) {
+      // Log del error pero no fallar la operación
+      console.error('Error enviando notificación de vehículo eliminado:', emailError);
+    }
 
     return {
       data: id,
