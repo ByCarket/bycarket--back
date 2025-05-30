@@ -50,12 +50,4 @@ export class SubscriptionService {
       client_secret: session.client_secret,
     };
   }
-
-  async createSubMembership() {
-    return await this.createSession({
-      user_id: userDb.id,
-      customer: userDb.stripeCustomerId,
-      price,
-    });
-  }
 }
