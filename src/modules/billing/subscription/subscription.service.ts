@@ -55,7 +55,15 @@ export class SubscriptionService {
     };
   }
 
+  async getSubscriptions(userId: string) {
+    const subscriptions = await this.subscriptionRepository.find({
+      where: { user: { id: userId } },
+    });
+    return subscriptions;
+  }
+
   async createSubscription(userId: string, subscription: CreateSubscriptionDto) {
+    console.log(subscription);
     const user = await this.userRepository.findOneBy({ id: userId });
     if (!user) throw new NotFoundException('User not found.');
 
@@ -66,5 +74,22 @@ export class SubscriptionService {
     await this.subscriptionRepository.save(newSubscription);
   }
 
-  async deleteSubscription(subscriptionId: string) {}
+  async updateSubscription(userId: string, { id, ...newSubscription }: CreateSubscriptionDto) {
+    const subscription = await this.subscriptionRepository.findOneBy({
+      id,
+      user: { id: userId },
+    });
+    if (!subscription) throw new NotFoundException('Subscription not found for this user.');
+
+    await this.subscriptionRepository.update(subscription.id, newSubscription);
+  }
+
+  async deleteSubscription(userId: string, subscriptionId: string) {
+    const subscription = await this.subscriptionRepository.findOneBy({
+      id: subscriptionId,
+      user: { id: userId },
+    });
+    if (!subscription) throw new NotFoundException('Subscription not found for this user.');
+    await this.subscriptionRepository.delete(subscription.id);
+  }
 }

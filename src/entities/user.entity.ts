@@ -64,6 +64,9 @@ export class User {
   @Column({ type: 'varchar', length: 100, nullable: true })
   stripeCustomerId: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  subscription_active: string | null;
+
   @OneToMany(() => Post, post => post.user)
   posts: Post[];
 
@@ -76,6 +79,6 @@ export class User {
   @OneToMany(() => Invoice, invoice => invoice.user)
   invoices: Invoice[];
 
-  @OneToOne(() => Subscription, subscription => subscription.user, { nullable: true })
-  subscriptions: Subscription | null;
+  @OneToMany(() => Subscription, subscription => subscription.user)
+  subscriptions: Subscription[];
 }

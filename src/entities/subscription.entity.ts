@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { User } from './user.entity';
 import { StatusSubscription } from 'src/enums/statusSubscription.enum';
 import { Invoice } from './invoice.entity';
@@ -14,6 +14,9 @@ export class Subscription {
   @OneToMany(() => Invoice, invoice => invoice.subscription)
   invoices: Invoice[];
 
+  @CreateDateColumn()
+  started_at: Date;
+
   @Column({ type: 'varchar', nullable: true })
   latest_invoice: string | null;
 
@@ -22,7 +25,7 @@ export class Subscription {
 
   @Column({
     nullable: true,
-    type: 'timestamp',
+    type: 'timestamptz',
     transformer: {
       to: (value: number | Date) => {
         if (typeof value === 'number') {
@@ -52,4 +55,19 @@ export class Subscription {
     },
   })
   canceled_at: Date | null;
+
+  @Column({
+    nullable: true,
+    type: 'timestamp',
+    transformer: {
+      to: (value: number | Date) => {
+        if (typeof value === 'number') {
+          return new Date(value * 1000);
+        }
+        return value;
+      },
+      from: (value: Date) => value,
+    },
+  })
+  ended_at: Date | null;
 }

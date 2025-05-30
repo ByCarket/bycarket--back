@@ -105,6 +105,7 @@ export class WebhooksService {
     await this.subscriptionService.createSubscription(user.id, newSubscription);
 
     user.role = Role.PREMIUM;
+    user.subscription_active = newSubscription.id;
     await this.usersRepository.save(user);
   }
 
@@ -112,15 +113,22 @@ export class WebhooksService {
 
   private async handleSubPaused(subscription: Stripe.Subscription) {}
 
-  private async handleSubUpdated(subscription: Stripe.Subscription) {}
+  private async handleSubUpdated(subscription: Stripe.Subscription) {
+    const user = await this.usersRepository.findOneBy({ id: subscription.metadata.user_id });
+    if (!user) throw new NotFoundException('User not found for subscription creation');
+    const newSubscription = plainToInstance(CreateSubscriptionDto, subscription, {
+      excludeExtraneousValues: true,
+    });
+
+    await this.subscriptionService.updateSubscription(user.id, newSubscription);
+  }
 
   private async handleSubDeleted(subscription: Stripe.Subscription) {
     const user = await this.usersRepository.findOneBy({ id: subscription.metadata.user_id });
     if (!user) throw new NotFoundException('User not found for subscription delete');
 
-    await this.subscriptionService.deleteSubscription(subscription.id);
-
     user.role = Role.USER;
+    user.subscription_active = null;
     await this.usersRepository.save(user);
   }
 
