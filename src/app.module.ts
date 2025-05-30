@@ -22,7 +22,7 @@ import { OpenAiModule } from './modules/openai/openai.module';
 import { AcaraScrapingModule } from './modules/acara-scraping/acaraScraping.module';
 import { StripeSimulatorModule } from './modules/stripe-simulator/stripe-simulator.module';
 
-dotenv.config({ path: '.env.development' });
+dotenv.config();
 
 @Module({
   imports: [
