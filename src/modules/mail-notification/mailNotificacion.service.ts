@@ -20,10 +20,59 @@ export class MailService {
           }),
         },
       });
-      // console.log(`Email de bienvenida enviado a: ${email}`);
+      console.log(`Email de bienvenida enviado a: ${email}`);
     } catch (error) {
       console.error('Error enviando email de bienvenida:', error);
       throw error;
+    }
+  }
+  
+  async sendAccountActivationEmail(email: string, name: string, activationToken: string) {
+    try {
+      // URL base de tu frontend - configúrala según tu entorno
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const activationUrl = `${frontendUrl}/activate-account?token=${activationToken}`;
+
+      await this.mailerService.sendMail({
+        to: email,
+        subject: '¡Activa tu cuenta para comenzar!',
+        template: './account-activation',
+        context: {
+          name,
+          activationUrl,
+          date: new Date().toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+        },
+      });
+      console.log(`Email de activación enviado a: ${email}`);
+    } catch (error) {
+      console.error('Error enviando email de activación:', error);
+      throw error;
+    }
+  }
+
+  async sendAccountActivatedEmail(email: string, name: string) {
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: '¡Cuenta activada exitosamente!',
+        template: './account-activated',
+        context: {
+          name,
+          date: new Date().toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+        },
+      });
+      console.log(`Confirmación de activación enviada a: ${email}`);
+    } catch (error) {
+      console.error('Error enviando confirmación de activación:', error);
+      // No lanzar error para no afectar la activación
     }
   }
 
