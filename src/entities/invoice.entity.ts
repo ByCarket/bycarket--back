@@ -8,7 +8,7 @@ export class Invoice {
   @PrimaryColumn()
   id: string;
 
-  @ManyToOne(() => User, user => user.invoices)
+  @ManyToOne(() => User, user => user.invoices, { onDelete: 'CASCADE' })
   user: User;
 
   @ManyToOne(() => Subscription, suscription => suscription.invoices)

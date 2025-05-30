@@ -1,4 +1,9 @@
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HandleSubDto } from 'src/DTOs/billingDto/webhooksDto/handleSub.dto';
@@ -6,10 +11,15 @@ import { User } from 'src/entities/user.entity';
 import { STRIPE_CLIENT } from 'src/providers/stripe.provider';
 import Stripe from 'stripe';
 import { Repository } from 'typeorm';
+import { SubscriptionService } from '../subscription/subscription.service';
+import { plainToInstance } from 'class-transformer';
+import { CreateSubscriptionDto } from 'src/DTOs/billingDto/subscriptionDto/createSubscription.dto';
+import { Role } from 'src/enums/roles.enum';
 
 @Injectable()
 export class WebhooksService {
   constructor(
+    private readonly subscriptionService: SubscriptionService,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     @Inject(STRIPE_CLIENT) private readonly stripe: Stripe,
@@ -85,17 +95,36 @@ export class WebhooksService {
     return await this.stripe.webhooks.constructEventAsync(raw, signature, secret);
   }
 
-  private async handleSubCreated(sub: Stripe.Subscription) {}
+  private async handleSubCreated(subscription: Stripe.Subscription) {
+    const user = await this.usersRepository.findOneBy({ id: subscription.metadata.user_id });
+    if (!user) throw new NotFoundException('User not found for subscription creation');
+    const newSubscription = plainToInstance(CreateSubscriptionDto, subscription, {
+      excludeExtraneousValues: true,
+    });
 
-  private async handleSubTrialEnd(sub: Stripe.Subscription) {}
+    await this.subscriptionService.createSubscription(user.id, newSubscription);
 
-  private async handleSubPaused(sub: Stripe.Subscription) {}
+    user.role = Role.PREMIUM;
+    await this.usersRepository.save(user);
+  }
 
-  private async handleSubUpdated(sub: Stripe.Subscription) {}
+  private async handleSubTrialEnd(subscription: Stripe.Subscription) {}
 
-  private async handleSubDeleted(sub: Stripe.Subscription) {}
+  private async handleSubPaused(subscription: Stripe.Subscription) {}
 
-  private async handleSubResumed(sub: Stripe.Subscription) {}
+  private async handleSubUpdated(subscription: Stripe.Subscription) {}
+
+  private async handleSubDeleted(subscription: Stripe.Subscription) {
+    const user = await this.usersRepository.findOneBy({ id: subscription.metadata.user_id });
+    if (!user) throw new NotFoundException('User not found for subscription delete');
+
+    await this.subscriptionService.deleteSubscription(subscription.id);
+
+    user.role = Role.USER;
+    await this.usersRepository.save(user);
+  }
+
+  private async handleSubResumed(subscription: Stripe.Subscription) {}
 
   private async handleInvoiceCreated(invoice: Stripe.Invoice) {}
 

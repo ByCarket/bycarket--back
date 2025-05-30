@@ -8,7 +8,7 @@ export class Subscription {
   @PrimaryColumn()
   id: string;
 
-  @ManyToOne(() => User, user => user.subscriptions)
+  @ManyToOne(() => User, user => user.subscriptions, { onDelete: 'CASCADE' })
   user: User;
 
   @OneToMany(() => Invoice, invoice => invoice.subscription)
@@ -52,19 +52,4 @@ export class Subscription {
     },
   })
   canceled_at: Date | null;
-
-  @Column({
-    nullable: true,
-    type: 'timestamp',
-    transformer: {
-      to: (value: number | Date) => {
-        if (typeof value === 'number') {
-          return new Date(value * 1000);
-        }
-        return value;
-      },
-      from: (value: Date) => value,
-    },
-  })
-  ended_at: Date | null;
 }
