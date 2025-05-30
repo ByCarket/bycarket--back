@@ -2,15 +2,17 @@ import { Type } from 'class-transformer';
 import {
   IsEmail,
   IsNotEmpty,
-  IsNumber,
   IsString,
   MaxLength,
   MinLength,
   Matches,
   Validate,
+  ValidateNested,
 } from 'class-validator';
 import { MatchPassword } from 'src/decorators/matchPassword.decorator';
 import { ApiProperty } from '@nestjs/swagger';
+import { PhoneDto } from './phone.dto';
+
 
 /**
  * Base DTO for user-related operations
@@ -77,15 +79,19 @@ export class CreateUserDto {
   })
   address: string;
 
-  @Type(() => Number)
-  @IsNumber()
-  @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => PhoneDto)
   @ApiProperty({
-    description: 'User phone number',
-    example: 1234567890,
-    type: Number,
+    description: 'User phone number with country code, area code, and number',
+    example: {
+      countryCode: '+1',
+      areaCode: '555',
+      number: '1234567'
+    },
+    type: PhoneDto,
+    required: true,
   })
-  phone: number;
+  phone: PhoneDto;
 
   @IsString()
   @IsNotEmpty()

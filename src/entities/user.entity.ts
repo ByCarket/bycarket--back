@@ -5,6 +5,7 @@ import { Post } from './post.entity';
 import { Question } from './question.entity';
 import { Vehicle } from './vehicle.entity';
 import { CloudinaryUserImage } from 'src/interfaces/cloudinaryUserImage.interface';
+import { PhoneNumber } from 'src/interfaces/phone.interface';
 
 @Entity({
   name: 'users',
@@ -22,8 +23,12 @@ export class User {
   @Column({ type: 'varchar', length: 80, nullable: false })
   password: string;
 
-  @Column({ type: 'int', nullable: true })
-  phone: number;
+  @Column({ 
+    type: 'simple-json', 
+    nullable: true,
+    comment: 'Phone number with country code, area code, and number'
+  })
+  phone: PhoneNumber;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
   country: string;
