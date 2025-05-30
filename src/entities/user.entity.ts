@@ -5,6 +5,8 @@ import { Post } from './post.entity';
 import { Question } from './question.entity';
 import { Vehicle } from './vehicle.entity';
 import { CloudinaryUserImage } from 'src/interfaces/cloudinaryUserImage.interface';
+import { Invoice } from './invoice.entity';
+import { Subscription } from './subscription.entity';
 
 @Entity({
   name: 'users',
@@ -64,4 +66,10 @@ export class User {
 
   @OneToMany(() => Vehicle, vehicle => vehicle.user)
   vehicles: Vehicle[];
+
+  @OneToMany(() => Invoice, invoice => invoice.user)
+  invoices: Invoice[];
+
+  @OneToMany(() => Subscription, subscription => subscription.user)
+  subscriptions: Subscription[];
 }
