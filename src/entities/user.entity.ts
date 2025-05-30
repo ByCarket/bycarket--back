@@ -34,7 +34,7 @@ export class User {
   @Column({ type: 'varchar', length: 50, nullable: true })
   address: string;
 
-  @Column({ type: 'boolean', default: true }) //poner en false en producción
+  @Column({ type: 'boolean', default: false })
   isActive: boolean;
 
   @Column({ type: 'varchar', nullable: true })

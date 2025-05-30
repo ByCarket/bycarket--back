@@ -53,12 +53,10 @@ export class AuthService {
       ...user,
       password: hashedPassword,
       stripeCustomerId,
-      isActive: false, // Usuario inactivo por defecto
       activationToken,
       activationTokenExpires,
     });
     const savedUser = await this.usersRepository.save(newUser);
-    // Enviar email de bienvenida
     try {
       // Enviar email de activación
       await this.mailService.sendAccountActivationEmail(
