@@ -14,13 +14,14 @@ export class Subscription {
   @OneToMany(() => Invoice, invoice => invoice.subscription)
   invoices: Invoice[];
 
-  @Column({ type: 'varchar' })
-  latest_invoice: string;
+  @Column({ type: 'varchar', nullable: true })
+  latest_invoice: string | null;
 
   @Column({ type: 'enum', enum: StatusSubscription })
   status: StatusSubscription;
 
   @Column({
+    nullable: true,
     type: 'timestamp',
     transformer: {
       to: (value: number | Date) => {
@@ -32,12 +33,13 @@ export class Subscription {
       from: (value: Date) => value,
     },
   })
-  cancel_at: Date;
+  cancel_at: Date | null;
 
   @Column({ type: 'boolean' })
   cancel_at_period_end: boolean;
 
   @Column({
+    nullable: true,
     type: 'timestamp',
     transformer: {
       to: (value: number | Date) => {
@@ -49,9 +51,10 @@ export class Subscription {
       from: (value: Date) => value,
     },
   })
-  canceled_at: Date;
+  canceled_at: Date | null;
 
   @Column({
+    nullable: true,
     type: 'timestamp',
     transformer: {
       to: (value: number | Date) => {
@@ -63,5 +66,5 @@ export class Subscription {
       from: (value: Date) => value,
     },
   })
-  ended_at: Date;
+  ended_at: Date | null;
 }

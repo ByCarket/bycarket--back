@@ -49,10 +49,11 @@ export class Invoice {
   period_start: Date;
 
   @Column({
+    nullable: true,
     type: 'enum',
     enum: StatusInvoice,
   })
-  status: StatusInvoice;
+  status: StatusInvoice | null;
 
   @Column({
     type: 'decimal',
