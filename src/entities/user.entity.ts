@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import { Role } from '../enums/roles.enum';
 import { Post } from './post.entity';
@@ -63,6 +63,9 @@ export class User {
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   stripeCustomerId: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  subscription_active: string | null;
 
   @OneToMany(() => Post, post => post.user)
   posts: Post[];

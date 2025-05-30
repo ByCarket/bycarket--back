@@ -6,7 +6,8 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateSessionDto } from 'src/DTOs/billingDto/subscriptionDto/createSession.dto';
+import { CreateSubscriptionDto } from 'src/DTOs/billingDto/subscriptionDto/createSubscription.dto';
+import { Subscription } from 'src/entities/subscription.entity';
 import { User } from 'src/entities/user.entity';
 import { STRIPE_CLIENT } from 'src/providers/stripe.provider';
 import Stripe from 'stripe';
@@ -16,7 +17,10 @@ import { Repository } from 'typeorm';
 export class SubscriptionService {
   constructor(
     private readonly configService: ConfigService,
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(Subscription)
+    private readonly subscriptionRepository: Repository<Subscription>,
     @Inject(STRIPE_CLIENT) private readonly stripe: Stripe,
   ) {}
 
@@ -49,5 +53,43 @@ export class SubscriptionService {
       session_id: session.id,
       client_secret: session.client_secret,
     };
+  }
+
+  async getSubscriptions(userId: string) {
+    const subscriptions = await this.subscriptionRepository.find({
+      where: { user: { id: userId } },
+    });
+    return subscriptions;
+  }
+
+  async createSubscription(userId: string, subscription: CreateSubscriptionDto) {
+    console.log(subscription);
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) throw new NotFoundException('User not found.');
+
+    const newSubscription = await this.subscriptionRepository.create({
+      ...subscription,
+      user,
+    });
+    await this.subscriptionRepository.save(newSubscription);
+  }
+
+  async updateSubscription(userId: string, { id, ...newSubscription }: CreateSubscriptionDto) {
+    const subscription = await this.subscriptionRepository.findOneBy({
+      id,
+      user: { id: userId },
+    });
+    if (!subscription) throw new NotFoundException('Subscription not found for this user.');
+
+    await this.subscriptionRepository.update(subscription.id, newSubscription);
+  }
+
+  async deleteSubscription(userId: string, subscriptionId: string) {
+    const subscription = await this.subscriptionRepository.findOneBy({
+      id: subscriptionId,
+      user: { id: userId },
+    });
+    if (!subscription) throw new NotFoundException('Subscription not found for this user.');
+    await this.subscriptionRepository.delete(subscription.id);
   }
 }

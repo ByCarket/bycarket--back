@@ -10,6 +10,12 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 export class SubscriptionController {
   constructor(private readonly subscriptionService: SubscriptionService) {}
 
+  @Get('me')
+  @HttpCode(200)
+  async getSubscriptions(@UserAuthenticated('sub') userId: string) {
+    return await this.subscriptionService.getSubscriptions(userId);
+  }
+
   @Get(':id')
   @HttpCode(200)
   async getSessionById(@Param('id') id: string) {

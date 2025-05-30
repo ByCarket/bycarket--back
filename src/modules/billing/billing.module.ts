@@ -7,9 +7,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { WebhooksController } from './webhooks/webhooks.controller';
 import { WebhooksService } from './webhooks/webhooks.service';
+import { Subscription } from 'src/entities/subscription.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [TypeOrmModule.forFeature([User, Subscription])],
   controllers: [SubscriptionController, WebhooksController],
   providers: [SubscriptionService, CustomerService, StripeProvider, WebhooksService],
   exports: [CustomerService],

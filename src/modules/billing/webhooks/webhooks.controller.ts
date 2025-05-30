@@ -8,7 +8,7 @@ export class WebhooksController {
   @Post('stripe')
   @HttpCode(200)
   async handleSubscription(@RawBody() raw: Buffer, @Headers('stripe-signature') signature: string) {
-    await this.webhooksService.handleSub({ raw, signature });
+    this.webhooksService.handleSub({ raw, signature });
     return { received: true };
   }
 }

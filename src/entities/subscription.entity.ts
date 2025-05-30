@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { User } from './user.entity';
 import { StatusSubscription } from 'src/enums/statusSubscription.enum';
 import { Invoice } from './invoice.entity';
@@ -8,11 +8,14 @@ export class Subscription {
   @PrimaryColumn()
   id: string;
 
-  @ManyToOne(() => User, user => user.subscriptions)
+  @ManyToOne(() => User, user => user.subscriptions, { onDelete: 'CASCADE' })
   user: User;
 
   @OneToMany(() => Invoice, invoice => invoice.subscription)
   invoices: Invoice[];
+
+  @CreateDateColumn()
+  started_at: Date;
 
   @Column({ type: 'varchar', nullable: true })
   latest_invoice: string | null;
@@ -22,7 +25,7 @@ export class Subscription {
 
   @Column({
     nullable: true,
-    type: 'timestamp',
+    type: 'timestamptz',
     transformer: {
       to: (value: number | Date) => {
         if (typeof value === 'number') {
