@@ -28,6 +28,7 @@ export class PostsService {
     search,
     orderBy,
     order,
+    status,
     ...filters
   }: QueryPostsDto): Promise<ResponsePaginatedPostsDto> {
     const query = await this.postsRepository
@@ -35,8 +36,14 @@ export class PostsService {
       .leftJoinAndSelect('posts.vehicle', 'vehicle')
       .leftJoinAndSelect('vehicle.brand', 'brand')
       .leftJoinAndSelect('vehicle.model', 'model')
-      .leftJoinAndSelect('vehicle.version', 'version')
-      .where('posts.status = :status', { status: PostStatus.ACTIVE });
+      .leftJoinAndSelect('vehicle.version', 'version');
+
+    // Si no se especifica status, filtrar solo activos por defecto
+    if (!status) {
+      query.andWhere('posts.status = :status', { status: PostStatus.ACTIVE });
+    } else {
+      query.andWhere('posts.status = :status', { status });
+    }
 
     const { orConditions, orParams, andConditions, andParams } =
       await this.buildPostFilters(filters);
@@ -168,7 +175,7 @@ export class PostsService {
 
   async getUserPosts(
     userId: string,
-    { page, limit }: QueryPostsDto,
+    { page, limit, status }: QueryPostsDto,
   ): Promise<ResponsePaginatedPostsDto> {
     const skip = (page - 1) * limit;
 
@@ -179,10 +186,14 @@ export class PostsService {
     }
 
     // Obtener posts del usuario con paginación
+    const whereCondition: any = { user: { id: userId } };
+    if (status) {
+      whereCondition.status = status;
+    }
     const [posts, total] = await this.postsRepository.findAndCount({
       skip,
       take: limit,
-      where: { user: { id: userId } },
+      where: whereCondition,
       relations: {
         user: true,
         vehicle: {
@@ -226,11 +237,14 @@ export class PostsService {
       throw new NotFoundException(`User with ID ${userId} not found.`);
     }
 
-    if (user.role === Role.USER && user.posts !== undefined) {
-      const validPosts: Post[] = user.posts.filter(
-        post => post.status === PostStatus.ACTIVE || PostStatus.PENDING,
-      );
-      if (validPosts.length >= 3) {
+    if (user.role === Role.USER) {
+      const [_, total] = await this.postsRepository.findAndCount({
+        where: [
+          { user: { id: user.id }, status: PostStatus.ACTIVE },
+          { user: { id: user.id }, status: PostStatus.PENDING },
+        ],
+      });
+      if (total >= 3) {
         throw new ForbiddenException(
           'You are not allowed to create more posts. Please upgrade to a premium plan.',
         );
@@ -341,9 +355,8 @@ export class PostsService {
     if (post.user.id !== userId) {
       throw new ForbiddenException(`Post with ID ${id} does not belong to user with ID ${userId}.`);
     }
-
     // Marcar el post como inactivo en lugar de eliminarlo físicamente
-    await this.postsRepository.update(id, { status: PostStatus.INACTIVE });
+    await this.postsRepository.delete(id);
 
     return {
       data: id,

@@ -13,6 +13,7 @@ import { ChangePasswordDto } from 'src/DTOs/usersDto/changePassword.dto';
 import { GoogleProfileDto } from 'src/DTOs/usersDto/google-profile.dto';
 import { CustomerService } from '../billing/customer/customer.service';
 import { MailService } from '../mail-notification/mailNotificacion.service';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -25,6 +26,11 @@ export class AuthService {
     private readonly mailService: MailService,
   ) {}
 
+  // Método auxiliar para generar token de activación
+  private generateActivationToken(): string {
+    return crypto.randomBytes(32).toString('hex');
+  }
+
   async register({ confirmPassword, password, ...user }: CreateUserDto) {
     const userExist = await this.usersRepository.findOne({
       where: { email: user.email },
@@ -33,32 +39,121 @@ export class AuthService {
       throw new BadRequestException('Email already registered');
     }
 
+    // Generar token de activación
+    const activationToken = this.generateActivationToken();
+    const activationTokenExpires = new Date();
+    activationTokenExpires.setHours(activationTokenExpires.getHours() + 24); // Expira en 24 horas
     const hashedPassword = await bcrypt.hash(password, 10);
     const stripeCustomerId = await this.customerService.createCustomer({
       email: user.email,
       name: user.name,
     });
 
-    const newUser = await this.usersRepository.save({
+    const newUser = this.usersRepository.create({
       ...user,
       password: hashedPassword,
       stripeCustomerId,
+      activationToken,
+      activationTokenExpires,
     });
-
-    // Enviar email de bienvenida
+    const savedUser = await this.usersRepository.save(newUser);
     try {
-      await this.mailService.sendWelcomeEmail(newUser.email, newUser.name);
-    } catch (emailError) {emailError}
+      // Enviar email de activación
+      await this.mailService.sendAccountActivationEmail(
+        savedUser.email,
+        savedUser.name,
+        activationToken,
+      );
+    } catch (emailError) {
+      emailError;
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: newUserPassword, ...userWithoutPassword } = newUser;
     return userWithoutPassword;
   }
 
+  async activateAccount(token: string) {
+    try {
+      const user = await this.usersRepository.findOne({
+        where: {
+          activationToken: token,
+          isActive: false,
+        },
+      });
+
+      if (!user) {
+        throw new BadRequestException('Token de activación inválido o cuenta ya activada');
+      }
+
+      // Verificar si el token ha expirado
+      if (!user.activationTokenExpires || user.activationTokenExpires < new Date()) {
+        throw new BadRequestException('El token de activación ha expirado');
+      }
+
+      // Activar la cuenta
+      user.isActive = true;
+      user.activationToken = null;
+      user.activationTokenExpires = null;
+
+      await this.usersRepository.save(user);
+
+      // Enviar email de confirmación de activación
+      await this.mailService.sendAccountActivatedEmail(user.email, user.name);
+
+      return {
+        message: 'Cuenta activada exitosamente. Ya puedes iniciar sesión.',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // NUEVO MÉTODO - Reenviar email de activación
+  async resendActivationEmail(email: string) {
+    try {
+      const user = await this.usersRepository.findOne({
+        where: {
+          email,
+          isActive: false,
+        },
+      });
+
+      if (!user) {
+        throw new BadRequestException('Usuario no encontrado o cuenta ya activada');
+      }
+
+      // Generar nuevo token
+      const activationToken = this.generateActivationToken();
+      const activationTokenExpires = new Date();
+      activationTokenExpires.setHours(activationTokenExpires.getHours() + 24);
+
+      user.activationToken = activationToken;
+      user.activationTokenExpires = activationTokenExpires;
+
+      await this.usersRepository.save(user);
+
+      // Enviar nuevo email de activación
+      await this.mailService.sendAccountActivationEmail(user.email, user.name, activationToken);
+
+      return {
+        message: 'Email de activación reenviado exitosamente.',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async login({ email, password }: LoginUserDto) {
     const user = await this.usersService.getUserByEmail(email);
     if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException(
+        'Cuenta no activada. Revisa tu email para activar tu cuenta.',
+      );
     }
     const jwtPayload: JwtSign = {
       sub: user.id,
@@ -88,17 +183,19 @@ export class AuthService {
         country: '',
         city: '',
         address: '',
+        isActive: true,
         stripeCustomerId,
       };
 
-      user = await this.usersRepository.create(newUser);
+      user = this.usersRepository.create(newUser);
       await this.usersRepository.save(user);
 
       // Enviar email de bienvenida para usuarios de Google nuevos
       try {
         await this.mailService.sendWelcomeEmail(user.email, user.name);
-
-      } catch (emailError) {emailError}
+      } catch (emailError) {
+        emailError;
+      }
     } else if (!user.googleId) {
       user.googleId = sub;
       await this.usersRepository.save(user);
@@ -173,7 +270,9 @@ export class AuthService {
     // Enviar notificación de cambio de contraseña
     try {
       await this.mailService.sendPasswordChangeNotification(user.email, user.name);
-    } catch (emailError) {emailError}
+    } catch (emailError) {
+      emailError;
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     await this.usersRepository.update(id, { password: hashedPassword });

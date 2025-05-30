@@ -5,6 +5,9 @@ import { OrderDirectionEnum } from 'src/enums/order.enum';
 import { FiltersDto } from './filters.dto';
 
 export class QueryPostsDto extends FiltersDto {
+  @IsOptional()
+  @IsString()
+  status?: string;
   // Pagination
   @Transform(({ value }) => value ?? 1)
   @Type(() => Number)

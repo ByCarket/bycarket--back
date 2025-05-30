@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Cuenta Activada</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #2196F3; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; background-color: #f9f9f9; }
+        .success-box { background-color: white; padding: 20px; margin: 20px 0; border-radius: 5px; border-left: 4px solid #2196F3; text-align: center; }
+        .login-button { 
+            display: inline-block; 
+            background-color: #2196F3; 
+            color: white; 
+            padding: 15px 30px; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .login-button:hover { background-color: #0b7dda; }
+        .footer { text-align: center; padding: 20px; color: #666; }
+        .success-icon { font-size: 48px; margin-bottom: 10px; }
+        .features { background-color: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        .features ul { text-align: left; margin: 0; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="success-icon">✅</div>
+        <h1>¡Cuenta Activada!</h1>
+    </div>
+    
+    <div class="content">
+        <p>Hola <strong>{{name}}</strong>,</p>
+        
+        <p>¡Excelente! Tu cuenta ha sido activada exitosamente. Ya puedes iniciar sesión y comenzar a disfrutar de todas las funcionalidades de nuestra plataforma.</p>
+        
+        <div class="success-box">
+            <h3>🚀 ¡Todo listo para comenzar!</h3>
+            <a href="{{loginUrl}}" class="login-button">INICIAR SESIÓN</a>
+        </div>
+        
+        <div class="features">
+            <h3>🎯 ¿Qué puedes hacer ahora?</h3>
+            <ul>
+                <li>Registrar y gestionar tus vehículos</li>
+                <li>Acceder a todas las funcionalidades de la plataforma</li>
+                <li>Recibir notificaciones importantes en tu email</li>
+                <li>Disfrutar de una experiencia completa y segura</li>
+            </ul>
+        </div>
+        
+        <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactar con nuestro equipo de soporte.</p>
+    </div>
+    
+    <div class="footer">
+        <p>Fecha de activación: {{date}}</p>
+        <p>Este es un mensaje automático, por favor no responder a este email.</p>
+    </div>
+</body>
+</html>
