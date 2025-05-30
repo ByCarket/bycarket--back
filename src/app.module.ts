@@ -18,22 +18,23 @@ import { BillingModule } from './modules/billing/billing.module';
 import stripeConfig from './config/stripe.config';
 import { MailModule } from './modules/mail-notification/mailNotification.module';
 import { PricesModule } from './modules/prices/prices.module';
+import { OpenAiModule } from './modules/openai/openai.module';
+import { AcaraScrapingModule } from './modules/acara-scraping/acaraScraping.module';
+import { StripeSimulatorModule } from './modules/stripe-simulator/stripe-simulator.module';
 
-dotenv.config({ path: '.env.development' });
+dotenv.config();
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [typeormConfig, stripeConfig],
-      envFilePath: '.env.development',
+      envFilePath: '.env',
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService): TypeOrmModuleOptions => {
         const config = configService.get<TypeOrmModuleOptions>('typeorm');
-        console.log('DB_HOST usado:', process.env.DB_HOST);
-        console.log('TypeORM config:', configService.get<TypeOrmModuleOptions>('typeorm'));
         return config as TypeOrmModuleOptions;
       },
     }),
@@ -55,6 +56,9 @@ dotenv.config({ path: '.env.development' });
     BillingModule,
     MailModule,
     PricesModule,
+    OpenAiModule,
+    AcaraScrapingModule,
+    StripeSimulatorModule,
   ],
   controllers: [],
   providers: [],

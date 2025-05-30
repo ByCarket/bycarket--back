@@ -1,10 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import { Role } from '../enums/roles.enum';
 import { Post } from './post.entity';
 import { Question } from './question.entity';
 import { Vehicle } from './vehicle.entity';
 import { CloudinaryUserImage } from 'src/interfaces/cloudinaryUserImage.interface';
+import { Invoice } from './invoice.entity';
+import { Subscription } from './subscription.entity';
 
 @Entity({
   name: 'users',
@@ -34,8 +36,14 @@ export class User {
   @Column({ type: 'varchar', length: 50, nullable: true })
   address: string;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ type: 'boolean', default: false })
   isActive: boolean;
+
+  @Column({ type: 'varchar', nullable: true })
+  activationToken: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  activationTokenExpires: Date | null;
 
   @Column({
     type: 'simple-json',
@@ -56,6 +64,9 @@ export class User {
   @Column({ type: 'varchar', length: 100, nullable: true })
   stripeCustomerId: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  subscription_active: string | null;
+
   @OneToMany(() => Post, post => post.user)
   posts: Post[];
 
@@ -64,4 +75,10 @@ export class User {
 
   @OneToMany(() => Vehicle, vehicle => vehicle.user)
   vehicles: Vehicle[];
+
+  @OneToMany(() => Invoice, invoice => invoice.user)
+  invoices: Invoice[];
+
+  @OneToMany(() => Subscription, subscription => subscription.user)
+  subscriptions: Subscription[];
 }

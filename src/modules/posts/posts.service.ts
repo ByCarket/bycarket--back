@@ -8,6 +8,8 @@ import { PostStatus } from 'src/enums/postStatus.enum';
 import { ResponsePaginatedPostsDto } from 'src/DTOs/postsDto/responsePaginatedPosts.dto';
 import { CreatePostDto } from 'src/DTOs/postsDto/createPost.dto';
 import { QueryPostsDto } from 'src/DTOs/postsDto/queryPosts.dto';
+import { FiltersDto } from 'src/DTOs/postsDto/filters.dto';
+import { Role } from 'src/enums/roles.enum';
 
 @Injectable()
 export class PostsService {
@@ -26,6 +28,7 @@ export class PostsService {
     search,
     orderBy,
     order,
+    status,
     ...filters
   }: QueryPostsDto): Promise<ResponsePaginatedPostsDto> {
     const query = await this.postsRepository
@@ -33,32 +36,17 @@ export class PostsService {
       .leftJoinAndSelect('posts.vehicle', 'vehicle')
       .leftJoinAndSelect('vehicle.brand', 'brand')
       .leftJoinAndSelect('vehicle.model', 'model')
-      .leftJoinAndSelect('vehicle.version', 'version')
-      .where('posts.status = :status', { status: PostStatus.ACTIVE });
+      .leftJoinAndSelect('vehicle.version', 'version');
 
-    const exactFilters = {
-      brandId: 'brand.id',
-      modelId: 'model.id',
-      versionId: 'version.id',
-      typeOfVehicle: 'vehicle.typeOfVehicle',
-      condition: 'vehicle.condition',
-      currency: 'vehicle.currency',
-    };
+    // Si no se especifica status, filtrar solo activos por defecto
+    if (!status) {
+      query.andWhere('posts.status = :status', { status: PostStatus.ACTIVE });
+    } else {
+      query.andWhere('posts.status = :status', { status });
+    }
 
-    const rangeFilters = {
-      minYear: { column: 'vehicle.year', operator: '>=' },
-      maxYear: { column: 'vehicle.year', operator: '<=' },
-
-      minPrice: { column: 'vehicle.price', operator: '>=' },
-      maxPrice: { column: 'vehicle.price', operator: '<=' },
-
-      minMileage: { column: 'vehicle.mileage', operator: '>=' },
-      maxMileage: { column: 'vehicle.mileage', operator: '<=' },
-    };
-
-    const cleanedFilters = Object.entries(filters).filter(
-      ([_, value]) => value !== undefined && value !== null && value !== '',
-    );
+    const { orConditions, orParams, andConditions, andParams } =
+      await this.buildPostFilters(filters);
 
     if (search) {
       query.andWhere(
@@ -70,15 +58,12 @@ export class PostsService {
       );
     }
 
-    for (const [key, value] of cleanedFilters) {
-      if (exactFilters[key]) {
-        query.andWhere(`${exactFilters[key]} = :${key}`, { [key]: value });
-      }
+    if (orConditions.length > 0) {
+      query.andWhere(`(${orConditions.join(' OR ')})`, orParams);
+    }
 
-      if (rangeFilters[key]) {
-        const { column, operator } = rangeFilters[key];
-        query.andWhere(`${column} ${operator} :${key}`, { [key]: value });
-      }
+    if (andConditions.length > 0) {
+      query.andWhere(andConditions.join(' AND '), andParams);
     }
 
     query.orderBy(orderBy, order);
@@ -91,6 +76,71 @@ export class PostsService {
       page,
       limit,
       totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async buildPostFilters(filters: FiltersDto) {
+    const exactFilters = {
+      brandId: 'brand.id',
+      modelId: 'model.id',
+      versionId: 'version.id',
+      typeOfVehicle: 'vehicle.typeOfVehicle',
+      condition: 'vehicle.condition',
+      currency: 'vehicle.currency',
+    };
+
+    const rangeFilters = {
+      minYear: { column: 'vehicle.year', operator: '>=' },
+      maxYear: { column: 'vehicle.year', operator: '<=' },
+      minPrice: { column: 'vehicle.price', operator: '>=' },
+      maxPrice: { column: 'vehicle.price', operator: '<=' },
+      minMileage: { column: 'vehicle.mileage', operator: '>=' },
+      maxMileage: { column: 'vehicle.mileage', operator: '<=' },
+    };
+
+    const orFilterKeys = ['brandId', 'modelId', 'versionId'];
+
+    const orConditions: string[] = [];
+    const orParams: Record<string, any> = {};
+    const andConditions: string[] = [];
+    const andParams: Record<string, any> = {};
+
+    const cleanedFilters = Object.entries(filters).filter(
+      ([_, value]) =>
+        (Array.isArray(value) && value.length > 0) ||
+        (!Array.isArray(value) && value !== undefined && value !== null),
+    );
+
+    for (const [key, value] of cleanedFilters) {
+      if (exactFilters[key]) {
+        const column = exactFilters[key];
+
+        if (orFilterKeys.includes(key)) {
+          orConditions.push(`${column} IN (:...${key})`);
+          orParams[key] = value;
+        } else {
+          if (Array.isArray(value)) {
+            andConditions.push(`${column} IN (:...${key})`);
+            andParams[key] = value;
+          } else {
+            andConditions.push(`${column} = :${key}`);
+            andParams[key] = value;
+          }
+        }
+      }
+
+      if (rangeFilters[key]) {
+        const { column, operator } = rangeFilters[key];
+        andConditions.push(`${column} ${operator} :${key}`);
+        andParams[key] = value;
+      }
+    }
+
+    return {
+      orConditions,
+      orParams,
+      andConditions,
+      andParams,
     };
   }
 
@@ -125,7 +175,7 @@ export class PostsService {
 
   async getUserPosts(
     userId: string,
-    { page, limit }: QueryPostsDto,
+    { page, limit, status }: QueryPostsDto,
   ): Promise<ResponsePaginatedPostsDto> {
     const skip = (page - 1) * limit;
 
@@ -136,10 +186,14 @@ export class PostsService {
     }
 
     // Obtener posts del usuario con paginación
+    const whereCondition: any = { user: { id: userId } };
+    if (status) {
+      whereCondition.status = status;
+    }
     const [posts, total] = await this.postsRepository.findAndCount({
       skip,
       take: limit,
-      where: { user: { id: userId } },
+      where: whereCondition,
       relations: {
         user: true,
         vehicle: {
@@ -173,11 +227,28 @@ export class PostsService {
     };
   }
 
-  async createPost({ vehicleId, description }: CreatePostDto, userId: string) {
+  async createPost({ vehicleId, description, price }: CreatePostDto, userId: string) {
     // Verificar que el usuario existe
-    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['posts'],
+    });
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found.`);
+    }
+
+    if (user.role === Role.USER) {
+      const [_, total] = await this.postsRepository.findAndCount({
+        where: [
+          { user: { id: user.id }, status: PostStatus.ACTIVE },
+          { user: { id: user.id }, status: PostStatus.PENDING },
+        ],
+      });
+      if (total >= 3) {
+        throw new ForbiddenException(
+          'You are not allowed to create more posts. Please upgrade to a premium plan.',
+        );
+      }
     }
 
     // Verificar que el vehículo existe y pertenece al usuario
@@ -190,22 +261,29 @@ export class PostsService {
       );
     }
 
+    // Verificar si ya existe un post activo para este vehículo
+    const existingPost = await this.postsRepository
+      .createQueryBuilder('posts')
+      .leftJoinAndSelect('posts.vehicle', 'vehicle')
+      .where('vehicle.id = :vehicleId', { vehicleId })
+      .andWhere('posts.status IN (:...status)', { status: [PostStatus.ACTIVE, PostStatus.PENDING] })
+      .getOne();
+
+    if (existingPost) {
+      throw new ForbiddenException(
+        `An active or pending post already exists for vehicle with ID ${vehicleId}.`,
+      );
+    }
+
     // Solo actualizar la descripción del vehículo si se proporciona una nueva
     if (description !== undefined && description !== null && description.trim() !== '') {
       vehicle.description = description;
       await this.vehiclesRepository.save(vehicle);
     }
 
-    // Verificar si ya existe un post activo para este vehículo
-    const existingPost = await this.postsRepository.findOne({
-      where: { vehicle: { id: vehicleId }, status: PostStatus.ACTIVE },
-      relations: { vehicle: true },
-    });
-
-    if (existingPost) {
-      throw new ForbiddenException(
-        `An active post already exists for vehicle with ID ${vehicleId}.`,
-      );
+    if (price) {
+      vehicle.price = price;
+      await this.vehiclesRepository.save(vehicle);
     }
 
     // Crear y guardar el nuevo post
@@ -277,9 +355,8 @@ export class PostsService {
     if (post.user.id !== userId) {
       throw new ForbiddenException(`Post with ID ${id} does not belong to user with ID ${userId}.`);
     }
-
     // Marcar el post como inactivo en lugar de eliminarlo físicamente
-    await this.postsRepository.update(id, { status: PostStatus.INACTIVE });
+    await this.postsRepository.delete(id);
 
     return {
       data: id,
