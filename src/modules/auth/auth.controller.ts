@@ -1,6 +1,6 @@
 import { CreateUserDto } from 'src/DTOs/usersDto/createUser.dto';
 import { LoginUserDto } from 'src/DTOs/usersDto/loginUser.dto';
-import { Controller, Post, Body, HttpCode, UseGuards, Patch } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, UseGuards, Patch, Get, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
@@ -24,6 +24,16 @@ export class AuthController {
   })
   async register(@Body() createUserDto: CreateUserDto) {
     return await this.authService.register(createUserDto);
+  }
+
+  @Get('activate/:token')
+  async activateAccount(@Param('token') token: string) {
+    return this.authService.activateAccount(token);
+  }
+
+  @Post('resend-activation')
+  async resendActivationEmail(@Body('email') email: string) {
+    return this.authService.resendActivationEmail(email);
   }
 
   @Post('login')
