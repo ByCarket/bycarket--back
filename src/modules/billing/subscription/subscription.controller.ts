@@ -18,10 +18,7 @@ export class SubscriptionController {
 
   @Post(':id')
   @HttpCode(200)
-  async createSubMembership(
-    @UserAuthenticated('sub') userId: string,
-    @Param('id') priceId: string,
-  ) {
-    return await this.subscriptionService.createSubMembership(userId, priceId);
+  async createSession(@UserAuthenticated('sub') userId: string, @Param('id') priceId: string) {
+    return await this.subscriptionService.createSession(userId, priceId);
   }
 }

@@ -20,6 +20,7 @@ import { MailModule } from './modules/mail-notification/mailNotification.module'
 import { PricesModule } from './modules/prices/prices.module';
 import { OpenAiModule } from './modules/openai/openai.module';
 import { AcaraScrapingModule } from './modules/acara-scraping/acaraScraping.module';
+import { StripeSimulatorModule } from './modules/stripe-simulator/stripe-simulator.module';
 
 dotenv.config();
 
@@ -57,6 +58,7 @@ dotenv.config();
     PricesModule,
     OpenAiModule,
     AcaraScrapingModule,
+    StripeSimulatorModule,
   ],
   controllers: [],
   providers: [],
