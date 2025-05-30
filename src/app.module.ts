@@ -57,6 +57,8 @@ dotenv.config();
     MailModule,
     PricesModule,
     OpenAiModule,
+    AcaraScrapingModule,
+    StripeSimulatorModule,
   ],
   controllers: [],
   providers: [],
