@@ -168,6 +168,7 @@ export class VehiclesService {
         message: 'Vehicle created successfully with images.',
       };
     } catch (error) {
+      console.error('❌ Error en createVehicleWithImages:', error);
       if (queryRunner.isTransactionActive) {
         await queryRunner.rollbackTransaction();
       }
