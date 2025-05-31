@@ -134,7 +134,10 @@ export class VehiclesService {
         )
         .map(res => res.value);
 
-      if (hasErrors) throw new InternalServerErrorException('Some images failed to upload');
+      if (hasErrors) {
+        console.error('❌ Error en hasErrors');
+        throw new InternalServerErrorException('Some images failed to upload');
+      }
 
       vehicle.images = uploadedImages.map(img => {
         return {
