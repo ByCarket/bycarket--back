@@ -1,12 +1,4 @@
-import {
-  IsUUID,
-  IsNumber,
-  IsString,
-  Min,
-  Max,
-  IsNotEmpty,
-  IsEnum,
-} from 'class-validator';
+import { IsUUID, IsNumber, IsString, Min, Max, IsNotEmpty, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { VehicleTypeEnum } from 'src/enums/vehicleType.enum';
 import { VehicleCondition } from 'src/enums/vehicleCondition.enum';
@@ -58,10 +50,13 @@ export class BaseVehicleDto {
   @IsNumber()
   mileage: number;
 
-  @ApiProperty({ description: 'Descripción del vehículo', example: 'Muy buen estado, único dueño.' })
+  @ApiProperty({
+    description: 'Descripción del vehículo',
+    example: 'Muy buen estado, único dueño.',
+  })
   @IsString()
   @IsNotEmpty()
   description: string;
-  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' } })
-  images?: Express.Multer.File[];
+  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' }, name: 'images' })
+  images: Express.Multer.File[];
 }

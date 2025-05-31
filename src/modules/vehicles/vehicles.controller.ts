@@ -72,10 +72,10 @@ export class VehiclesController {
           new MaxFileSizeValidator({ maxSize: 1000000 }), // 1MB por imagen
           new FileTypeValidator({ fileType: /(jpg|jpeg|png|webp)/ }),
         ],
-        fileIsRequired: false, // Las imágenes son opcionales
+        fileIsRequired: true, // Las imágenes son opcionales
       }),
     )
-    files?: Express.Multer.File[],
+    files: Express.Multer.File[],
   ) {
     // Asociar las imágenes al DTO
     createVehicleDto.images = files;

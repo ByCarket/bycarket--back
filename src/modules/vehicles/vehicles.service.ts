@@ -1,4 +1,11 @@
-import { ForbiddenException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FilesService } from '../files/files.service';
@@ -11,6 +18,7 @@ import { Model } from 'src/entities/model.entity';
 import { User } from 'src/entities/user.entity';
 import { Version } from 'src/entities/version.entity';
 import { MailService } from 'src/modules/mail-notification/mailNotificacion.service';
+import { UploadApiResponse } from 'cloudinary';
 
 @Injectable()
 export class VehiclesService {
@@ -86,11 +94,15 @@ export class VehiclesService {
     { images, brandId, modelId, versionId, ...CreateVehicleDto }: CreateVehicleDto,
     userId: string,
   ) {
+    console.log(CreateVehicleDto, images);
     const queryRunner = this.vehicleRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    const uploadedImages: CloudinaryVehicleImage[] = [];
+    let uploadedImages: UploadApiResponse[] = [];
+    const uploadPromises: Promise<UploadApiResponse>[] = images.map(image =>
+      this.filesService.uploadImgCloudinary(image),
+    );
 
     try {
       const user = await this.userRepository.findOneBy({ id: userId });
@@ -103,7 +115,6 @@ export class VehiclesService {
       if (!model) throw new NotFoundException(`Model with ID ${modelId} not found`);
       if (!version) throw new NotFoundException(`Version with ID ${versionId} not found`);
 
-      // 1. Crear el vehículo (sin guardar en la base de datos todavía)
       const vehicle = this.vehicleRepository.create({
         brand,
         model,
@@ -112,130 +123,119 @@ export class VehiclesService {
         ...CreateVehicleDto,
       });
 
-      // 2. Subir imágenes a Cloudinary si existen
-      if (images && images.length > 0) {
-        if (images.length > 6) {
-          throw new HttpException(
-            {
-              status: 400,
-              error: 'A vehicle cannot have more than 6 images.',
-            },
-            400,
-          );
-        }
+      if (images.length > 6) throw new BadRequestException('You can only upload up to 6 images');
 
-        // Subir cada imagen a Cloudinary
-        for (const image of images) {
-          const uploadResult = await this.filesService.uploadImgCloudinary(image);
+      const uploadResults = await Promise.allSettled(uploadPromises);
 
-          // Guardar tanto el public_id como la secure_url
-          uploadedImages.push({
-            public_id: uploadResult.public_id,
-            secure_url: uploadResult.secure_url,
-          });
-        }
+      const hasErrors = uploadResults.some(result => result.status === 'rejected');
+      uploadedImages = uploadResults
+        .filter(
+          (res): res is PromiseFulfilledResult<UploadApiResponse> => res.status === 'fulfilled',
+        )
+        .map(res => res.value);
 
-        // Asignar las imágenes al vehículo
-        vehicle.images = uploadedImages;
+      if (hasErrors) {
+        await Promise.all(
+          uploadedImages.map(img => this.filesService.deleteCloudinaryImage(img.public_id)),
+        );
+        throw new InternalServerErrorException('Some images failed to upload');
       }
 
-      // 3. Guardar el vehículo en la base de datos
-      const savedVehicle = await queryRunner.manager.save(vehicle);
+      vehicle.images = uploadedImages.map(img => {
+        return {
+          public_id: img.public_id,
+          secure_url: img.secure_url,
+        };
+      });
 
-      // 4. Commit de la transacción
+      await queryRunner.manager.save(vehicle);
       await queryRunner.commitTransaction();
 
-      // ✅ 5. Enviar notificación por email (después del commit exitoso)
       try {
         await this.mailService.sendVehicleCreatedNotification(user.email, user.name, {
           brand: brand.name,
           model: model.name,
           version: version.name,
-          year: savedVehicle.year,
+          year: vehicle.year,
         });
       } catch (emailError) {
-        // Log del error pero no fallar la operación
         console.error('Error enviando notificación de vehículo creado:', emailError);
       }
 
-      // 6. Retornar la respuesta
-      savedVehicle.user = {
-        id: savedVehicle.user.id,
-        name: savedVehicle.user.name,
-        email: savedVehicle.user.email,
+      vehicle.user = {
+        id: vehicle.user.id,
+        name: vehicle.user.name,
+        email: vehicle.user.email,
       } as User;
 
       return {
-        data: savedVehicle,
+        data: vehicle,
         message: 'Vehicle created successfully with images.',
       };
     } catch (error) {
-      // Rollback de la transacción en caso de error
       if (queryRunner.isTransactionActive) {
         await queryRunner.rollbackTransaction();
       }
-
-      // Si se subieron imágenes a Cloudinary, eliminarlas
       if (uploadedImages.length > 0) {
-        // Extraer solo los public_ids de las imágenes subidas
-        const publicIds = uploadedImages.map(img => img.public_id);
-        await this.filesService.deleteMultipleCloudinaryImages(publicIds);
+        await Promise.all(
+          uploadedImages.map(img =>
+            this.filesService.deleteCloudinaryImage(img.public_id).catch(() => null),
+          ),
+        );
       }
-
-      throw error;
+      throw new HttpException(error.getResponse(), error.getStatus());
     } finally {
-      // Liberar el query runner
       await queryRunner.release();
     }
   }
 
-// ✅ UPDATE vehicle con notificación simple por email
-async updateVehicle(id: string, userId: string, updateVehicleInfo: UpdateVehicleDto) {
-  // Obtener datos del vehículo ANTES del update
-  const originalVehicle = await this.vehicleRepository.findOne({
-    where: { id },
-    relations: ['brand', 'model', 'version', 'user'],
-  });
+  // ✅ UPDATE vehicle con notificación simple por email
+  async updateVehicle(id: string, userId: string, updateVehicleInfo: UpdateVehicleDto) {
+    // Obtener datos del vehículo ANTES del update
+    const originalVehicle = await this.vehicleRepository.findOne({
+      where: { id },
+      relations: ['brand', 'model', 'version', 'user'],
+    });
 
-  if (!originalVehicle) throw new NotFoundException(`Vehicle with ID ${id} not found`);
-  if (originalVehicle.user && originalVehicle.user.id !== userId) {
-    throw new ForbiddenException(
-      `Vehicle with ID ${id} does not belong to user with ID ${userId}`,
-    );
+    if (!originalVehicle) throw new NotFoundException(`Vehicle with ID ${id} not found`);
+    if (originalVehicle.user && originalVehicle.user.id !== userId) {
+      throw new ForbiddenException(
+        `Vehicle with ID ${id} does not belong to user with ID ${userId}`,
+      );
+    }
+
+    // Guardar información del vehículo para el email
+    const vehicleInfo = {
+      brand: originalVehicle.brand.name,
+      model: originalVehicle.model.name,
+      version: originalVehicle.version.name,
+      year: originalVehicle.year,
+    };
+
+    const userInfo = {
+      email: originalVehicle.user.email,
+      name: originalVehicle.user.name,
+    };
+
+    // Actualizar el vehículo
+    await this.vehicleRepository.update(id, updateVehicleInfo);
+
+    // ✅ Enviar notificación simple por email después de la actualización exitosa
+    try {
+      await this.mailService.sendVehicleUpdatedNotification(
+        userInfo.email,
+        userInfo.name,
+        vehicleInfo,
+      );
+    } catch (emailError) {
+      console.error('Error enviando notificación de vehículo actualizado:', emailError);
+    }
+
+    return {
+      data: id,
+      message: 'Vehicle updated successfully',
+    };
   }
-
-  // Guardar información del vehículo para el email
-  const vehicleInfo = {
-    brand: originalVehicle.brand.name,
-    model: originalVehicle.model.name,
-    version: originalVehicle.version.name,
-    year: originalVehicle.year,
-  };
-
-  const userInfo = {
-    email: originalVehicle.user.email,
-    name: originalVehicle.user.name,
-  };
-
-  // Actualizar el vehículo
-  await this.vehicleRepository.update(id, updateVehicleInfo);
-
-  // ✅ Enviar notificación simple por email después de la actualización exitosa
-  try {
-    await this.mailService.sendVehicleUpdatedNotification(
-      userInfo.email,
-      userInfo.name,
-      vehicleInfo
-    );
-  } catch (emailError) {
-    console.error('Error enviando notificación de vehículo actualizado:', emailError);
-  }
-
-  return {
-    data: id,
-    message: 'Vehicle updated successfully',
-  };
-}
 
   // ✅ DELETE vehicle con notificación por email
   async deleteVehicle(id: string, userId: string) {
