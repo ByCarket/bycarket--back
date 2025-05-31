@@ -4,56 +4,237 @@
     <meta charset="utf-8">
     <title>Activa tu Cuenta</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #4CAF50; color: white; padding: 20px; text-align: center; }
-        .content { padding: 20px; background-color: #f9f9f9; }
-        .activation-box { background-color: white; padding: 20px; margin: 20px 0; border-radius: 5px; border-left: 4px solid #4CAF50; text-align: center; }
-        .activation-button { 
-            display: inline-block; 
-            background-color: #4CAF50; 
-            color: white; 
-            padding: 15px 30px; 
-            text-decoration: none; 
-            border-radius: 5px; 
-            font-weight: bold;
-            margin: 20px 0;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .activation-button:hover { background-color: #45a049; }
-        .footer { text-align: center; padding: 20px; color: #666; }
-        .welcome-icon { font-size: 48px; margin-bottom: 10px; }
-        .warning { background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; }
-        .link-text { word-break: break-all; background-color: #f5f5f5; padding: 10px; border-radius: 3px; font-family: monospace; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(16, 54, 99, 0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #103663 0%, #4a77a8 100%);
+            padding: 50px 40px;
+            text-align: center;
+            color: white;
+        }
+        
+        .welcome-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 30px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 24px;
+            color: #103663;
+        }
+        
+        .message {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 32px;
+        }
+        
+        .activation-section {
+            background: #f8f9fa;
+            padding: 32px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 32px 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        .activation-title {
+            color: #103663;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .activation-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #103663 0%, #4a77a8 100%);
+            color: white;
+            padding: 18px 40px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 24px;
+        }
+        
+        .activation-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 54, 99, 0.3);
+        }
+        
+        .link-instructions {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 16px;
+        }
+        
+        .link-text {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 12px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            font-size: 13px;
+            color: #103663;
+            word-break: break-all;
+            line-height: 1.4;
+        }
+        
+        .warning {
+            background: linear-gradient(135deg, #fff4e6 0%, #fef0e6 100%);
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 32px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .warning-icon {
+            color: #ff8800;
+            font-size: 20px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        
+        .warning-content {
+            flex: 1;
+        }
+        
+        .warning-title {
+            font-weight: 600;
+            color: #cc6600;
+            margin-bottom: 4px;
+        }
+        
+        .warning-text {
+            color: #995500;
+            font-size: 14px;
+        }
+        
+        .disclaimer {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 24px 40px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .footer p {
+            color: #666;
+            font-size: 13px;
+            margin: 4px 0;
+        }
+        
+        .footer .date {
+            color: #103663;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="welcome-icon">🎉</div>
-        <h1>¡Bienvenido a nuestra plataforma!</h1>
-    </div>
-    
-    <div class="content">
-        <p>Hola <strong>{{name}}</strong>,</p>
+    <div class="container">
+        <div class="header">
+            <div class="welcome-icon">🎉</div>
+            <h1>¡Bienvenido a nuestra plataforma!</h1>
+        </div>
         
-        <p>¡Gracias por registrarte! Para completar tu registro y comenzar a usar tu cuenta, necesitas activarla haciendo clic en el botón de abajo:</p>
-        
-        <div class="activation-box">
-            <h3>🔐 Activar mi cuenta</h3>
-            <a href="{{activationUrl}}" class="activation-button">ACTIVAR CUENTA</a>
+        <div class="content">
+            <div class="greeting">
+                Hola <strong>{{name}}</strong>,
+            </div>
             
-            <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
-            <div class="link-text">{{activationUrl}}</div>
+            <div class="message">
+                ¡Gracias por registrarte! Para completar tu registro y comenzar a usar tu cuenta, necesitas activarla utilizando el botón de abajo.
+            </div>
+            
+            <div class="activation-section">
+                <div class="activation-title">
+                    🔐 Activar mi cuenta
+                </div>
+                
+                <a href="{{activationUrl}}" class="activation-button">Activar Cuenta</a>
+                
+                <div class="link-instructions">
+                    Si el botón no funciona, copia y pega este enlace en tu navegador:
+                </div>
+                
+                <div class="link-text">{{activationUrl}}</div>
+            </div>
+            
+            <div class="warning">
+                <div class="warning-icon">⏰</div>
+                <div class="warning-content">
+                    <div class="warning-title">Importante</div>
+                    <div class="warning-text">
+                        Este enlace de activación expirará en 24 horas por seguridad. Si no activas tu cuenta en este tiempo, deberás solicitar un nuevo enlace de activación.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="disclaimer">
+                Si no te registraste en nuestra plataforma, puedes ignorar este email.
+            </div>
         </div>
         
-        <div class="warning">
-            <strong>⏰ Importante:</strong> Este enlace de activación expirará en 24 horas por seguridad. Si no activas tu cuenta en este tiempo, deberás solicitar un nuevo enlace de activación.
+        <div class="footer">
+            <p class="date">Registrado el {{date}}</p>
+            <p>Este es un mensaje automático, no responder.</p>
         </div>
-        
-        <p>Si no te registraste en nuestra plataforma, puedes ignorar este email.</p>
-    </div>
-    
-    <div class="footer">
-        <p>Fecha de registro: {{date}}</p>
-        <p>Este es un mensaje automático, por favor no responder a este email.</p>
     </div>
 </body>
 </html>

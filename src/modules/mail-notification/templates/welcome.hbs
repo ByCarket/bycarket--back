@@ -5,73 +5,270 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>¡Bienvenido!</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             line-height: 1.6;
             color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f4f4f4;
+            background-color: #f8f9fa;
         }
+        
         .container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(16, 54, 99, 0.1);
         }
+        
         .header {
+            background: linear-gradient(135deg, #103663 0%, #4a77a8 100%);
+            padding: 50px 40px;
             text-align: center;
-            margin-bottom: 30px;
+            color: white;
+            position: relative;
         }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="30" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="70" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="80" r="1.2" fill="rgba(255,255,255,0.1)"/></svg>');
+        }
+        
+        .welcome-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 36px;
+            position: relative;
+            z-index: 1;
+        }
+        
         .header h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
         }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
         .welcome-message {
-            background-color: #ecf0f1;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 32px;
+            border-left: 4px solid #4a77a8;
+            position: relative;
         }
+        
+        .welcome-message::before {
+            content: '👋';
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            font-size: 24px;
+            background: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .greeting {
+            font-size: 18px;
+            color: #103663;
+            margin-bottom: 16px;
+        }
+        
+        .message-text {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 16px;
+        }
+        
+        .highlight {
+            color: #103663;
+            font-weight: 600;
+        }
+        
+        .cta-section {
+            text-align: center;
+            padding: 32px 0;
+        }
+        
+        .cta-text {
+            font-size: 18px;
+            color: #103663;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+        
         .button {
             display: inline-block;
-            background-color: #3498db;
+            background: linear-gradient(135deg, #103663 0%, #4a77a8 100%);
             color: white;
-            padding: 12px 25px;
+            padding: 18px 40px;
             text-decoration: none;
-            border-radius: 5px;
-            margin: 20px 0;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .footer {
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 54, 99, 0.3);
+        }
+        
+        .features {
+            background: #f8f9fa;
+            padding: 24px;
+            border-radius: 8px;
+            margin: 32px 0;
+        }
+        
+        .features h3 {
+            color: #103663;
+            font-size: 18px;
+            margin-bottom: 16px;
             text-align: center;
-            margin-top: 30px;
-            font-size: 14px;
-            color: #7f8c8d;
+            font-weight: 600;
+        }
+        
+        .features-list {
+            display: grid;
+            gap: 8px;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #555;
+            font-size: 15px;
+        }
+        
+        .feature-check {
+            width: 20px;
+            height: 20px;
+            background: #4a77a8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 32px 40px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .footer-message {
+            color: #666;
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+        
+        .footer-thanks {
+            color: #103663;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .footer-disclaimer {
+            color: #999;
+            font-size: 13px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
+            <div class="welcome-icon">🎉</div>
             <h1>¡Bienvenido {{name}}!</h1>
             <p>Gracias por registrarte en nuestra plataforma</p>
         </div>
 
-        <div class="welcome-message">
-            <p>Hola <strong>{{name}}</strong>,</p>
-            <p>¡Nos complace darte la bienvenida a nuestra plataforma! Tu cuenta ha sido creada exitosamente el <strong>{{date}}</strong>.</p>
-            <p>Ahora puedes acceder a todas las funcionalidades disponibles y comenzar a disfrutar de nuestros servicios.</p>
-        </div>
+        <div class="content">
+            <div class="welcome-message">
+                <div class="greeting">Hola <strong>{{name}}</strong>,</div>
+                <div class="message-text">
+                    ¡Nos complace darte la bienvenida a nuestra plataforma! Tu cuenta ha sido creada exitosamente el <span class="highlight">{{date}}</span>.
+                </div>
+                <div class="message-text">
+                    Ahora puedes acceder a todas las funcionalidades disponibles y comenzar a disfrutar de nuestros servicios.
+                </div>
+            </div>
 
-        <div style="text-align: center;">
-            <a href="#" class="button">Comenzar Ahora</a>
+            <div class="features">
+                <h3>¿Qué puedes hacer ahora?</h3>
+                <div class="features-list">
+                    <div class="feature-item">
+                        <div class="feature-check">✓</div>
+                        <div>Explorar todas las funcionalidades de la plataforma</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-check">✓</div>
+                        <div>Personalizar tu perfil y preferencias</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-check">✓</div>
+                        <div>Acceder a soporte técnico especializado</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-check">✓</div>
+                        <div>Disfrutar de una experiencia segura y optimizada</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cta-section">
+                <div class="cta-text">¿Listo para empezar?</div>
+                <a href="#" class="button">Comenzar Ahora</a>
+            </div>
         </div>
 
         <div class="footer">
-            <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
-            <p>¡Gracias por confiar en nosotros!</p>
-            <small>Este es un email automático, por favor no respondas a este mensaje.</small>
+            <div class="footer-message">Si tienes alguna pregunta, no dudes en contactarnos.</div>
+            <div class="footer-thanks">¡Gracias por confiar en nosotros!</div>
+            <div class="footer-disclaimer">Este es un email automático, por favor no respondas a este mensaje.</div>
         </div>
     </div>
 </body>
