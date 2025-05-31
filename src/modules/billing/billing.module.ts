@@ -8,11 +8,20 @@ import { User } from 'src/entities/user.entity';
 import { WebhooksController } from './webhooks/webhooks.controller';
 import { WebhooksService } from './webhooks/webhooks.service';
 import { Subscription } from 'src/entities/subscription.entity';
+import { InvoicesController } from './invoices/invoices.controller';
+import { InvoicesService } from './invoices/invoices.service';
+import { Invoice } from 'src/entities/invoice.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Subscription])],
-  controllers: [SubscriptionController, WebhooksController],
-  providers: [SubscriptionService, CustomerService, StripeProvider, WebhooksService],
+  imports: [TypeOrmModule.forFeature([User, Subscription, Invoice])],
+  controllers: [SubscriptionController, WebhooksController, InvoicesController],
+  providers: [
+    SubscriptionService,
+    CustomerService,
+    StripeProvider,
+    WebhooksService,
+    InvoicesService,
+  ],
   exports: [CustomerService],
 })
 export class BillingModule {}

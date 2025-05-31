@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -13,12 +14,18 @@ import Stripe from 'stripe';
 import { Repository } from 'typeorm';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { plainToInstance } from 'class-transformer';
-import { CreateSubscriptionDto } from 'src/DTOs/billingDto/subscriptionDto/createSubscription.dto';
 import { Role } from 'src/enums/roles.enum';
+import { InvoiceDto } from 'src/DTOs/billingDto/invoicesDto/invoice.dto';
+import { InvoicesService } from '../invoices/invoices.service';
+import { Subscription } from 'src/entities/subscription.entity';
+import { HandleInvoicesDto } from 'src/DTOs/billingDto/invoicesDto/handleInvoices.dto';
+import { HandleSubscriptionDto } from 'src/DTOs/billingDto/subscriptionDto/handleSubscription.dto';
+import { SubscriptionDto } from 'src/DTOs/billingDto/subscriptionDto/subscription.dto';
 
 @Injectable()
 export class WebhooksService {
   constructor(
+    private readonly invoicesService: InvoicesService,
     private readonly subscriptionService: SubscriptionService,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
@@ -95,17 +102,16 @@ export class WebhooksService {
     return await this.stripe.webhooks.constructEventAsync(raw, signature, secret);
   }
 
-  private async handleSubCreated(subscription: Stripe.Subscription) {
-    const user = await this.usersRepository.findOneBy({ id: subscription.metadata.user_id });
-    if (!user) throw new NotFoundException('User not found for subscription creation');
-    const newSubscription = plainToInstance(CreateSubscriptionDto, subscription, {
-      excludeExtraneousValues: true,
-    });
+  // Handle Subscriptions
+  // These methods are called when the subscription events are triggered by Stripe.
 
-    await this.subscriptionService.createSubscription(user.id, newSubscription);
+  private async handleSubCreated(subscription: Stripe.Subscription) {
+    const { user, subscriptionDto } = await this.handleSubscriptionsValidations(subscription);
+
+    await this.subscriptionService.createSubscription(user, subscriptionDto);
 
     user.role = Role.PREMIUM;
-    user.subscription_active = newSubscription.id;
+    user.subscription_active = subscriptionDto.id;
     await this.usersRepository.save(user);
   }
 
@@ -114,18 +120,13 @@ export class WebhooksService {
   private async handleSubPaused(subscription: Stripe.Subscription) {}
 
   private async handleSubUpdated(subscription: Stripe.Subscription) {
-    const user = await this.usersRepository.findOneBy({ id: subscription.metadata.user_id });
-    if (!user) throw new NotFoundException('User not found for subscription creation');
-    const newSubscription = plainToInstance(CreateSubscriptionDto, subscription, {
-      excludeExtraneousValues: true,
-    });
+    const { user, subscriptionDto } = await this.handleSubscriptionsValidations(subscription);
 
-    await this.subscriptionService.updateSubscription(user.id, newSubscription);
+    await this.subscriptionService.updateSubscription(user.id, subscriptionDto);
   }
 
   private async handleSubDeleted(subscription: Stripe.Subscription) {
-    const user = await this.usersRepository.findOneBy({ id: subscription.metadata.user_id });
-    if (!user) throw new NotFoundException('User not found for subscription delete');
+    const { user } = await this.handleSubscriptionsValidations(subscription);
 
     user.role = Role.USER;
     user.subscription_active = null;
@@ -134,11 +135,57 @@ export class WebhooksService {
 
   private async handleSubResumed(subscription: Stripe.Subscription) {}
 
-  private async handleInvoiceCreated(invoice: Stripe.Invoice) {}
+  private async handleSubscriptionsValidations(
+    subscription: Stripe.Subscription,
+  ): Promise<HandleSubscriptionDto> {
+    const user = await this.usersRepository.findOneBy({ id: subscription.metadata.user_id });
+    if (!user) throw new NotFoundException('User not found for subscription creation');
+    const subscriptionDto = plainToInstance(SubscriptionDto, subscription, {
+      excludeExtraneousValues: true,
+    });
+
+    return {
+      user,
+      subscriptionDto,
+    };
+  }
+
+  // Handle Invoices
+  // These methods are called when the invoice events are triggered by Stripe.
+
+  private async handleInvoiceCreated(invoice: Stripe.Invoice) {
+    const result = await this.handleInvoicesValidations(invoice);
+    await this.invoicesService.createInvoice(result);
+  }
 
   private async handleInvoicePaid(invoice: Stripe.Invoice) {}
 
-  private async handleInvoiceUpdated(invoice: Stripe.Invoice) {}
+  private async handleInvoiceUpdated(invoice: Stripe.Invoice) {
+    const result = await this.handleInvoicesValidations(invoice);
+    await this.invoicesService.updateInvoice(result);
+  }
 
   private async handleInvoicePaymentFailed(invoice: Stripe.Invoice) {}
+
+  private async handleInvoicesValidations(invoice: Stripe.Invoice): Promise<HandleInvoicesDto> {
+    if (!invoice.metadata) throw new BadRequestException('Invoice is missing metadata');
+    const user = await this.usersRepository.findOneBy({ id: invoice.metadata.user_id });
+    if (!user) throw new NotFoundException('User not found for invoice creation');
+    if (!user.subscription_active) {
+      throw new BadRequestException('User does not have an active subscription');
+    }
+    const subscription: Subscription = await this.subscriptionService.getSubscriptionById(
+      user.id,
+      user.subscription_active,
+    );
+    const invoiceDto = plainToInstance(InvoiceDto, invoice, {
+      excludeExtraneousValues: true,
+    });
+
+    return {
+      user,
+      subscription,
+      invoiceDto,
+    };
+  }
 }

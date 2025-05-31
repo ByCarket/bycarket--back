@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateSubscriptionDto } from 'src/DTOs/billingDto/subscriptionDto/createSubscription.dto';
+import { SubscriptionDto } from 'src/DTOs/billingDto/subscriptionDto/subscription.dto';
 import { Subscription } from 'src/entities/subscription.entity';
 import { User } from 'src/entities/user.entity';
 import { STRIPE_CLIENT } from 'src/providers/stripe.provider';
@@ -47,6 +47,14 @@ export class SubscriptionService {
       return_url: `${success_url}?session_id={CHECKOUT_SESSION_ID}`,
       metadata: { user_id: userDb.id },
       subscription_data: { metadata: { user_id: userDb.id } },
+      invoice_creation: {
+        enabled: true,
+        invoice_data: {
+          metadata: { user_id: userDb.id },
+          description: `Subscription to Premium Plan for ${userDb.name}`,
+          footer: 'Thank you for your business!',
+        },
+      },
     });
 
     return {
@@ -62,19 +70,27 @@ export class SubscriptionService {
     return subscriptions;
   }
 
-  async createSubscription(userId: string, subscription: CreateSubscriptionDto) {
-    console.log(subscription);
-    const user = await this.userRepository.findOneBy({ id: userId });
-    if (!user) throw new NotFoundException('User not found.');
+  async getSubscriptionById(userId: string, subscriptionId: string): Promise<Subscription> {
+    const subscription = await this.subscriptionRepository.findOne({
+      where: {
+        id: subscriptionId,
+        user: { id: userId },
+      },
+    });
+    if (!subscription) throw new NotFoundException('Subscription not found for this user.');
+    return subscription;
+  }
 
+  async createSubscription(user: User, subscription: SubscriptionDto) {
     const newSubscription = await this.subscriptionRepository.create({
       ...subscription,
       user,
     });
+
     await this.subscriptionRepository.save(newSubscription);
   }
 
-  async updateSubscription(userId: string, { id, ...newSubscription }: CreateSubscriptionDto) {
+  async updateSubscription(userId: string, { id, ...newSubscription }: SubscriptionDto) {
     const subscription = await this.subscriptionRepository.findOneBy({
       id,
       user: { id: userId },
