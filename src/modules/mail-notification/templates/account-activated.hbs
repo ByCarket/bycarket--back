@@ -4,59 +4,226 @@
     <meta charset="utf-8">
     <title>Cuenta Activada</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #2196F3; color: white; padding: 20px; text-align: center; }
-        .content { padding: 20px; background-color: #f9f9f9; }
-        .success-box { background-color: white; padding: 20px; margin: 20px 0; border-radius: 5px; border-left: 4px solid #2196F3; text-align: center; }
-        .login-button { 
-            display: inline-block; 
-            background-color: #2196F3; 
-            color: white; 
-            padding: 15px 30px; 
-            text-decoration: none; 
-            border-radius: 5px; 
-            font-weight: bold;
-            margin: 20px 0;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .login-button:hover { background-color: #0b7dda; }
-        .footer { text-align: center; padding: 20px; color: #666; }
-        .success-icon { font-size: 48px; margin-bottom: 10px; }
-        .features { background-color: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
-        .features ul { text-align: left; margin: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(16, 54, 99, 0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #103663 0%, #4a77a8 100%);
+            padding: 50px 40px;
+            text-align: center;
+            color: white;
+        }
+        
+        .success-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 30px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 24px;
+            color: #103663;
+        }
+        
+        .message {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 32px;
+        }
+        
+        .cta-section {
+            text-align: center;
+            padding: 32px 0;
+            border-top: 1px solid #e9ecef;
+            border-bottom: 1px solid #e9ecef;
+            margin: 32px 0;
+        }
+        
+        .cta-text {
+            font-size: 18px;
+            color: #103663;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .login-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #103663 0%, #4a77a8 100%);
+            color: white;
+            padding: 16px 40px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 54, 99, 0.3);
+        }
+        
+        .features {
+            background: #f8f9fa;
+            padding: 32px;
+            border-radius: 8px;
+            margin: 32px 0;
+        }
+        
+        .features h3 {
+            color: #103663;
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .features-grid {
+            display: grid;
+            gap: 16px;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            background: #4a77a8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        
+        .feature-text {
+            color: #555;
+            font-size: 15px;
+        }
+        
+        .support-text {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 32px;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 24px 40px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .footer p {
+            color: #666;
+            font-size: 13px;
+            margin: 4px 0;
+        }
+        
+        .footer .date {
+            color: #103663;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="success-icon">✅</div>
-        <h1>¡Cuenta Activada!</h1>
-    </div>
-    
-    <div class="content">
-        <p>Hola <strong>{{name}}</strong>,</p>
-        
-        <p>¡Excelente! Tu cuenta ha sido activada exitosamente. Ya puedes iniciar sesión y comenzar a disfrutar de todas las funcionalidades de nuestra plataforma.</p>
-        
-        <div class="success-box">
-            <h3>🚀 ¡Todo listo para comenzar!</h3>
-            <a href="{{loginUrl}}" class="login-button">INICIAR SESIÓN</a>
+    <div class="container">
+        <div class="header">
+            <div class="success-icon">✓</div>
+            <h1>Cuenta Activada</h1>
         </div>
         
-        <div class="features">
-            <h3>🎯 ¿Qué puedes hacer ahora?</h3>
-            <ul>
-                <li>Registrar y gestionar tus vehículos</li>
-                <li>Acceder a todas las funcionalidades de la plataforma</li>
-                <li>Recibir notificaciones importantes en tu email</li>
-                <li>Disfrutar de una experiencia completa y segura</li>
-            </ul>
+        <div class="content">
+            <div class="greeting">
+                Hola <strong>{{name}}</strong>,
+            </div>
+            
+            <div class="message">
+                Tu cuenta ha sido activada exitosamente. Ya puedes acceder a todas las funcionalidades de nuestra plataforma y comenzar a disfrutar de una experiencia completa.
+            </div>
+            
+            <div class="cta-section">
+                <div class="cta-text">Todo listo para comenzar</div>
+                <a href="{{loginUrl}}" class="login-button">Iniciar Sesión</a>
+            </div>
+            
+            <div class="features">
+                <h3>Funcionalidades disponibles</h3>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">1</div>
+                        <div class="feature-text">Registrar y gestionar tus vehículos</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">2</div>
+                        <div class="feature-text">Acceder a todas las herramientas de la plataforma</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">3</div>
+                        <div class="feature-text">Recibir notificaciones importantes</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">4</div>
+                        <div class="feature-text">Experiencia segura y optimizada</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="support-text">
+                ¿Necesitas ayuda? Contacta con nuestro equipo de soporte.
+            </div>
         </div>
         
-        <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactar con nuestro equipo de soporte.</p>
-    </div>
-    
-    <div class="footer">
-        <p>Fecha de activación: {{date}}</p>
-        <p>Este es un mensaje automático, por favor no responder a este email.</p>
+        <div class="footer">
+            <p class="date">Activado el {{date}}</p>
+            <p>Este es un mensaje automático, no responder.</p>
+        </div>
     </div>
 </body>
 </html>

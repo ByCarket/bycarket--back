@@ -4,43 +4,334 @@
     <meta charset="utf-8">
     <title>Vehículo Registrado</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #4CAF50; color: white; padding: 20px; text-align: center; }
-        .content { padding: 20px; background-color: #f9f9f9; }
-        .vehicle-info { background-color: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
-        .footer { text-align: center; padding: 20px; color: #666; }
-        .success-icon { font-size: 48px; margin-bottom: 10px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(16, 54, 99, 0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #103663 0%, #4a77a8 100%);
+            padding: 50px 40px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M20,30 Q30,20 40,30 T60,30" stroke="rgba(255,255,255,0.1)" stroke-width="1" fill="none"/><path d="M70,60 Q80,50 90,60" stroke="rgba(255,255,255,0.1)" stroke-width="1" fill="none"/></svg>');
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 36px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 24px;
+            color: #103663;
+        }
+        
+        .message {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 32px;
+        }
+        
+        .vehicle-info {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 32px;
+            margin: 32px 0;
+            border-left: 4px solid #4a77a8;
+            position: relative;
+        }
+        
+        .vehicle-info::before {
+            content: '📋';
+            position: absolute;
+            top: -12px;
+            right: 24px;
+            font-size: 24px;
+            background: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .vehicle-info h3 {
+            color: #103663;
+            font-size: 20px;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+        
+        .vehicle-details {
+            display: grid;
+            gap: 16px;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .detail-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #103663 0%, #4a77a8 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+        
+        .detail-icon::before {
+            content: '•';
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .detail-content {
+            flex: 1;
+        }
+        
+        .detail-label {
+            font-size: 13px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        
+        .detail-value {
+            font-size: 16px;
+            color: #103663;
+            font-weight: 600;
+        }
+        
+        .management-section {
+            background: #f8f9fa;
+            padding: 24px;
+            border-radius: 8px;
+            margin: 32px 0;
+            text-align: center;
+        }
+        
+        .management-title {
+            color: #103663;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .management-text {
+            color: #555;
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .features-list {
+            display: grid;
+            gap: 8px;
+            text-align: left;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        .feature-check {
+            width: 18px;
+            height: 18px;
+            background: #4a77a8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            flex-shrink: 0;
+        }
+        
+        .thanks-message {
+            text-align: center;
+            color: #103663;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 24px 40px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .footer p {
+            color: #666;
+            font-size: 13px;
+            margin: 4px 0;
+        }
+        
+        .footer .date {
+            color: #103663;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="success-icon">🚗</div>
-        <h1>¡Vehículo Registrado Exitosamente!</h1>
-    </div>
-    
-    <div class="content">
-        <p>Hola <strong>{{name}}</strong>,</p>
-        
-        <p>Te confirmamos que tu vehículo ha sido registrado exitosamente en nuestra plataforma.</p>
-        
-        <div class="vehicle-info">
-            <h3>📋 Detalles del Vehículo:</h3>
-            <ul>
-                <li><strong>Marca:</strong> {{vehicleBrand}}</li>
-                <li><strong>Modelo:</strong> {{vehicleModel}}</li>
-                <li><strong>Versión:</strong> {{vehicleVersion}}</li>
-                <li><strong>Año:</strong> {{vehicleYear}}</li>
-            </ul>
+    <div class="container">
+        <div class="header">
+            <div class="success-icon">🚗</div>
+            <h1>¡Vehículo Registrado Exitosamente!</h1>
         </div>
         
-        <p>Ahora puedes gestionar tu vehículo desde tu panel de usuario. Podrás actualizar la información, agregar más fotos y mucho más.</p>
+        <div class="content">
+            <div class="greeting">
+                Hola <strong>{{name}}</strong>,
+            </div>
+            
+            <div class="message">
+                Te confirmamos que tu vehículo ha sido registrado exitosamente en nuestra plataforma.
+            </div>
+            
+            <div class="vehicle-info">
+                <h3>Detalles del Vehículo</h3>
+                <div class="vehicle-details">
+                    <div class="detail-item">
+                        <div class="detail-icon"></div>
+                        <div class="detail-content">
+                            <div class="detail-label">Marca</div>
+                            <div class="detail-value">{{vehicleBrand}}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-icon"></div>
+                        <div class="detail-content">
+                            <div class="detail-label">Modelo</div>
+                            <div class="detail-value">{{vehicleModel}}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-icon"></div>
+                        <div class="detail-content">
+                            <div class="detail-label">Versión</div>
+                            <div class="detail-value">{{vehicleVersion}}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-icon"></div>
+                        <div class="detail-content">
+                            <div class="detail-label">Año</div>
+                            <div class="detail-value">{{vehicleYear}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="management-section">
+                <div class="management-title">¿Qué puedes hacer ahora?</div>
+                <div class="management-text">
+                    Gestiona tu vehículo desde tu panel de usuario
+                </div>
+                
+                <div class="features-list">
+                    <div class="feature-item">
+                        <div class="feature-check">✓</div>
+                        <div>Actualizar información del vehículo</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-check">✓</div>
+                        <div>Agregar más fotos y documentos</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-check">✓</div>
+                        <div>Gestionar mantenimientos y servicios</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-check">✓</div>
+                        <div>Acceder a herramientas especializadas</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="thanks-message">
+                ¡Gracias por confiar en nosotros!
+            </div>
+        </div>
         
-        <p>¡Gracias por confiar en nosotros!</p>
-    </div>
-    
-    <div class="footer">
-        <p>Fecha de registro: {{date}}</p>
-        <p>Este es un mensaje automático, por favor no responder a este email.</p>
+        <div class="footer">
+            <p class="date">Registrado el {{date}}</p>
+            <p>Este es un mensaje automático, no responder.</p>
+        </div>
     </div>
 </body>
 </html>

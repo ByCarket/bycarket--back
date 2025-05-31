@@ -2,48 +2,268 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vehículo Actualizado</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #2196F3; color: white; padding: 20px; text-align: center; }
-        .content { padding: 40px; background-color: #f9f9f9; }
-        .vehicle-info { background-color: white; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #2196F3; }
-        .footer { text-align: center; padding: 20px; color: #666; }
-        .update-icon { font-size: 48px; margin-bottom: 10px; }
-        .info-box { background-color: #e3f2fd; padding: 10px; border-radius: 5px; margin: 15px 0; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 0; 
+            background-color: #f5f7fa;
+            line-height: 1.6;
+        }
+        
+        .email-container {
+            background-color: white;
+            margin: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(16, 54, 99, 0.1);
+            overflow: hidden;
+        }
+        
+        .header { 
+            background: linear-gradient(135deg, #103663 0%, #4a77a8 100%);
+            color: white; 
+            padding: 30px 20px; 
+            text-align: center;
+            position: relative;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"/><circle cx="80" cy="40" r="1.5" fill="white" opacity="0.1"/><circle cx="40" cy="80" r="1" fill="white" opacity="0.1"/></svg>');
+            pointer-events: none;
+        }
+        
+        .update-icon { 
+            font-size: 52px; 
+            margin-bottom: 15px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .content { 
+            padding: 35px 30px; 
+            background-color: white;
+        }
+        
+        .greeting {
+            font-size: 18px;
+            color: #103663;
+            margin-bottom: 20px;
+        }
+        
+        .description {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+        
+        .vehicle-info { 
+            background: linear-gradient(145deg, #f8fbff 0%, #ffffff 100%);
+            padding: 25px; 
+            margin: 25px 0; 
+            border-radius: 10px; 
+            border-left: 5px solid #4a77a8;
+            box-shadow: 0 2px 8px rgba(16, 54, 99, 0.08);
+            position: relative;
+        }
+        
+        .vehicle-info::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #103663, #4a77a8);
+            border-radius: 50%;
+            opacity: 0.1;
+        }
+        
+        .vehicle-info h3 {
+            color: #103663;
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .vehicle-info ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .vehicle-info li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .vehicle-info li:last-child {
+            border-bottom: none;
+        }
+        
+        .vehicle-info .label {
+            color: #666;
+            font-weight: 500;
+            min-width: 80px;
+        }
+        
+        .vehicle-info .value {
+            color: #103663;
+            font-weight: 600;
+            text-align: right;
+        }
+        
+        .info-box { 
+            background: linear-gradient(135deg, #e8f4f8 0%, #f0f8fc 100%);
+            padding: 20px; 
+            border-radius: 10px; 
+            margin: 25px 0;
+            border-left: 4px solid #4a77a8;
+            position: relative;
+        }
+        
+        .info-box::before {
+            content: 'ℹ️';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 20px;
+        }
+        
+        .info-box .content-text {
+            margin-left: 35px;
+            color: #103663;
+            font-weight: 500;
+        }
+        
+        .warning {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffeaa7 30%);
+            color: #d68910;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #f39c12;
+            font-weight: 500;
+        }
+        
+        .footer { 
+            text-align: center; 
+            padding: 25px 20px; 
+            background-color: #f8fbff;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+        
+        .footer p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .date-time {
+            color: #4a77a8;
+            font-weight: 600;
+        }
+        
+        .disclaimer {
+            font-style: italic;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 480px) {
+            .email-container {
+                margin: 10px;
+            }
+            
+            .content {
+                padding: 25px 20px;
+            }
+            
+            .header {
+                padding: 25px 15px;
+            }
+            
+            .vehicle-info, .info-box {
+                padding: 20px 15px;
+            }
+            
+            .vehicle-info li {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .vehicle-info .value {
+                text-align: left;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="update-icon">✏️</div>
-        <h1>Vehículo Actualizado</h1>
-    </div>
-    
-    <div class="content">
-        <p>Hola <strong>{{name}}</strong>,</p>
-        
-        <p>Te confirmamos que la información del siguiente vehículo ha sido actualizada exitosamente:</p>
-        
-        <div class="vehicle-info">
-            <h3>🚗 Vehículo Actualizado:</h3>
-            <ul>
-                <li><strong>Marca:</strong> {{vehicleBrand}}</li>
-                <li><strong>Modelo:</strong> {{vehicleModel}}</li>
-                <li><strong>Versión:</strong> {{vehicleVersion}}</li>
-                <li><strong>Año:</strong> {{vehicleYear}}</li>
-            </ul>
+    <div class="email-container">
+        <div class="header">
+            <div class="update-icon">✏️</div>
+            <h1>Vehículo Actualizado</h1>
         </div>
         
-        <div class="info-box">
-            <strong>ℹ️ Información:</strong> Los cambios realizados ya están visibles en tu cuenta y han sido guardados correctamente.
+        <div class="content">
+            <p class="greeting">Hola <strong>{{name}}</strong>,</p>
+            
+            <p class="description">Te confirmamos que la información del siguiente vehículo ha sido actualizada exitosamente:</p>
+            
+            <div class="vehicle-info">
+                <h3>🚗 Información del Vehículo</h3>
+                <ul>
+                    <li>
+                        <span class="label">Marca:</span>
+                        <span class="value">{{vehicleBrand}}</span>
+                    </li>
+                    <li>
+                        <span class="label">Modelo:</span>
+                        <span class="value">{{vehicleModel}}</span>
+                    </li>
+                    <li>
+                        <span class="label">Versión:</span>
+                        <span class="value">{{vehicleVersion}}</span>
+                    </li>
+                    <li>
+                        <span class="label">Año:</span>
+                        <span class="value">{{vehicleYear}}</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="info-box">
+                <div class="content-text">
+                    <strong>Estado:</strong> Los cambios realizados ya están visibles en tu cuenta y han sido guardados correctamente.
+                </div>
+            </div>
+            
+            <div class="warning">
+                <strong>⚠️ Importante:</strong> Si no realizaste esta actualización, por favor contacta con nuestro equipo de soporte inmediatamente.
+            </div>
         </div>
         
-        <p>Si no realizaste esta actualización, por favor contacta con nuestro equipo de soporte <strong>inmediatamente</strong>.</p>
-    </div>
-    
-    <div class="footer">
-        <p>Fecha de actualización: {{date}} a las {{time}}</p>
-        <p>Este es un mensaje automático, por favor no responder a este email.</p>
+        <div class="footer">
+            <p class="date-time">Fecha de actualización: {{date}} a las {{time}}</p>
+            <p class="disclaimer">Este es un mensaje automático, por favor no responder a este email.</p>
+        </div>
     </div>
 </body>
 </html>

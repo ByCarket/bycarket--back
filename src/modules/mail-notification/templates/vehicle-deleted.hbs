@@ -4,46 +4,321 @@
     <meta charset="utf-8">
     <title>Vehículo Eliminado</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #f44336; color: white; padding: 20px; text-align: center; }
-        .content { padding: 20px; background-color: #f9f9f9; }
-        .vehicle-info { background-color: white; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #f44336; }
-        .footer { text-align: center; padding: 20px; color: #666; }
-        .delete-icon { font-size: 48px; margin-bottom: 10px; }
-        .warning { background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 15px 0; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(16, 54, 99, 0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            padding: 50px 40px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="15" cy="25" r="1" fill="rgba(255,255,255,0.1)" opacity="0.6"/><circle cx="85" cy="35" r="1.5" fill="rgba(255,255,255,0.1)" opacity="0.4"/><circle cx="35" cy="75" r="1" fill="rgba(255,255,255,0.1)" opacity="0.5"/></svg>');
+        }
+        
+        .delete-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 36px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 24px;
+            color: #103663;
+        }
+        
+        .message {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 32px;
+        }
+        
+        .vehicle-info {
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            border-radius: 12px;
+            padding: 32px;
+            margin: 32px 0;
+            border-left: 4px solid #dc3545;
+            position: relative;
+        }
+        
+        .vehicle-info::before {
+            content: '📋';
+            position: absolute;
+            top: -12px;
+            right: 24px;
+            font-size: 24px;
+            background: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .vehicle-info h3 {
+            color: #dc3545;
+            font-size: 20px;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+        
+        .vehicle-details {
+            display: grid;
+            gap: 16px;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .detail-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+        
+        .detail-icon::before {
+            content: '•';
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .detail-content {
+            flex: 1;
+        }
+        
+        .detail-label {
+            font-size: 13px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        
+        .detail-value {
+            font-size: 16px;
+            color: #dc3545;
+            font-weight: 600;
+        }
+        
+        .warning {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border: 1px solid #ffc107;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 32px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+        
+        .warning-icon {
+            width: 48px;
+            height: 48px;
+            background: #ff8800;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        
+        .warning-content {
+            flex: 1;
+        }
+        
+        .warning-title {
+            font-weight: 600;
+            color: #cc6600;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .warning-text {
+            color: #995500;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .support-alert {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-left: 4px solid #103663;
+            border-radius: 8px;
+            padding: 24px;
+            margin: 32px 0;
+            text-align: center;
+        }
+        
+        .support-text {
+            color: #555;
+            font-size: 16px;
+        }
+        
+        .support-highlight {
+            color: #dc3545;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 24px 40px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .footer p {
+            color: #666;
+            font-size: 13px;
+            margin: 4px 0;
+        }
+        
+        .footer .timestamp {
+            color: #dc3545;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="delete-icon">🗑️</div>
-        <h1>Vehículo Eliminado</h1>
-    </div>
-    
-    <div class="content">
-        <p>Hola <strong>{{name}}</strong>,</p>
-        
-        <p>Te confirmamos que el siguiente vehículo ha sido eliminado de tu cuenta:</p>
-        
-        <div class="vehicle-info">
-            <h3>📋 Vehículo Eliminado:</h3>
-            <ul>
-                <li><strong>Marca:</strong> {{vehicleBrand}}</li>
-                <li><strong>Modelo:</strong> {{vehicleModel}}</li>
-                <li><strong>Versión:</strong> {{vehicleVersion}}</li>
-                <li><strong>Año:</strong> {{vehicleYear}}</li>
-            </ul>
+    <div class="container">
+        <div class="header">
+            <div class="delete-icon">🗑️</div>
+            <h1>Vehículo Eliminado</h1>
         </div>
         
-        <div class="warning">
-            <strong>⚠️ Importante:</strong> Esta acción no se puede deshacer. Si eliminaste este vehículo por error, deberás registrarlo nuevamente.
+        <div class="content">
+            <div class="greeting">
+                Hola <strong>{{name}}</strong>,
+            </div>
+            
+            <div class="message">
+                Te confirmamos que el siguiente vehículo ha sido eliminado de tu cuenta:
+            </div>
+            
+            <div class="vehicle-info">
+                <h3>Vehículo Eliminado</h3>
+                <div class="vehicle-details">
+                    <div class="detail-item">
+                        <div class="detail-icon"></div>
+                        <div class="detail-content">
+                            <div class="detail-label">Marca</div>
+                            <div class="detail-value">{{vehicleBrand}}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-icon"></div>
+                        <div class="detail-content">
+                            <div class="detail-label">Modelo</div>
+                            <div class="detail-value">{{vehicleModel}}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-icon"></div>
+                        <div class="detail-content">
+                            <div class="detail-label">Versión</div>
+                            <div class="detail-value">{{vehicleVersion}}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-icon"></div>
+                        <div class="detail-content">
+                            <div class="detail-label">Año</div>
+                            <div class="detail-value">{{vehicleYear}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="warning">
+                <div class="warning-icon">⚠️</div>
+                <div class="warning-content">
+                    <div class="warning-title">Importante</div>
+                    <div class="warning-text">
+                        Esta acción no se puede deshacer. Si eliminaste este vehículo por error, deberás registrarlo nuevamente desde tu panel de usuario.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="support-alert">
+                <div class="support-text">
+                    Si no realizaste esta eliminación, contacta con nuestro equipo de soporte <span class="support-highlight">inmediatamente</span>.
+                </div>
+            </div>
         </div>
         
-        <p>Si no realizaste esta eliminación, por favor contacta con nuestro equipo de soporte <strong>inmediatamente</strong>.</p>
-    </div>
-    
-    <div class="footer">
-        <p>Fecha de eliminación: {{date}} a las {{time}}</p>
-        <p>Este es un mensaje automático, por favor no responder a este email.</p>
+        <div class="footer">
+            <p class="timestamp">Eliminado el {{date}} a las {{time}}</p>
+            <p>Este es un mensaje automático, no responder.</p>
+        </div>
     </div>
 </body>
 </html>
