@@ -134,12 +134,7 @@ export class VehiclesService {
         )
         .map(res => res.value);
 
-      if (hasErrors) {
-        await Promise.all(
-          uploadedImages.map(img => this.filesService.deleteCloudinaryImage(img.public_id)),
-        );
-        throw new InternalServerErrorException('Some images failed to upload');
-      }
+      if (hasErrors) throw new InternalServerErrorException('Some images failed to upload');
 
       vehicle.images = uploadedImages.map(img => {
         return {
@@ -183,7 +178,11 @@ export class VehiclesService {
           ),
         );
       }
-      throw new HttpException(error.getResponse(), error.getStatus());
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new InternalServerErrorException('Unexpected error creating vehicle');
+      }
     } finally {
       await queryRunner.release();
     }
