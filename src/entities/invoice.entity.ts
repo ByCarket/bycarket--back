@@ -64,7 +64,7 @@ export class Invoice {
       from: (value: string) => value,
     },
   })
-  total: string;
+  total: number;
 
   @Column({
     type: 'decimal',

@@ -3,7 +3,7 @@ import { IsBoolean, IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { StatusSubscription } from 'src/enums/statusSubscription.enum';
 import { Timestamp } from 'typeorm';
 
-export class CreateSubscriptionDto {
+export class SubscriptionDto {
   @Expose()
   @IsNotEmpty()
   @IsString()
