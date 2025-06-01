@@ -29,10 +29,7 @@ export class FilesService {
         (error, result) => {
           if (error) reject(error);
           else if (!result)
-            throw new HttpException(
-              { status: 500, error: 'Upload failed: No result returned from Cloudinary.' },
-              500,
-            );
+            reject(new HttpException('Upload failed: No result returned from Cloudinary.', 500));
           else resolve(result);
         },
       );
