@@ -43,7 +43,7 @@ export class SubscriptionService {
       customer: userDb.stripeCustomerId,
       line_items: [{ price, quantity: 1 }],
       mode: 'subscription',
-      ui_mode: 'custom',
+      ui_mode: 'embedded',
       return_url: `${success_url}?session_id={CHECKOUT_SESSION_ID}`,
       metadata: { user_id: userDb.id },
       subscription_data: { metadata: { user_id: userDb.id } },
