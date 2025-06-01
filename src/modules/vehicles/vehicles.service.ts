@@ -94,7 +94,6 @@ export class VehiclesService {
     { images, brandId, modelId, versionId, ...CreateVehicleDto }: CreateVehicleDto,
     userId: string,
   ) {
-    console.log(CreateVehicleDto, images);
     const queryRunner = this.vehicleRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -107,13 +106,20 @@ export class VehiclesService {
     try {
       const user = await this.userRepository.findOneBy({ id: userId });
       const brand = await this.brandRepository.findOneBy({ id: brandId });
-      const model = await this.modelRepository.findOneBy({ id: modelId });
-      const version = await this.versionRepository.findOneBy({ id: versionId });
+      const model = await this.modelRepository.findOneBy({ id: modelId, brand: { id: brandId } });
+      const version = await this.versionRepository.findOneBy({
+        id: versionId,
+        model: { id: modelId, brand: { id: brandId } },
+      });
 
       if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
       if (!brand) throw new NotFoundException(`Brand with ID ${brandId} not found`);
-      if (!model) throw new NotFoundException(`Model with ID ${modelId} not found`);
-      if (!version) throw new NotFoundException(`Version with ID ${versionId} not found`);
+      if (!model)
+        throw new NotFoundException(`Model with ID ${modelId} not found for brand ${brandId}`);
+      if (!version)
+        throw new NotFoundException(
+          `Version with ID ${versionId} not found for model ${modelId} and brand ${brandId}`,
+        );
 
       const vehicle = this.vehicleRepository.create({
         brand,
@@ -134,10 +140,7 @@ export class VehiclesService {
         )
         .map(res => res.value);
 
-      if (hasErrors) {
-        console.error('❌ Error en hasErrors');
-        throw new InternalServerErrorException('Some images failed to upload');
-      }
+      if (hasErrors) throw new InternalServerErrorException('Some images failed to upload');
 
       vehicle.images = uploadedImages.map(img => {
         return {
@@ -171,7 +174,6 @@ export class VehiclesService {
         message: 'Vehicle created successfully with images.',
       };
     } catch (error) {
-      console.error('❌ Error en createVehicleWithImages:', error);
       if (queryRunner.isTransactionActive) {
         await queryRunner.rollbackTransaction();
       }
