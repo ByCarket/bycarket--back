@@ -25,10 +25,10 @@ export class User {
   @Column({ type: 'varchar', length: 80, nullable: false })
   password: string;
 
-  @Column({ 
-    type: 'simple-json', 
+  @Column({
+    type: 'simple-json',
     nullable: true,
-    comment: 'Phone number with country code, area code, and number'
+    comment: 'Phone number with country code, area code, and number',
   })
   phone: PhoneNumber;
 
@@ -55,7 +55,7 @@ export class User {
     nullable: true,
     default: {
       secure_url:
-        'https://res.cloudinary.com/dps04b1up/image/upload/v1748212732/rl5hbrtgudxyvfbybuhk.jpg',
+        'https://res.cloudinary.com/dps04b1up/image/upload/v1748807133/bodsjo0usufkr0svhblj.png',
     },
   })
   image: CloudinaryUserImage;
