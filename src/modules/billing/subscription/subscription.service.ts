@@ -63,11 +63,24 @@ export class SubscriptionService {
     };
   }
 
-  async getSubscriptions(userId: string) {
-    const subscriptions = await this.subscriptionRepository.find({
-      where: { user: { id: userId } },
+  async getSubscription(userId: string) {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+    if (!user.subscription_active) {
+      throw new NotFoundException('User does not have an active subscription.');
+    }
+
+    const subscription = await this.subscriptionRepository.findOneBy({
+      id: user.subscription_active,
+      user: { id: userId },
     });
-    return subscriptions;
+    if (!subscription) {
+      throw new NotFoundException('Subscription not found for this user.');
+    }
+
+    return subscription;
   }
 
   async getSubscriptionById(userId: string, subscriptionId: string): Promise<Subscription> {
@@ -107,5 +120,13 @@ export class SubscriptionService {
     });
     if (!subscription) throw new NotFoundException('Subscription not found for this user.');
     await this.subscriptionRepository.delete(subscription.id);
+  }
+
+  async cancelSubscription(userId: string) {
+    const subscription = await this.getSubscription(userId);
+
+    await this.stripe.subscriptions.update(subscription.id, {
+      cancel_at_period_end: true,
+    });
   }
 }
