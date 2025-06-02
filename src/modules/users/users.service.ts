@@ -76,9 +76,7 @@ export class UsersService {
     const user = await this.usersRepository.findOne({
       where: { id },
       relations: {
-        posts: {
-          questions: true,
-        },
+        posts: true,
       },
     });
     if (!user) {

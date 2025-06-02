@@ -21,6 +21,7 @@ import { PricesModule } from './modules/prices/prices.module';
 import { OpenAiModule } from './modules/openai/openai.module';
 import { AcaraScrapingModule } from './modules/acara-scraping/acaraScraping.module';
 import { StripeSimulatorModule } from './modules/stripe-simulator/stripe-simulator.module';
+import { ChatModule } from './modules/chat/chat.module';
 
 dotenv.config();
 
@@ -59,6 +60,7 @@ dotenv.config();
     OpenAiModule,
     AcaraScrapingModule,
     StripeSimulatorModule,
+    ChatModule,
   ],
   controllers: [],
   providers: [],

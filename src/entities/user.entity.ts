@@ -1,13 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import { Role } from '../enums/roles.enum';
 import { Post } from './post.entity';
-import { Question } from './question.entity';
 import { Vehicle } from './vehicle.entity';
 import { CloudinaryUserImage } from 'src/interfaces/cloudinaryUserImage.interface';
 import { Invoice } from './invoice.entity';
 import { Subscription } from './subscription.entity';
 import { PhoneNumber } from 'src/interfaces/phone.interface';
+import { Message } from './message.entity';
 
 @Entity({
   name: 'users',
@@ -25,10 +25,10 @@ export class User {
   @Column({ type: 'varchar', length: 80, nullable: false })
   password: string;
 
-  @Column({ 
-    type: 'simple-json', 
+  @Column({
+    type: 'simple-json',
     nullable: true,
-    comment: 'Phone number with country code, area code, and number'
+    comment: 'Phone number with country code, area code, and number',
   })
   phone: PhoneNumber;
 
@@ -75,9 +75,6 @@ export class User {
   @OneToMany(() => Post, post => post.user)
   posts: Post[];
 
-  @OneToMany(() => Question, question => question.user)
-  questions: Question[];
-
   @OneToMany(() => Vehicle, vehicle => vehicle.user)
   vehicles: Vehicle[];
 
@@ -86,4 +83,10 @@ export class User {
 
   @OneToMany(() => Subscription, subscription => subscription.user)
   subscriptions: Subscription[];
+
+  @OneToMany(() => Message, message => message.sender)
+  sentMessages: Message[];
+
+  @OneToMany(() => Message, message => message.receiver)
+  receivedMessages: Message[];
 }
