@@ -184,6 +184,7 @@ export class AuthService {
         city: '',
         address: '',
         isActive: true,
+        role: Role.USER,
         stripeCustomerId,
       };
 
@@ -201,7 +202,7 @@ export class AuthService {
       await this.usersRepository.save(user);
     }
 
-    const jwtPayload = { sub: user.id, email: user.email };
+    const jwtPayload = { sub: user.id, email: user.email, role: user.role };
     const token = this.jwtService.sign(jwtPayload);
 
     return {
