@@ -8,7 +8,6 @@ import {
   ParseFilePipe,
   ParseUUIDPipe,
   Patch,
-  Post,
   UploadedFile,
   UploadedFiles,
   UseGuards,
@@ -40,8 +39,8 @@ export class FilesController {
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({
-            maxSize: 15000000,
-            message: 'The file must not exceed 15Mb.',
+            maxSize: 5000000,
+            message: 'The file must not exceed 5Mb.',
           }),
           new FileTypeValidator({
             fileType: /(jpg|jpeg|png|webp)/,
@@ -66,8 +65,8 @@ export class FilesController {
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({
-            maxSize: 15000000,
-            message: 'The file must not exceed 15Mb.',
+            maxSize: 5000000,
+            message: 'The file must not exceed 5Mb.',
           }),
           new FileTypeValidator({ fileType: /(jpg|jpeg|png|webp)/ }),
         ],

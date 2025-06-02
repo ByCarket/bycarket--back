@@ -25,7 +25,6 @@ import { VehiclesService } from './vehicles.service';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
-import { ApiUploadVehicleImagesDocs } from '../files/decorators/apiUploadVehicleImagesDocs.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiCreateVehicleDocs } from './decorators/apiCreateVehicleDocs.decorator';
 
@@ -69,13 +68,13 @@ export class VehiclesController {
     @UploadedFiles(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 1000000 }), // 1MB por imagen
+          new MaxFileSizeValidator({ maxSize: 5000000, message: 'Images must not exceed 5Mb.' }),
           new FileTypeValidator({ fileType: /(jpg|jpeg|png|webp)/ }),
         ],
-        fileIsRequired: false, // Las imágenes son opcionales
+        fileIsRequired: true,
       }),
     )
-    files?: Express.Multer.File[],
+    files: Express.Multer.File[],
   ) {
     // Asociar las imágenes al DTO
     createVehicleDto.images = files;
