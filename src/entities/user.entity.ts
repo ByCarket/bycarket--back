@@ -55,7 +55,7 @@ export class User {
     nullable: true,
     default: {
       secure_url:
-        'https://res.cloudinary.com/dps04b1up/image/upload/v1748212732/rl5hbrtgudxyvfbybuhk.jpg',
+        'https://res.cloudinary.com/dps04b1up/image/upload/v1748807133/bodsjo0usufkr0svhblj.png',
     },
   })
   image: CloudinaryUserImage;
