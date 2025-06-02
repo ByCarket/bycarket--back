@@ -37,7 +37,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection {
 
   @SubscribeMessage('join_inbox')
   handleJoinInbox(@WsUserAuth('sub') userId: string, @ConnectedSocket() socket: Socket) {
-    socket.join(`inbox-${userId}`);
+    socket.join(`inbox_${userId}`);
   }
 
   @SubscribeMessage('leave_inbox')
