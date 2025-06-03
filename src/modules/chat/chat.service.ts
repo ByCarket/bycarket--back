@@ -71,9 +71,14 @@ export class ChatService {
     for (const message of lastMessages) {
       const otherUser = message.sender.id === userId ? message.receiver : message.sender;
 
+      //TODO: id, nombre y foto
       if (!conversations.has(otherUser.id)) {
         conversations.set(otherUser.id, {
-          userId: otherUser.id,
+          user: {
+            id: otherUser.id,
+            name: otherUser.name,
+            image: otherUser.image,
+          } as User,
           lastMessage: message.content,
           created_at: message.created_at,
           unreadCount: unreadList.get(otherUser.id) || 0,
