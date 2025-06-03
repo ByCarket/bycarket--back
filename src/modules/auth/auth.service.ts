@@ -199,7 +199,7 @@ export class AuthService {
       await this.usersRepository.save(user);
     }
 
-    const jwtPayload = { sub: user.id, email: user.email, role: user.role };
+    const jwtPayload = { sub: user.id, email: user.email };
     const token = this.jwtService.sign(jwtPayload);
 
     return {
