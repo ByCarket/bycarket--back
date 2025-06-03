@@ -174,7 +174,8 @@ export class AuthService {
         email,
         name: name || email.split('@')[0],
       });
-      const newUser = {
+
+      const newUser = this.usersRepository.create({
         email,
         name: name || email.split('@')[0],
         password: Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2),
@@ -183,12 +184,9 @@ export class AuthService {
         country: '',
         city: '',
         address: '',
-        isActive: true,
         stripeCustomerId,
-      };
-
-      user = this.usersRepository.create(newUser);
-      await this.usersRepository.save(user);
+      });
+      user = await this.usersRepository.save(newUser);
 
       // Enviar email de bienvenida para usuarios de Google nuevos
       try {
@@ -231,6 +229,7 @@ export class AuthService {
       ...user,
       password: hashedPassword,
       role: Role.ADMIN,
+      isActive: true,
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: newUserPassword, ...userWithoutPassword } = newUser;
