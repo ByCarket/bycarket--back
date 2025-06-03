@@ -41,7 +41,6 @@ export class SubscriptionService {
 
     const session = await this.stripe.checkout.sessions.create({
       customer_creation: 'if_required',
-      customer_email: userDb.email,
       customer: userDb.stripeCustomerId,
       line_items: [{ price, quantity: 1 }],
       mode: 'subscription',
