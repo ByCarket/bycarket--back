@@ -22,10 +22,12 @@ import { HandleInvoicesDto } from 'src/DTOs/billingDto/invoicesDto/handleInvoice
 import { HandleSubscriptionDto } from 'src/DTOs/billingDto/subscriptionDto/handleSubscription.dto';
 import { SubscriptionDto } from 'src/DTOs/billingDto/subscriptionDto/subscription.dto';
 import { Request } from 'express';
+import { CustomerService } from '../customer/customer.service';
 
 @Injectable()
 export class WebhooksService {
   constructor(
+    private readonly customerService: CustomerService,
     private readonly invoicesService: InvoicesService,
     private readonly subscriptionService: SubscriptionService,
     @InjectRepository(User)
@@ -38,6 +40,10 @@ export class WebhooksService {
     const event: Stripe.Event = req.body;
 
     switch (event.type) {
+      case 'customer.created':
+        const customerCreated = event.data.object as Stripe.Customer;
+        await this.handleCustomerCreated(customerCreated);
+        break;
       case 'customer.subscription.created':
         // Actualizar rol y bd
         const subscriptionCreated = event.data.object;
@@ -103,6 +109,22 @@ export class WebhooksService {
     return await this.stripe.webhooks.constructEventAsync(raw, signature, secret);
   }
 
+  // Handle Customers
+  // These methods are called when the customer events are triggered by Stripe.
+
+  private async handleCustomerCreated(customer: Stripe.Customer) {
+    if (!customer.email) {
+      throw new BadRequestException('Customer email is required');
+    }
+    const user = await this.usersRepository.findOneBy({ email: customer.email });
+    if (!user) {
+      throw new NotFoundException('User not found for customer creation');
+    }
+
+    user.stripeCustomerId = customer.id;
+    await this.usersRepository.save(user);
+  }
+
   // Handle Subscriptions
   // These methods are called when the subscription events are triggered by Stripe.
 
@@ -144,7 +166,9 @@ export class WebhooksService {
   private async handleSubscriptionsValidations(
     subscription: Stripe.Subscription,
   ): Promise<HandleSubscriptionDto> {
-    const user = await this.usersRepository.findOneBy({ id: subscription.metadata.user_id });
+    const user = await this.usersRepository.findOneBy({
+      stripeCustomerId: subscription.customer as string,
+    });
     if (!user) throw new NotFoundException('User not found for subscription creation');
     const subscriptionDto = plainToInstance(SubscriptionDto, subscription, {
       excludeExtraneousValues: true,
