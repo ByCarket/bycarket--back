@@ -1,6 +1,6 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { BasePostDto } from './basePosts.dto';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreatePostDto extends PickType(BasePostDto, ['vehicleId'] as const) {
   @ApiProperty({
@@ -18,4 +18,12 @@ export class CreatePostDto extends PickType(BasePostDto, ['vehicleId'] as const)
   @IsOptional()
   @IsNumber()
   price?: number;
+
+  @ApiProperty({
+    description: 'Indica si el post es negociable',
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsBoolean()
+  isNegotiable: boolean;
 }

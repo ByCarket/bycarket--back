@@ -33,6 +33,9 @@ export class Post {
   })
   status: PostStatus;
 
+  @Column({ type: 'boolean' })
+  isNegotiable: boolean;
+
   @OneToMany(() => Question, question => question.post)
   questions: Question[];
 }

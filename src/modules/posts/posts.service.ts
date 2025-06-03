@@ -227,7 +227,7 @@ export class PostsService {
     };
   }
 
-  async createPost({ vehicleId, description, price }: CreatePostDto, userId: string) {
+  async createPost({ vehicleId, description, price, isNegotiable }: CreatePostDto, userId: string) {
     // Verificar que el usuario existe
     const user = await this.usersRepository.findOne({
       where: { id: userId },
@@ -291,6 +291,7 @@ export class PostsService {
       user,
       vehicle,
       postDate: new Date(),
+      isNegotiable,
     });
 
     const savedPost = await this.postsRepository.save(newPost);
