@@ -163,12 +163,15 @@ export class PostsService {
 
     // Filtrar datos del usuario para mostrar solo lo necesario
     if (post.user) {
-      const { name, phone } = post.user;
-      post.user = { name, phone } as User;
+      const { id, name, phone } = post.user;
+      post.user = { id, name, phone } as User;
     }
 
     return {
-      data: post,
+      data: {
+        ...post,
+        sellerId: post.user?.id,
+      },
       message: 'Post found successfully.',
     };
   }
