@@ -1,4 +1,4 @@
-import { Controller, Headers, HttpCode, Post, RawBody, Req } from '@nestjs/common';
+import { Controller, HttpCode, Post, Req } from '@nestjs/common';
 import { WebhooksService } from './webhooks.service';
 import { Request } from 'express';
 
