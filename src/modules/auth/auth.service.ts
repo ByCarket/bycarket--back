@@ -185,6 +185,7 @@ export class AuthService {
         city: '',
         address: '',
         stripeCustomerId,
+        isActive: true,
       });
       user = await this.usersRepository.save(newUser);
 
