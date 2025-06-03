@@ -107,13 +107,18 @@ export class WebhooksService {
   // These methods are called when the subscription events are triggered by Stripe.
 
   private async handleSubCreated(subscription: Stripe.Subscription) {
+    console.log('Subscription created:', subscription);
     const { user, subscriptionDto } = await this.handleSubscriptionsValidations(subscription);
 
+    console.log('User found:', user);
+    console.log('Subscription DTO:', subscriptionDto);
     await this.subscriptionService.createSubscription(user, subscriptionDto);
 
     user.role = Role.PREMIUM;
     user.subscription_active = subscriptionDto.id;
-    await this.usersRepository.save(user);
+    const userDb = await this.usersRepository.save(user);
+
+    console.log('User updated:', userDb);
   }
 
   private async handleSubTrialEnd(subscription: Stripe.Subscription) {}
