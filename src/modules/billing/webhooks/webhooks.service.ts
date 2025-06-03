@@ -21,6 +21,7 @@ import { Subscription } from 'src/entities/subscription.entity';
 import { HandleInvoicesDto } from 'src/DTOs/billingDto/invoicesDto/handleInvoices.dto';
 import { HandleSubscriptionDto } from 'src/DTOs/billingDto/subscriptionDto/handleSubscription.dto';
 import { SubscriptionDto } from 'src/DTOs/billingDto/subscriptionDto/subscription.dto';
+import { Request } from 'express';
 
 @Injectable()
 export class WebhooksService {
@@ -33,8 +34,8 @@ export class WebhooksService {
     private readonly configService: ConfigService,
   ) {}
 
-  async handleSub(handleSub: HandleSubDto) {
-    const event: Stripe.Event = await this.verifySignature(handleSub);
+  async handleSub(req: Request) {
+    const event: Stripe.Event = req.body;
 
     switch (event.type) {
       case 'customer.subscription.created':

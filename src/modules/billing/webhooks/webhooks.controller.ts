@@ -1,5 +1,6 @@
-import { Controller, Headers, HttpCode, Post, RawBody } from '@nestjs/common';
+import { Controller, Headers, HttpCode, Post, RawBody, Req } from '@nestjs/common';
 import { WebhooksService } from './webhooks.service';
+import { Request } from 'express';
 
 @Controller('webhooks')
 export class WebhooksController {
@@ -7,8 +8,8 @@ export class WebhooksController {
 
   @Post('stripe')
   @HttpCode(200)
-  async handleSubscription(@RawBody() raw: Buffer, @Headers('stripe-signature') signature: string) {
-    this.webhooksService.handleSub({ raw, signature });
+  async handleSubscription(@Req() req: Request) {
+    this.webhooksService.handleSub(req);
     return { received: true };
   }
 }
