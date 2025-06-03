@@ -3,11 +3,22 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { LoggerGlobal } from './middlewares/logger.middleware';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
+import * as express from 'express';
+import { json, urlencoded } from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     rawBody: true,
   });
+
+  app.use((req, res, next) => {
+    if (req.originalUrl === '/webhook') {
+      express.raw({ type: 'application/json' })(req, res, next);
+    } else {
+      json()(req, res, next);
+    }
+  });
+
   app.enableCors();
 
   const swaggerConfig = new DocumentBuilder()
