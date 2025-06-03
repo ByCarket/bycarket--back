@@ -12,7 +12,7 @@ async function bootstrap() {
   });
 
   app.use((req, res, next) => {
-    if (req.originalUrl === '/webhook') {
+    if (req.originalUrl === '/webhooks/stripe') {
       express.raw({ type: 'application/json' })(req, res, next);
     } else {
       json()(req, res, next);
