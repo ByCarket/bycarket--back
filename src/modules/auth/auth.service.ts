@@ -232,6 +232,7 @@ export class AuthService {
       ...user,
       password: hashedPassword,
       role: Role.ADMIN,
+      isActive: true,
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: newUserPassword, ...userWithoutPassword } = newUser;
