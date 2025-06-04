@@ -222,23 +222,18 @@ export class WebhooksService {
     console.log('Processing paid invoice:', invoice.id);
     
     const result = await this.handleInvoicesValidations(invoice);
-    const { user, subscription, invoiceDto } = result;
-
+    const user = result.user;
+    
     // Actualizar la factura en la base de datos si es necesario
     await this.invoicesService.updateInvoice(result);
-
-    // Obtener información de la suscripción para el período de facturación
-    const stripeSubscription = await this.stripe.subscriptions.retrieve(
-      subscription.id
-    );
-
+    
     // Preparar información del pago para el email
     const paymentInfo = {
       amount: invoice.amount_paid || 0,
       currency: invoice.currency || 'usd',
       invoiceId: invoice.id,
-      subscriptionPeriodStart: new Date((stripeSubscription.start_date || 0) * 1000),
-      subscriptionPeriodEnd: new Date((stripeSubscription.ended_at || 0) * 1000),
+      subscriptionPeriodStart: new Date((invoice.period_start || 0) * 1000),
+      subscriptionPeriodEnd: new Date((invoice.period_end || 0) * 1000),
     };
 
     // Enviar notificación por email
