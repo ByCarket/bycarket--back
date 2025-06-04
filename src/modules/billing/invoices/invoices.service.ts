@@ -15,7 +15,6 @@ export class InvoicesService {
   async createInvoice({ user, invoiceDto }: HandleInvoicesDto) {
     const invoice = await this.invoicesRepository.create({
       ...invoiceDto,
-      id: invoiceDto.id.toString(),
       user,
     });
     await this.invoicesRepository.save(invoice);
