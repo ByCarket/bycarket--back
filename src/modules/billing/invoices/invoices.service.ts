@@ -4,31 +4,27 @@ import { HandleInvoicesDto } from 'src/DTOs/billingDto/invoicesDto/handleInvoice
 import { Invoice } from 'src/entities/invoice.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/entities/user.entity';
-import { SubscriptionService } from '../subscription/subscription.service';
 
 @Injectable()
 export class InvoicesService {
   constructor(
     @InjectRepository(Invoice) private readonly invoicesRepository: Repository<Invoice>,
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
-    private readonly subscriptionService: SubscriptionService,
   ) {}
 
-  async createInvoice({ user, subscription, invoiceDto }: HandleInvoicesDto) {
+  async createInvoice({ user, invoiceDto }: HandleInvoicesDto) {
     const invoice = await this.invoicesRepository.create({
       ...invoiceDto,
       user,
-      subscription,
     });
     await this.invoicesRepository.save(invoice);
   }
 
-  async updateInvoice({ user, subscription, invoiceDto }: HandleInvoicesDto) {
+  async updateInvoice({ user, invoiceDto }: HandleInvoicesDto) {
     const invoiceDb = await this.invoicesRepository.findOne({
       where: {
         id: invoiceDto.id,
         user: { id: user.id },
-        subscription: { id: subscription.id },
       },
     });
     if (!invoiceDb) {

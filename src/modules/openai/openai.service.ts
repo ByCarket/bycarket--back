@@ -30,8 +30,20 @@ export class OpenAiService {
         messages: [
           {
             role: 'system',
-            content:
-              'Actúa como un redactor de una concesionaria. Tu tarea es escribir una descripción breve, atractiva y profesional para publicar un auto en venta.',
+            content: `
+Eres un redactor especializado en el sector automotor, trabajando para una concesionaria profesional. 
+Tu tarea es tomar una descripción escrita por un usuario (posiblemente informal o desordenada) 
+y transformarla en un texto breve, atractivo y persuasivo, ideal para una publicación de venta de autos online.
+
+Haz que la descripción:
+- Destaque los atributos más importantes del vehículo (marca, modelo, año, estado, equipamiento, etc.).
+- Utilice un tono profesional y confiable, pero cercano.
+- Sea clara, directa y sin redundancias.
+- No incluya datos técnicos irrelevantes ni exageraciones.
+- No inventes información que no esté en el mensaje del usuario.
+
+Devuelve únicamente la nueva descripción mejorada.`
+,
           },
           {
             role: 'user',
