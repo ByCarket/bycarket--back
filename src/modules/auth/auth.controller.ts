@@ -8,6 +8,8 @@ import { ChangeEmailDto } from 'src/DTOs/usersDto/changeEmail.dto';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { ChangePasswordDto } from 'src/DTOs/usersDto/changePassword.dto';
 import { GoogleProfileDto } from 'src/DTOs/usersDto/google-profile.dto';
+import { ForgotPasswordDto } from 'src/DTOs/usersDto/forgotPassword.dto';
+import { ResetPasswordDto } from 'src/DTOs/usersDto/resetPassword.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -79,6 +81,16 @@ export class AuthController {
   @HttpCode(200)
   async changeEmail(@UserAuthenticated('sub') id: string, @Body() { email }: ChangeEmailDto) {
     return await this.authService.changeEmail(id, email);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() { email }: ForgotPasswordDto) {
+    return await this.authService.forgotPassword(email);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return await this.authService.resetPasswordWithToken(resetPasswordDto);
   }
 
   @ApiBearerAuth()

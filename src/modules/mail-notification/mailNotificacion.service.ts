@@ -76,6 +76,38 @@ export class MailService {
     }
   }
 
+async sendPasswordResetEmail(email: string, name: string, resetToken: string) {
+  try {
+    // URL base de tu frontend - configúrala según tu entorno
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
+
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Restablecer contraseña',
+      template: './password-reset',
+      context: {
+        name,
+        resetUrl,
+        expiresIn: '1 hora',
+        date: new Date().toLocaleDateString('es-ES', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }),
+        time: new Date().toLocaleTimeString('es-ES', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      },
+    });
+    console.log(`Email de reset de contraseña enviado a: ${email}`);
+  } catch (error) {
+    console.error('Error enviando email de reset de contraseña:', error);
+    throw error;
+  }
+}
+
   async sendPasswordChangeNotification(email: string, name: string) {
     try {
       await this.mailerService.sendMail({

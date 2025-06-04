@@ -14,6 +14,7 @@ import { GoogleProfileDto } from 'src/DTOs/usersDto/google-profile.dto';
 import { CustomerService } from '../billing/customer/customer.service';
 import { MailService } from '../mail-notification/mailNotificacion.service';
 import * as crypto from 'crypto';
+import { ResetPasswordDto } from 'src/DTOs/usersDto/resetPassword.dto';
 
 @Injectable()
 export class AuthService {
@@ -280,5 +281,64 @@ export class AuthService {
       data: id,
       message: 'Password changed successfully',
     };
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.usersService.getUserByEmail(email);
+    if (!user) {
+      // Por seguridad, no revelar si el email existe o no
+      return {
+        message: 'Si el email existe, recibirás instrucciones para resetear tu contraseña',
+      };
+    }
+
+    if (!user.isActive) {
+      throw new BadRequestException('La cuenta no está activada');
+    }
+
+    const resetToken = this.jwtService.sign({ sub: user.id }, { expiresIn: '1h' });
+
+    await this.mailService.sendPasswordResetEmail(user.email, user.name, resetToken);
+
+    return {
+      message: 'Si el email existe, recibirás instrucciones para resetear tu contraseña',
+    };
+  }
+
+  async resetPasswordWithToken({ token, password, confirmPassword }: ResetPasswordDto) {
+    if (password !== confirmPassword) {
+      throw new BadRequestException('Las contraseñas no coinciden');
+    }
+
+    const user = await this.validateResetToken(token);
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await this.usersRepository.update(user.id, { password: hashedPassword });
+
+    // Enviar notificación de cambio
+    try {
+      await this.mailService.sendPasswordChangeNotification(user.email, user.name);
+    } catch (emailError) {
+      console.error('Error enviando notificación:', emailError);
+    }
+
+    return {
+      message: 'Contraseña restablecida exitosamente',
+    };
+  }
+
+  async validateResetToken(token: string) {
+    try {
+      const decoded = this.jwtService.verify(token) as JwtSign;
+      const user = await this.usersRepository.findOneBy({ id: decoded.sub });
+
+      if (!user) {
+        throw new BadRequestException('Token inválido');
+      }
+
+      return user;
+    } catch (error) {
+      throw new BadRequestException('Token inválido o expirado');
+    }
   }
 }
