@@ -21,6 +21,7 @@ import { Subscription } from 'src/entities/subscription.entity';
 import { HandleInvoicesDto } from 'src/DTOs/billingDto/invoicesDto/handleInvoices.dto';
 import { HandleSubscriptionDto } from 'src/DTOs/billingDto/subscriptionDto/handleSubscription.dto';
 import { SubscriptionDto } from 'src/DTOs/billingDto/subscriptionDto/subscription.dto';
+import { MailService } from 'src/modules/mail-notification/mailNotificacion.service';
 import { Request } from 'express';
 
 @Injectable()
@@ -28,6 +29,7 @@ export class WebhooksService {
   constructor(
     private readonly invoicesService: InvoicesService,
     private readonly subscriptionService: SubscriptionService,
+    private readonly mailService: MailService,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     @Inject(STRIPE_CLIENT) private readonly stripe: Stripe,
@@ -215,7 +217,45 @@ export class WebhooksService {
     await this.invoicesService.createInvoice(result);
   }
 
-  private async handleInvoicePaid(invoice: Stripe.Invoice) {}
+  private async handleInvoicePaid(invoice: Stripe.Invoice) {
+    try {
+    console.log('Processing paid invoice:', invoice.id);
+    
+    const result = await this.handleInvoicesValidations(invoice);
+    const { user, subscription, invoiceDto } = result;
+
+    // Actualizar la factura en la base de datos si es necesario
+    await this.invoicesService.updateInvoice(result);
+
+    // Obtener información de la suscripción para el período de facturación
+    const stripeSubscription = await this.stripe.subscriptions.retrieve(
+      subscription.id
+    );
+
+    // Preparar información del pago para el email
+    const paymentInfo = {
+      amount: invoice.amount_paid || 0,
+      currency: invoice.currency || 'usd',
+      invoiceId: invoice.id,
+      subscriptionPeriodStart: new Date((stripeSubscription.start_date || 0) * 1000),
+      subscriptionPeriodEnd: new Date((stripeSubscription.ended_at || 0) * 1000),
+    };
+
+    // Enviar notificación por email
+    await this.mailService.sendSubscriptionPaymentSuccessEmail(
+      user.email,
+      user.name || user.email.split('@')[0], // Usar el nombre del usuario o parte del email
+      paymentInfo
+    );
+
+    console.log(`Payment notification sent successfully for invoice ${invoice.id} to user ${user.email}`);
+
+  } catch (error) {
+    console.error('Error processing paid invoice:', error);
+    // No lanzar el error para que no afecte el procesamiento del webhook
+    console.warn('Invoice payment processing failed, but payment was successful in Stripe');
+  }
+  }
 
   private async handleInvoiceUpdated(invoice: Stripe.Invoice) {
     const result = await this.handleInvoicesValidations(invoice);
