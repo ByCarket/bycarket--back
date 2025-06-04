@@ -4,6 +4,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  RawBodyRequest,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -22,12 +23,10 @@ import { HandleInvoicesDto } from 'src/DTOs/billingDto/invoicesDto/handleInvoice
 import { HandleSubscriptionDto } from 'src/DTOs/billingDto/subscriptionDto/handleSubscription.dto';
 import { SubscriptionDto } from 'src/DTOs/billingDto/subscriptionDto/subscription.dto';
 import { Request } from 'express';
-import { CustomerService } from '../customer/customer.service';
 
 @Injectable()
 export class WebhooksService {
   constructor(
-    private readonly customerService: CustomerService,
     private readonly invoicesService: InvoicesService,
     private readonly subscriptionService: SubscriptionService,
     @InjectRepository(User)
@@ -36,8 +35,11 @@ export class WebhooksService {
     private readonly configService: ConfigService,
   ) {}
 
-  async handleSub(req: Request) {
-    const event: Stripe.Event = req.body;
+  async handleSub(req: RawBodyRequest<Request>, signature: string) {
+    if (!req.rawBody) {
+      throw new BadRequestException('Raw body is required for Stripe webhook verification');
+    }
+    const event: Stripe.Event = await this.verifySignature({ raw: req.rawBody, signature });
 
     switch (event.type) {
       case 'customer.created':
