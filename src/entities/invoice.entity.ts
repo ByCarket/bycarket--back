@@ -1,7 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 import { User } from './user.entity';
 import { StatusInvoice } from 'src/enums/statusInvoice.enum';
-import { Subscription } from './subscription.entity';
 
 @Entity('invoices')
 export class Invoice {
@@ -10,9 +9,6 @@ export class Invoice {
 
   @ManyToOne(() => User, user => user.invoices, { onDelete: 'CASCADE' })
   user: User;
-
-  @ManyToOne(() => Subscription, suscription => suscription.invoices)
-  subscription: Subscription;
 
   @Column({ type: 'varchar' })
   hosted_invoice_url: string;

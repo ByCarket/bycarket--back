@@ -12,22 +12,20 @@ export class InvoicesService {
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
   ) {}
 
-  async createInvoice({ user, subscription, invoiceDto }: HandleInvoicesDto) {
+  async createInvoice({ user, invoiceDto }: HandleInvoicesDto) {
     const invoice = await this.invoicesRepository.create({
       ...invoiceDto,
       id: invoiceDto.id.toString(),
       user,
-      subscription,
     });
     await this.invoicesRepository.save(invoice);
   }
 
-  async updateInvoice({ user, subscription, invoiceDto }: HandleInvoicesDto) {
+  async updateInvoice({ user, invoiceDto }: HandleInvoicesDto) {
     const invoiceDb = await this.invoicesRepository.findOne({
       where: {
         id: invoiceDto.id,
         user: { id: user.id },
-        subscription: { id: subscription.id },
       },
     });
     if (!invoiceDb) {

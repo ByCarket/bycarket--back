@@ -236,21 +236,12 @@ export class WebhooksService {
         `User not found for customer ${invoice.customer} with email ${stripeCustomer.email}`,
       );
     }
-    if (!user.subscription_active) {
-      throw new BadRequestException('User does not have an active subscription');
-    }
-
-    const subscription: Subscription = await this.subscriptionService.getSubscriptionById(
-      user.id,
-      user.subscription_active,
-    );
     const invoiceDto = plainToInstance(InvoiceDto, invoice, {
       excludeExtraneousValues: true,
     });
 
     return {
       user,
-      subscription,
       invoiceDto,
     };
   }
