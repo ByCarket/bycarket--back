@@ -21,6 +21,7 @@ import { Subscription } from 'src/entities/subscription.entity';
 import { HandleInvoicesDto } from 'src/DTOs/billingDto/invoicesDto/handleInvoices.dto';
 import { HandleSubscriptionDto } from 'src/DTOs/billingDto/subscriptionDto/handleSubscription.dto';
 import { SubscriptionDto } from 'src/DTOs/billingDto/subscriptionDto/subscription.dto';
+import { Request } from 'express';
 
 @Injectable()
 export class WebhooksService {
@@ -33,10 +34,14 @@ export class WebhooksService {
     private readonly configService: ConfigService,
   ) {}
 
-  async handleSub(handleSub: HandleSubDto) {
-    const event: Stripe.Event = await this.verifySignature(handleSub);
+  async handleSub(req: Request) {
+    const event: Stripe.Event = req.body;
 
     switch (event.type) {
+      case 'customer.created':
+        const customerCreated = event.data.object as Stripe.Customer;
+        await this.handleCustomerCreated(customerCreated);
+        break;
       case 'customer.subscription.created':
         // Actualizar rol y bd
         const subscriptionCreated = event.data.object;
@@ -102,17 +107,38 @@ export class WebhooksService {
     return await this.stripe.webhooks.constructEventAsync(raw, signature, secret);
   }
 
+  // Handle Customers
+  // These methods are called when the customer events are triggered by Stripe.
+
+  private async handleCustomerCreated(customer: Stripe.Customer) {
+    if (!customer.email) {
+      throw new BadRequestException('Customer email is required');
+    }
+    const user = await this.usersRepository.findOneBy({ email: customer.email });
+    if (!user) {
+      throw new NotFoundException('User not found for customer creation');
+    }
+
+    user.stripeCustomerId = customer.id;
+    await this.usersRepository.save(user);
+  }
+
   // Handle Subscriptions
   // These methods are called when the subscription events are triggered by Stripe.
 
   private async handleSubCreated(subscription: Stripe.Subscription) {
+    console.log('Subscription created:', subscription);
     const { user, subscriptionDto } = await this.handleSubscriptionsValidations(subscription);
 
+    console.log('User found:', user);
+    console.log('Subscription DTO:', subscriptionDto);
     await this.subscriptionService.createSubscription(user, subscriptionDto);
 
     user.role = Role.PREMIUM;
     user.subscription_active = subscriptionDto.id;
-    await this.usersRepository.save(user);
+    const userDb = await this.usersRepository.save(user);
+
+    console.log('User updated:', userDb);
   }
 
   private async handleSubTrialEnd(subscription: Stripe.Subscription) {}
@@ -138,8 +164,39 @@ export class WebhooksService {
   private async handleSubscriptionsValidations(
     subscription: Stripe.Subscription,
   ): Promise<HandleSubscriptionDto> {
-    const user = await this.usersRepository.findOneBy({ id: subscription.metadata.user_id });
-    if (!user) throw new NotFoundException('User not found for subscription creation');
+    const customer = await this.stripe.customers.retrieve(subscription.customer as string);
+    if (!customer || customer.deleted) {
+      throw new BadRequestException(`Customer ${subscription.customer} not found or deleted`);
+    }
+
+    const stripeCustomer = customer as Stripe.Customer;
+    if (!stripeCustomer.email) {
+      throw new BadRequestException('Customer email is required for subscription validation');
+    }
+
+    const user = await this.usersRepository.findOne({
+      where: [
+        { email: stripeCustomer.email },
+        { stripeCustomerId: subscription.customer as string },
+      ],
+    });
+
+    if (!user) {
+      throw new NotFoundException(
+        `User not found for customer ${subscription.customer} with email ${stripeCustomer.email}`,
+      );
+    }
+
+    // // Verificación adicional: asegurar que el stripeCustomerId coincida
+    // if (user.stripeCustomerId !== subscription.customer) {
+    //   console.warn(
+    //     `User ${user.id} stripeCustomerId mismatch. Expected: ${subscription.customer}, Found: ${user.stripeCustomerId}`,
+    //   );
+
+    //   // Actualizar el stripeCustomerId si es necesario
+    //   user.stripeCustomerId = subscription.customer as string;
+    //   await this.usersRepository.save(user);
+    // }
     const subscriptionDto = plainToInstance(SubscriptionDto, subscription, {
       excludeExtraneousValues: true,
     });
