@@ -4,10 +4,10 @@ import { UserAuthenticated } from 'src/decorators/userAuthenticated.decorator';
 
 @Controller('invoices')
 export class InvoicesController {
-constructor(private readonly invoicesService: InvoicesService) {}
+  constructor(private readonly invoicesService: InvoicesService) {}
 
-  @Get(':id')
-  async getInvoice(@Param('id') id: string, @UserAuthenticated('sub') userId: string) {
-      return await this.invoicesService.getInvoice(userId, id )
-}
+  @Get('me')
+  async getInvoice(@UserAuthenticated('sub') userId: string) {
+    return await this.invoicesService.getInvoices(userId);
+  }
 }

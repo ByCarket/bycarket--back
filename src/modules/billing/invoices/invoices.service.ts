@@ -36,17 +36,12 @@ export class InvoicesService {
     await this.invoicesRepository.update(invoiceDb.id, invoiceDto);
   }
 
-  async getInvoice(userId: string, invoiceId: string): Promise<Invoice> {
-    const user = await this.usersRepository.findOneBy({ id: userId });
-    if (!user) {
-      throw new NotFoundException('User not found.');
-    }
-    const invoice = await this.invoicesRepository.findOne({
-      where: { id: invoiceId, user: { id: user.id } },
+  async getInvoices(userId: string): Promise<Invoice[]> {
+    const invoices = await this.invoicesRepository.find({
+      where: { user: { id: userId } },
+      order: { period_end: 'DESC' },
     });
-    if (!invoice) {
-      throw new NotFoundException('Invoice not found for this user.');
-    }
-    return invoice;
+
+    return invoices;
   }
 }
