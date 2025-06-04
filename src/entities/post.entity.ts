@@ -31,4 +31,7 @@ export class Post {
     default: PostStatus.PENDING,
   })
   status: PostStatus;
+
+  @Column({ type: 'boolean' })
+  isNegotiable: boolean;
 }

@@ -3,11 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { HandleInvoicesDto } from 'src/DTOs/billingDto/invoicesDto/handleInvoices.dto';
 import { Invoice } from 'src/entities/invoice.entity';
 import { Repository } from 'typeorm';
+import { User } from 'src/entities/user.entity';
+import { SubscriptionService } from '../subscription/subscription.service';
 
 @Injectable()
 export class InvoicesService {
   constructor(
     @InjectRepository(Invoice) private readonly invoicesRepository: Repository<Invoice>,
+    @InjectRepository(User) private readonly usersRepository: Repository<User>,
+    private readonly subscriptionService: SubscriptionService,
   ) {}
 
   async createInvoice({ user, subscription, invoiceDto }: HandleInvoicesDto) {
@@ -34,5 +38,19 @@ export class InvoicesService {
     }
 
     await this.invoicesRepository.update(invoiceDb.id, invoiceDto);
+  }
+
+  async getInvoice(userId: string, invoiceId: string): Promise<Invoice> {
+    const user = await this.usersRepository.findOneBy({ id: userId });
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+    const invoice = await this.invoicesRepository.findOne({
+      where: { id: invoiceId, user: { id: user.id } },
+    });
+    if (!invoice) {
+      throw new NotFoundException('Invoice not found for this user.');
+    }
+    return invoice;
   }
 }
