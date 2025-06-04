@@ -237,7 +237,7 @@ export class WebhooksService {
       );
     }
     if (!user.subscription_active) {
-      throw new NotFoundException('Subscription active not found for this user');
+      throw new BadRequestException('User does not have an active subscription');
     }
 
     const subscription: Subscription = await this.subscriptionService.getSubscriptionById(
