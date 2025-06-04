@@ -1,15 +1,8 @@
 import { ForbiddenException, GoneException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from 'src/DTOs/usersDto/createUser.dto';
 import { UpdateUserInfoDto } from 'src/DTOs/usersDto/updateUserInfo.dto';
 import { User } from 'src/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsOrder } from 'typeorm';
-// import {
-//   ResponseIdDto,
-//   ResponsePagUsersDto,
-//   ResponsePrivateUserDto,
-//   ResponsePublicUserDto,
-// } from 'src/dto/usersDto/responses-user.dto';
 import { Role } from 'src/enums/roles.enum';
 import { Post } from 'src/entities/post.entity';
 import {
@@ -20,12 +13,10 @@ import {
 } from 'src/DTOs/usersDto/responses-user.dto';
 import { PostStatus } from 'src/enums/postStatus.enum';
 import { QueryPagUsersDto } from 'src/DTOs/usersDto/queryPagUsers.dto';
-import { CustomerService } from '../billing/customer/customer.service';
 
 @Injectable()
 export class UsersService {
   constructor(
-    private readonly customerService: CustomerService,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     @InjectRepository(Post)
@@ -117,9 +108,6 @@ export class UsersService {
     if (!userDb) throw new NotFoundException(`User with ID ${id} not found.`);
 
     await this.usersRepository.update(id, user);
-    if (user.name) {
-      await this.customerService.updateCustomer(userDb.stripeCustomerId, { name: user.name });
-    }
 
     return {
       data: id,

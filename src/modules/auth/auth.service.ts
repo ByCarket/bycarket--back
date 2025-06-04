@@ -11,14 +11,12 @@ import * as bcrypt from 'bcrypt';
 import { JwtSign } from 'src/interfaces/jwtPayload.interface';
 import { ChangePasswordDto } from 'src/DTOs/usersDto/changePassword.dto';
 import { GoogleProfileDto } from 'src/DTOs/usersDto/google-profile.dto';
-import { CustomerService } from '../billing/customer/customer.service';
 import { MailService } from '../mail-notification/mailNotificacion.service';
 import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly customerService: CustomerService,
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     @InjectRepository(User)
@@ -44,15 +42,10 @@ export class AuthService {
     const activationTokenExpires = new Date();
     activationTokenExpires.setHours(activationTokenExpires.getHours() + 24); // Expira en 24 horas
     const hashedPassword = await bcrypt.hash(password, 10);
-    const stripeCustomerId = await this.customerService.createCustomer({
-      email: user.email,
-      name: user.name,
-    });
 
     const newUser = this.usersRepository.create({
       ...user,
       password: hashedPassword,
-      stripeCustomerId,
       activationToken,
       activationTokenExpires,
     });
@@ -170,11 +163,6 @@ export class AuthService {
     let user = await this.usersService.getUserByEmail(email);
 
     if (!user) {
-      const stripeCustomerId = await this.customerService.createCustomer({
-        email,
-        name: name || email.split('@')[0],
-      });
-
       const newUser = this.usersRepository.create({
         email,
         name: name || email.split('@')[0],
@@ -184,7 +172,6 @@ export class AuthService {
         country: '',
         city: '',
         address: '',
-        stripeCustomerId,
         isActive: true,
       });
       user = await this.usersRepository.save(newUser);
@@ -249,7 +236,6 @@ export class AuthService {
 
     user.email = newEmail;
     await this.usersRepository.save(user);
-    await this.customerService.updateCustomer(user.stripeCustomerId, { email: newEmail });
 
     return {
       data: id,
