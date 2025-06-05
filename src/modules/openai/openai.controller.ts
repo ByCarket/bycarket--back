@@ -17,12 +17,12 @@ export class OpenAiController {
     return { description };
   }
 
- @Post('chatCompletion')
-@ApiOperation({ summary: 'Chat de preguntas sobre el vehículo' })
-@ApiResponse({ status: 200, description: 'Respuesta del chatbot' })
-async createChatCompletion(@Body() body: createChatCompletionRequestDto) {
-  const { messages, postId } = body;
-  const response = await this.openAiService.createChatCompletion(messages, postId);
-  return { response };
-}
+  @Post('chatCompletion')
+  @ApiOperation({ summary: 'Chat de preguntas sobre el vehículo' })
+  @ApiResponse({ status: 200, description: 'Respuesta del chatbot' })
+  async createChatCompletion(@Body() body: createChatCompletionRequestDto) {
+    const { messages, postId } = body;
+    const response = await this.openAiService.createChatCompletion(messages, postId);
+    return { response };
+  }
 }
