@@ -20,20 +20,20 @@ export class InvoicesService {
     await this.invoicesRepository.save(invoice);
   }
 
-  async updateInvoice({ user, invoiceDto }: HandleInvoicesDto) {
-    const invoiceDb = await this.invoicesRepository.findOne({
-      where: {
-        id: invoiceDto.id,
-        user: { id: user.id },
-      },
-    });
-    if (!invoiceDb) {
-      throw new NotFoundException(
-        'Invoice not found or does not belong to the user or subscription',
-      );
-    }
+  async updateInvoice({ invoiceDto }: HandleInvoicesDto) {
+    // const invoiceDb = await this.invoicesRepository.findOne({
+    //   where: {
+    //     id: invoiceDto.id,
+    //     user: { id: user.id },
+    //   },
+    // });
+    // if (!invoiceDb) {
+    //   throw new NotFoundException(
+    //     'Invoice not found or does not belong to the user or subscription',
+    //   );
+    // }
 
-    await this.invoicesRepository.update(invoiceDb.id, invoiceDto);
+    await this.invoicesRepository.update(invoiceDto.id, invoiceDto);
   }
 
   async getInvoices(userId: string): Promise<Invoice[]> {
