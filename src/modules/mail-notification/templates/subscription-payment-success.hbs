@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago Procesado Exitosamente</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(16, 54, 99, 0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            padding: 50px 40px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="30" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="70" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="80" r="1.2" fill="rgba(255,255,255,0.1)"/></svg>');
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 36px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .welcome-message {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 32px;
+            border-left: 4px solid #28a745;
+            position: relative;
+        }
+        
+        .welcome-message::before {
+            content: '💳';
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            font-size: 24px;
+            background: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .greeting {
+            font-size: 18px;
+            color: #28a745;
+            margin-bottom: 16px;
+        }
+        
+        .message-text {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 16px;
+        }
+        
+        .highlight {
+            color: #28a745;
+            font-weight: 600;
+        }
+        
+        .payment-details {
+            background: #f8f9fa;
+            padding: 32px;
+            border-radius: 12px;
+            margin: 32px 0;
+            border-left: 4px solid #20c997;
+        }
+        
+        .payment-details h3 {
+            color: #28a745;
+            font-size: 20px;
+            margin-bottom: 24px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .amount {
+            font-size: 36px;
+            font-weight: 700;
+            color: #28a745;
+            text-align: center;
+            margin: 24px 0;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .details-grid {
+            display: grid;
+            gap: 16px;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #103663;
+            font-size: 15px;
+        }
+        
+        .detail-value {
+            color: #555;
+            font-size: 15px;
+            text-align: right;
+        }
+        
+        .benefits {
+            background: #f8f9fa;
+            padding: 24px;
+            border-radius: 8px;
+            margin: 32px 0;
+        }
+        
+        .benefits h3 {
+            color: #28a745;
+            font-size: 18px;
+            margin-bottom: 16px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .benefits-list {
+            display: grid;
+            gap: 8px;
+        }
+        
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #555;
+            font-size: 15px;
+        }
+        
+        .benefit-check {
+            width: 20px;
+            height: 20px;
+            background: #28a745;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 32px 40px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .footer-message {
+            color: #666;
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+        
+        .footer-thanks {
+            color: #28a745;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .footer-disclaimer {
+            color: #999;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="success-icon">✅</div>
+            <h1>Pago Procesado Exitosamente</h1>
+            <p>Tu suscripción ha sido renovada correctamente</p>
+        </div>
+
+        <div class="content">
+            <div class="welcome-message">
+                <div class="greeting">¡Hola <strong>{{name}}</strong>!</div>
+                <div class="message-text">
+                    Te confirmamos que hemos procesado exitosamente el pago de tu suscripción el <span class="highlight">{{paymentDate}} a las {{paymentTime}}</span>.
+                </div>
+                <div class="message-text">
+                    Tu suscripción premium continúa activa y puedes seguir disfrutando de todos los beneficios de nuestra plataforma.
+                </div>
+            </div>
+
+            <div class="payment-details">
+                <h3>Detalles del Pago</h3>
+                <div class="amount">{{amount}}</div>
+                
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Número de Factura:</span>
+                        <span class="detail-value">{{invoiceNumber}}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Fecha de Pago:</span>
+                        <span class="detail-value">{{paymentDate}} - {{paymentTime}}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Período de Servicio:</span>
+                        <span class="detail-value">{{periodStart}} - {{periodEnd}}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Estado:</span>
+                        <span class="detail-value highlight">✓ Pagado</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="benefits">
+                <h3>Tu suscripción premium incluye:</h3>
+                <div class="benefits-list">
+                    <div class="benefit-item">
+                        <div class="benefit-check">✓</div>
+                        <div>Acceso completo a todas las funcionalidades premium</div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-check">✓</div>
+                        <div>Soporte técnico prioritario y especializado</div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-check">✓</div>
+                        <div>Actualizaciones automáticas y nuevas características</div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-check">✓</div>
+                        <div>Almacenamiento y procesamiento ilimitado</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-message">Si tienes alguna pregunta sobre tu facturación o suscripción, no dudes en contactarnos.</div>
+            <div class="footer-thanks">¡Gracias por confiar en nosotros!</div>
+            <div class="footer-disclaimer">Este es un email automático, por favor no respondas a este mensaje.</div>
+        </div>
+    </div>
+</body>
+</html>
