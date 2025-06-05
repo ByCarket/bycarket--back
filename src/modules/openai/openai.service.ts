@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import OpenAI from 'openai';
 import { ChatCompletionMessageParam } from 'openai/resources/chat';
 import { ChatComplationMessageDto } from 'src/DTOs/openaiDto/ChatComplationMessage.dto';
@@ -6,6 +6,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from 'src/entities/post.entity';
 import { queryPosts } from './tools/queryPosts';
+import { PostStatus } from 'src/enums/postStatus.enum';
+import { getActivePostsTool } from './tools/activePosts.tool';
 
 @Injectable()
 export class OpenAiService {
@@ -42,8 +44,7 @@ Haz que la descripción:
 - No incluya datos técnicos irrelevantes ni exageraciones.
 - No inventes información que no esté en el mensaje del usuario.
 
-Devuelve únicamente la nueva descripción mejorada.`
-,
+Devuelve únicamente la nueva descripción mejorada.`,
           },
           {
             role: 'user',
@@ -90,64 +91,83 @@ Devuelve únicamente la nueva descripción mejorada.`
   /**
    * Chat principal que maneja las herramientas y la respuesta
    */
- async createChatCompletion(
-  messages: ChatComplationMessageDto[],
-  postId: string
-): Promise<any> {
-  try {
-    // 👇 Inyectamos un mensaje "system" con el postId que el usuario está viendo
-    const systemMessage: ChatComplationMessageDto = {
-      role: 'system',
-      content: `El postId del vehículo que el usuario está viendo es: ${postId}`,
-    };
+  async createChatCompletion(messages: ChatComplationMessageDto[], postId?: string): Promise<any> {
+    try {
+      // 👇 Inyectamos un mensaje "system" con el postId que el usuario está viendo
+      const systemMessage: ChatComplationMessageDto = {
+        role: 'system',
+        content: `El usuario puede estar viendo un posteo que tiene un id o varios que no tiene nada. Actualmente está viendo lo siguiente: ${postId ? postId : 'todos los posteos activos, o la siguiente informacion: https://bycarket-front-main.vercel.app/home, https://bycarket-front-main.vercel.app/suscription, https://bycarket-front-main.vercel.app/contact, O este whatsapp de contacto: https://api.whatsapp.com/send/?phone=5493874562021&text&type=phone_number&app_absent=0'}`,
+      };
 
-    // 👇 Lo agregamos como primer mensaje en la conversación
-    const fullMessages = [systemMessage, ...messages];
+      // 👇 Lo agregamos como primer mensaje en la conversación
+      const fullMessages = [systemMessage, ...messages];
 
-    // 1️⃣ Llamada inicial a OpenAI con tools
-    const response = await this.openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: fullMessages as ChatCompletionMessageParam[],
-      tools: [queryPosts],
-      tool_choice: 'auto',
-    });
-
-    const message = response.choices[0].message;
-
-    // 2️⃣ Verificamos si hay llamada a la herramienta (function_call)
-    const toolCall = message.tool_calls?.[0];
-    if (toolCall && toolCall.function.name === 'get_vehicle_details') {
-      // ⚠️ Ignoramos el post_id que proponga la IA y usamos el real
-      const details = await this.getVehicleDetails(postId);
-
-      // 3️⃣ Enviamos la respuesta final a la IA con los detalles
-      const finalResponse = await this.openai.chat.completions.create({
+      // 1️⃣ Llamada inicial a OpenAI con tools
+      const response = await this.openai.chat.completions.create({
         model: 'gpt-4o',
-        messages: [
-          ...fullMessages,
-          {
-            role: 'assistant',
-            content: null,
-            tool_calls: [toolCall],
-          },
-          {
-            role: 'tool',
-            tool_call_id: toolCall.id,
-            content: JSON.stringify(details),
-          },
-        ],
+        messages: fullMessages as ChatCompletionMessageParam[],
+        tools: [queryPosts, getActivePostsTool],
+        tool_choice: 'auto',
       });
 
-      return finalResponse.choices[0].message.content;
+      const message = response.choices[0].message;
+
+      // 2️⃣ Verificamos si hay llamada a la herramienta (function_call)
+      const toolCall = message.tool_calls?.[0];
+      if (toolCall && toolCall.function.name === 'get_vehicle_details') {
+        // ⚠️ Ignoramos el post_id que proponga la IA y usamos el real
+        if (!postId) throw new BadRequestException('No hay postId.');
+        const details = await this.getVehicleDetails(postId);
+
+        // 3️⃣ Enviamos la respuesta final a la IA con los detalles
+        const finalResponse = await this.openai.chat.completions.create({
+          model: 'gpt-4o',
+          messages: [
+            ...fullMessages,
+            {
+              role: 'assistant',
+              content: null,
+              tool_calls: [toolCall],
+            },
+            {
+              role: 'tool',
+              tool_call_id: toolCall.id,
+              content: JSON.stringify(details),
+            },
+          ],
+        });
+
+        return finalResponse.choices[0].message.content;
+      } else if (toolCall && toolCall.function.name === 'get_active_posts') {
+        const postsActives = await this.postRepository.find({
+          where: { status: PostStatus.ACTIVE },
+        });
+
+        const finalResponse = await this.openai.chat.completions.create({
+          model: 'gpt-4o',
+          messages: [
+            ...fullMessages,
+            {
+              role: 'assistant',
+              content: null,
+              tool_calls: [toolCall],
+            },
+            {
+              role: 'tool',
+              tool_call_id: toolCall.id,
+              content: JSON.stringify(postsActives),
+            },
+          ],
+        });
+
+        return finalResponse.choices[0].message.content;
+      }
+
+      // Si no hubo llamada a la herramienta, devuelve la respuesta directa
+      return message.content;
+    } catch (error) {
+      console.error('Error en OpenAI:', error);
+      throw new InternalServerErrorException('Error generando respuesta del chat');
     }
-
-    // Si no hubo llamada a la herramienta, devuelve la respuesta directa
-    return message.content;
-  } catch (error) {
-    console.error('Error en OpenAI:', error);
-    throw new InternalServerErrorException('Error generando respuesta del chat');
   }
-}
-
-
 }
