@@ -95,9 +95,22 @@ Devuelve únicamente la nueva descripción mejorada.`,
     try {
       // 👇 Inyectamos un mensaje "system" con el postId que el usuario está viendo
       const systemMessage: ChatComplationMessageDto = {
-        role: 'system',
-        content: `El usuario puede estar viendo un posteo que tiene un id o varios que no tiene nada. Actualmente está viendo lo siguiente: ${postId ? postId : 'todos los posteos activos, o la siguiente informacion: https://bycarket-front-main.vercel.app/home, https://bycarket-front-main.vercel.app/suscription, https://bycarket-front-main.vercel.app/contact, O este whatsapp de contacto: https://api.whatsapp.com/send/?phone=5493874562021&text&type=phone_number&app_absent=0'}`,
-      };
+  role: 'system',
+  content: `Eres un asistente de ventas para la plataforma ByCarKet. 
+Tu objetivo es ayudar al usuario a tomar una decisión informada sobre vehículos, resolver sus dudas o guiarlo según lo que esté viendo en el sitio web.
+
+Contexto del usuario:
+${postId ? 
+  `• Actualmente está visualizando el post del vehículo con ID: ${postId}.` 
+  : 
+  `• No está viendo un post específico. Puede estar explorando:
+  - La página de inicio: muestra vehículos destacados y categorías.
+  - La sección de suscripciones: información sobre planes pagos.
+  - La página de contacto: opciones para comunicarse por WhatsApp o correo.
+  - También puede estar navegando por los posteos activos en el home.`}
+
+Ten en cuenta este contexto al responder preguntas. Si el usuario pregunta por un vehículo, asume que se refiere al que está viendo (si hay uno). Si no, responde en base a la lista general de vehículos disponibles o guíalo para encontrar el correcto.`
+};
 
       // 👇 Lo agregamos como primer mensaje en la conversación
       const fullMessages = [systemMessage, ...messages];
