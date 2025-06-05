@@ -11,9 +11,10 @@ import { InvoicesController } from './invoices/invoices.controller';
 import { InvoicesService } from './invoices/invoices.service';
 import { Invoice } from 'src/entities/invoice.entity';
 import { UsersModule } from '../users/users.module';
+import { MailModule } from '../mail-notification/mailNotification.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Subscription, Invoice]), forwardRef(() => UsersModule)],
+  imports: [MailModule,TypeOrmModule.forFeature([User, Subscription, Invoice]), forwardRef(() => UsersModule)],
   controllers: [SubscriptionController, WebhooksController, InvoicesController],
   providers: [SubscriptionService, StripeProvider, WebhooksService, InvoicesService],
 })
