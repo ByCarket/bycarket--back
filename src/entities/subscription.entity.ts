@@ -11,9 +11,6 @@ export class Subscription {
   @ManyToOne(() => User, user => user.subscriptions, { onDelete: 'CASCADE' })
   user: User;
 
-  @OneToMany(() => Invoice, invoice => invoice.subscription)
-  invoices: Invoice[];
-
   @CreateDateColumn()
   started_at: Date;
 

@@ -189,16 +189,6 @@ export class WebhooksService {
       );
     }
 
-    // // Verificación adicional: asegurar que el stripeCustomerId coincida
-    // if (user.stripeCustomerId !== subscription.customer) {
-    //   console.warn(
-    //     `User ${user.id} stripeCustomerId mismatch. Expected: ${subscription.customer}, Found: ${user.stripeCustomerId}`,
-    //   );
-
-    //   // Actualizar el stripeCustomerId si es necesario
-    //   user.stripeCustomerId = subscription.customer as string;
-    //   await this.usersRepository.save(user);
-    // }
     const subscriptionDto = plainToInstance(SubscriptionDto, subscription, {
       excludeExtraneousValues: true,
     });
@@ -260,23 +250,30 @@ export class WebhooksService {
   private async handleInvoicePaymentFailed(invoice: Stripe.Invoice) {}
 
   private async handleInvoicesValidations(invoice: Stripe.Invoice): Promise<HandleInvoicesDto> {
-    if (!invoice.metadata) throw new BadRequestException('Invoice is missing metadata');
-    const user = await this.usersRepository.findOneBy({ id: invoice.metadata.user_id });
-    if (!user) throw new NotFoundException('User not found for invoice creation');
-    if (!user.subscription_active) {
-      throw new BadRequestException('User does not have an active subscription');
+    const customer = await this.stripe.customers.retrieve(invoice.customer as string);
+    if (!customer || customer.deleted) {
+      throw new BadRequestException(`Customer ${invoice.customer} not found or deleted`);
     }
-    const subscription: Subscription = await this.subscriptionService.getSubscriptionById(
-      user.id,
-      user.subscription_active,
-    );
+
+    const stripeCustomer = customer as Stripe.Customer;
+    if (!stripeCustomer.email) {
+      throw new BadRequestException('Customer email is required for subscription validation');
+    }
+
+    const user = await this.usersRepository.findOne({
+      where: [{ email: stripeCustomer.email }, { stripeCustomerId: invoice.customer as string }],
+    });
+    if (!user) {
+      throw new NotFoundException(
+        `User not found for customer ${invoice.customer} with email ${stripeCustomer.email}`,
+      );
+    }
     const invoiceDto = plainToInstance(InvoiceDto, invoice, {
       excludeExtraneousValues: true,
     });
 
     return {
       user,
-      subscription,
       invoiceDto,
     };
   }
